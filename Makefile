@@ -23,6 +23,8 @@
 #                                                                               #
 #################################################################################
 
+VERSION=0.1
+
 INCLUDES=`ocamlfind query -i-format xmlm`
 COMPFLAGS=$(INCLUDES) -annot -rectypes
 OCAMLPP=
@@ -55,7 +57,7 @@ xtmpl.cmi: xtmpl.mli
 .PHONY: doc
 doc:
 	$(MKDIR) doc
-	$(OCAMLDOC) $(INCLUDES) xtmpl.mli -d doc -html
+	$(OCAMLDOC) $(INCLUDES) xtmpl.mli -t Xtmpl -d doc -html
 
 webdoc: doc
 	$(MKDIR) ../xtmpl-gh-pages/refdoc
@@ -70,9 +72,14 @@ install: xtmpl.cmo xtmpl.cmx
 uninstall:
 	ocamlfind remove xtmpl
 
+# archive :
+###########
+archive:
+	git archive --prefix=xtmpl-$(VERSION)/ HEAD | gzip > ../xtmpl-gh-pages/xtmpl-$(VERSION).tar.gz
+
 #####
 clean:
-	$(RM) *.cm* *.o *.annot
+	$(RM) *.cm* *.o *.annot *.a
 
 # headers :
 ###########
