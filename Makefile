@@ -61,6 +61,12 @@ doc:
 	$(MKDIR) doc
 	$(OCAMLDOC) $(INCLUDES) xtmpl.mli -d doc -html
 
+webdoc: doc
+	$(MKDIR) ../xtmpl-gh-pages/refdoc
+	$(CP) doc/* ../xtmpl-gh-pages/refdoc/
+	$(CP) web/index.html web/style.css ../xtmpl-gh-pages/
+
+
 ##########
 install: xtmpl.cmo xtmpl.cmx
 	ocamlfind install xtmpl META LICENSE xtmpl.cmi xtmpl.mli xtmpl.cmo xtmpl.cmx xtmpl.o
@@ -71,4 +77,15 @@ uninstall:
 #####
 clean:
 	$(RM) *.cm* *.o *.annot
+
+# headers :
+###########
+HEADFILES=Makefile *.ml *.mli
+.PHONY: headers noheaders
+headers:
+	headache -h header -c .headache_config $(HEADFILES)
+
+noheaders:
+	headache -r -c .headache_config $(HEADFILES)
+
 
