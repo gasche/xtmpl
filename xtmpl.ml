@@ -227,7 +227,9 @@ and eval_xml env = function
             else
               (
                let xml = f env (List.map (fun ((_,s),v) -> (s,v)) atts) subs in
-               List.flatten (List.map (eval_xml env) xml)
+               match xml with
+                 [o] when o = other -> xml
+               | _ -> List.flatten (List.map (eval_xml env) xml)
               )
               (* eval f before subs *)
         | _ ->
