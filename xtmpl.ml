@@ -58,6 +58,7 @@ let file_of_string ~file s =
 
 module Str_map = Map.Make (struct type t = string let compare = compare end);;
 
+exception No_change
 type env = (env -> (string * string) list -> tree list -> tree list) Str_map.t
 and callback = env -> (string * string) list -> tree list -> tree list
 and tree =
@@ -226,10 +227,16 @@ and eval_xml env = function
               )
             else
               (
-               let xml = f env (List.map (fun ((_,s),v) -> (s,v)) atts) subs in
+               let xml =
+                 try Some (f env (List.map (fun ((_,s),v) -> (s,v)) atts) subs)
+                 with No_change -> None
+               in
                match xml with
-                 [o] when o = other -> xml
-               | _ -> List.flatten (List.map (eval_xml env) xml)
+                 None ->
+                   (* no change in node, eval children anyway *)
+                   let subs = List.flatten (List.map (eval_xml env) subs) in
+                   [ E (((uri, tag), atts), subs) ]
+               | Some xml -> List.flatten (List.map (eval_xml env) xml)
               )
               (* eval f before subs *)
         | _ ->
