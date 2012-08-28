@@ -6,6 +6,7 @@
 <link rel="Start" href="index.html">
 <link rel="Up" href="index.html">
 <link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
 <link title="Index of values" rel=Appendix href="index_values.html">
 <link title="Index of modules" rel=Appendix href="index_modules.html">
 <link title="Xtmpl" rel="Chapter" href="Xtmpl.html"><link title="Environment" rel="Section" href="#2_Environment">
@@ -18,16 +19,21 @@
 <div class="navbar">&nbsp;<a class="up" href="index.html" title="Index">Up</a>
 &nbsp;</div>
 <h1>Module <a href="type_Xtmpl.html">Xtmpl</a></h1>
-<pre><span class="keyword">module</span> Xtmpl: <code class="code">sig</code> <a href="Xtmpl.html">..</a> <code class="code">end</code></pre>Xml templating library. 
+<pre><span class="keyword">module</span> Xtmpl: <code class="code">sig</code> <a href="Xtmpl.html">..</a> <code class="code">end</code></pre>Xml templating library.
 <p>
 
     Runs through an XML <a href="Xtmpl.html#TYPEtree"><code class="code">Xtmpl.tree</code></a> and alters it using <a href="Xtmpl.html#TYPEcallback"><code class="code">Xtmpl.callback</code></a> rules
-    provided by the <a href="Xtmpl.html#TYPEenv"><code class="code">Xtmpl.env</code></a> environment. 
+    provided by the <a href="Xtmpl.html#TYPEenv"><code class="code">Xtmpl.env</code></a> environment.
 <p>
 
     A complete description of the templating rules is available in the templating
     engine section below.<br>
 <hr width="100%">
+<pre><span id="EXCEPTIONNo_change"><span class="keyword">exception</span> No_change</span></pre>
+<div class="info">
+This exception can be raised by callbacks to indicate that the
+  node to be rewritten remains unchanged.<br>
+</div>
 <pre><span id="TYPEenv"><span class="keyword">type</span> <code class="type"></code>env</span> </pre>
 
 <pre><span id="TYPEcallback"><span class="keyword">type</span> <code class="type"></code>callback</span> = <code class="type"><a href="Xtmpl.html#TYPEenv">env</a> -> (string * string) list -> <a href="Xtmpl.html#TYPEtree">tree</a> list -> <a href="Xtmpl.html#TYPEtree">tree</a> list</code> </pre>
@@ -46,8 +52,8 @@
 <td align="left" valign="top" >
 <code><span id="TYPEELTtree.T"><span class="constructor">T</span></span> <span class="keyword">of</span> <code class="type">string * (string * string) list * <a href="Xtmpl.html#TYPEtree">tree</a> list</code></code></td>
 <td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Convenient notation for
-							 XML elements, without 
-							 having to specify the 
+							 XML elements, without
+							 having to specify the
 							 namespace as in Xmlm.tag</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
 </tr>
 <tr>
@@ -60,32 +66,32 @@
 
 
 <br>
-<span id="2_Environment"><h2>Environment</h2></span> 
+<span id="2_Environment"><h2>Environment</h2></span>
 <p>
 
     An <a href="Xtmpl.html#TYPEenv"><code class="code">Xtmpl.env</code></a> is a string-to-<a href="Xtmpl.html#TYPEcallback"><code class="code">Xtmpl.callback</code></a> associative map. In addition
     to basic manipulation functions, the functions <a href="Xtmpl.html#VALenv_add_att"><code class="code">Xtmpl.env_add_att</code></a> and
-    <a href="Xtmpl.html#VALenv_of_list"><code class="code">Xtmpl.env_of_list</code></a> provide convenient shortcuts for common operations. 
+    <a href="Xtmpl.html#VALenv_of_list"><code class="code">Xtmpl.env_of_list</code></a> provide convenient shortcuts for common operations.
 <p>
 
-    The environments are immutable, all mutating operations return new 
+    The environments are immutable, all mutating operations return new
     environments.<br>
 <pre><span id="VALenv_empty"><span class="keyword">val</span> env_empty</span> : <code class="type"><a href="Xtmpl.html#TYPEenv">env</a></code></pre><div class="info">
 An environment that contains no bindings.<br>
 </div>
 <pre><span id="VALenv_add"><span class="keyword">val</span> env_add</span> : <code class="type">string -> <a href="Xtmpl.html#TYPEcallback">callback</a> -> <a href="Xtmpl.html#TYPEenv">env</a> -> <a href="Xtmpl.html#TYPEenv">env</a></code></pre><div class="info">
-Add a binding to an environment. 
+Add a binding to an environment.
 <p>
 
     <code class="code">env_add "double" (fun _ _ xml -&gt; xml @ xml)</code> binds the key
-    string <code class="code">"double"</code> to a callback that doubles an XML subtree. 
+    string <code class="code">"double"</code> to a callback that doubles an XML subtree.
 <p>
 
-    If the same key was already bound, the previous binding is 
+    If the same key was already bound, the previous binding is
     replaced.<br>
 </div>
 <pre><span id="VALenv_get"><span class="keyword">val</span> env_get</span> : <code class="type">string -> <a href="Xtmpl.html#TYPEenv">env</a> -> <a href="Xtmpl.html#TYPEcallback">callback</a> option</code></pre><div class="info">
-Get a binding from an environment. 
+Get a binding from an environment.
 <p>
 
     If the binding is not found, returns <code class="code">None</code>.<br>
@@ -94,53 +100,58 @@ Get a binding from an environment.
 String representation of all the keys in the environment.<br>
 </div>
 <pre><span id="VALenv_add_att"><span class="keyword">val</span> env_add_att</span> : <code class="type">string -> string -> <a href="Xtmpl.html#TYPEenv">env</a> -> <a href="Xtmpl.html#TYPEenv">env</a></code></pre><div class="info">
-Bind a callback that returns some XML. 
+Bind a callback that returns some XML.
 <p>
 
     The most frequent operation performed by a callback is to return a
     constant XML subtree. This convenience function lets you provide
-    the XML subtree as a string. 
+    the XML subtree as a string.
 <p>
 
     <code class="code">env_add_att "logo" "&lt;img src=\"logo.png\"/&gt;" env</code> binds the key
-    "logo" to a callback that returns an XHTML image tag. 
+    "logo" to a callback that returns an XHTML image tag.
 <p>
 
     Note that the provided XML is automatically wrapped in the
-    <a href="Xtmpl.html#VALtag_main"><code class="code">Xtmpl.tag_main</code></a> tag, which will cause the corresponding 
+    <a href="Xtmpl.html#VALtag_main"><code class="code">Xtmpl.tag_main</code></a> tag, which will cause the corresponding
     templating rules to be applied to it<br>
 </div>
 <pre><span id="VALenv_of_list"><span class="keyword">val</span> env_of_list</span> : <code class="type">?env:<a href="Xtmpl.html#TYPEenv">env</a> -> (string * <a href="Xtmpl.html#TYPEcallback">callback</a>) list -> <a href="Xtmpl.html#TYPEenv">env</a></code></pre><div class="info">
-Add several bindings at once. 
+Add several bindings at once.
 <p>
 
-    This convenience function saves you the effort of calling 
-    <a href="Xtmpl.html#VALenv_add"><code class="code">Xtmpl.env_add</code></a> several times yourself. 
+    This convenience function saves you the effort of calling
+    <a href="Xtmpl.html#VALenv_add"><code class="code">Xtmpl.env_add</code></a> several times yourself.
 <p>
 
-    <code class="code">env_of_list ~env:env [ k1, f1 ; k2, f2 ]</code> is equivalent to 
-    <code class="code">env_add k2 f2 (env_add k1 f1 env)</code>.<br>
+    <code class="code">env_of_list ~env:env [ k1, f1 ; k2, f2 ]</code> is equivalent to
+    <code class="code">env_add k1 f1 (env_add k2 f2 env)</code>. This means that one key
+    is present twice in the list, the first association in the list
+    will hide the second one in the resulting environment.<br>
 </div>
-<div class="param_info"><code class="code">env</code> : The environment to which bindings are added. If 
+<div class="param_info"><code class="code">env</code> : The environment to which bindings are added. If
     not provided, <a href="Xtmpl.html#VALenv_empty"><code class="code">Xtmpl.env_empty</code></a> is used.</div>
 <br>
 <span id="2_XMLManipulation"><h2>XML Manipulation</h2></span><br>
 <pre><span id="VALtag_main"><span class="keyword">val</span> tag_main</span> : <code class="type">string</code></pre><div class="info">
-The main tag, currently <code class="code">"main_"</code>. 
+A dummy tag, currently <code class="code">"main_"</code>. It is used when parsing a
+   string as an XML tree, to ensure that we will parse a tree and
+   not a list of tree. For this purpose, the tag is used to enclosed
+   a string before parsing it.
 <p>
 
-    Used by <a href="Xtmpl.html#VALenv_add_att"><code class="code">Xtmpl.env_add_att</code></a>, <a href="Xtmpl.html#VALxml_of_string"><code class="code">Xtmpl.xml_of_string</code></a> and, most importantly, 
+    Used by <a href="Xtmpl.html#VALenv_add_att"><code class="code">Xtmpl.env_add_att</code></a>, <a href="Xtmpl.html#VALxml_of_string"><code class="code">Xtmpl.xml_of_string</code></a> and, most importantly,
     by the <a href="Xtmpl.html#VALapply"><code class="code">Xtmpl.apply</code></a> functions.<br>
 </div>
 <pre><span id="VALtag_env"><span class="keyword">val</span> tag_env</span> : <code class="type">string</code></pre><div class="info">
 The environment tag, currently <code class="code">"env_"</code>.
 <p>
 
-    See the template rules in the templating engine section below for more 
+    See the template rules in the templating engine section below for more
     information about this tag.<br>
 </div>
 <pre><span id="VALstring_of_xml"><span class="keyword">val</span> string_of_xml</span> : <code class="type"><a href="Xtmpl.html#TYPEtree">tree</a> -> string</code></pre><div class="info">
-Outputs an XML string. 
+Outputs an XML string.
 <p>
 
     Does not include the initial <code class="code">&lt;?xml ... ?&gt;</code>.<br>
@@ -149,14 +160,14 @@ Outputs an XML string.
 Parses a string as XML.<br>
 <b>Raises</b> <code>Failure</code> when a parsing error occurs, includes the source string.<br>
 </div>
-<div class="param_info"><code class="code">add_main</code> : if true, adds <code class="code">&lt;main&gt;..&lt;/main&gt;</code> around the string 
+<div class="param_info"><code class="code">add_main</code> : if true, adds <code class="code">&lt;main&gt;..&lt;/main&gt;</code> around the string
     (see <a href="Xtmpl.html#VALtag_main"><code class="code">Xtmpl.tag_main</code></a>).</div>
 <br>
-<span id="2_Templatingengine"><h2>Templating engine</h2></span> 
+<span id="2_Templatingengine"><h2>Templating engine</h2></span>
 <p>
 
-    These functions apply one of two variants of the templating engine. 
-    The first variant, used by <a href="Xtmpl.html#VALeval_xml"><code class="code">Xtmpl.eval_xml</code></a> and <a href="Xtmpl.html#VALapply_to_xmls"><code class="code">Xtmpl.apply_to_xmls</code></a>, 
+    These functions apply one of two variants of the templating engine.
+    The first variant, used by <a href="Xtmpl.html#VALeval_xml"><code class="code">Xtmpl.eval_xml</code></a> and <a href="Xtmpl.html#VALapply_to_xmls"><code class="code">Xtmpl.apply_to_xmls</code></a>,
     applies one iteration of the templating rules, while the second variant,
     used by <a href="Xtmpl.html#VALapply"><code class="code">Xtmpl.apply</code></a>, <a href="Xtmpl.html#VALapply_from_file"><code class="code">Xtmpl.apply_from_file</code></a>, <a href="Xtmpl.html#VALapply_to_file"><code class="code">Xtmpl.apply_to_file</code></a> and
     <a href="Xtmpl.html#VALapply_string_to_file"><code class="code">Xtmpl.apply_string_to_file</code></a>, applies as many iterations as necessary
@@ -164,11 +175,11 @@ Parses a string as XML.<br>
 <p>
 
     <b>I.</b> A single iteration descends recursively into the XML tree. If an
-    element (without a namespace) appears in the environment, then the 
+    element (without a namespace) appears in the environment, then the
     environment callback is applied to its attributes and children.
 <p>
 
-    <i>Example</i>: consider the following XML: 
+    <i>Example</i>: consider the following XML:
 <p>
 
     <pre class="verbatim">&lt;album author="Rammstein" name="Reise, Reise"&gt;
@@ -178,13 +189,13 @@ Parses a string as XML.<br>
 <p>
 
     This would look for a callback bound to <code class="code">"album"</code> in the environment
-    and call it using <code class="code">callback env ["author","Rammstein";"name","Reise, Reise"] xml</code> 
-    where <code class="code">env</code> is the current environment and <code class="code">xml</code> represents the 
-    two child <code class="code"> &lt;track&gt;..&lt;/track&gt; </code> elements. 
+    and call it using <code class="code">callback env ["author","Rammstein";"name","Reise, Reise"] xml</code>
+    where <code class="code">env</code> is the current environment and <code class="code">xml</code> represents the
+    two child <code class="code"> &lt;track&gt;..&lt;/track&gt; </code> elements.
 <p>
 
-    <b>II.</b> The callback returns a new list of elements that is used 
-    instead of the old element. 
+    <b>II.</b> The callback returns a new list of elements that is used
+    instead of the old element.
 <p>
 
     <i>Example</i>: assuming that <code class="code">env_add "x2" (fun _ _ xml -&gt; xml @ xml)</code>,
@@ -192,52 +203,52 @@ Parses a string as XML.<br>
 <p>
 
     <b>III.</b> The engine then recursively descends into those replacement
-    elements (this means that a poorly conceived rule set may well never 
-    terminate). 
+    elements (this means that a poorly conceived rule set may well never
+    terminate).
 <p>
 
-    <i>Example</i>: <code class="code">&lt;x2&gt;&lt;x2&gt;A&lt;/x2&gt;&lt;/x2&gt;</code> is first rewritten as 
+    <i>Example</i>: <code class="code">&lt;x2&gt;&lt;x2&gt;A&lt;/x2&gt;&lt;/x2&gt;</code> is first rewritten as
     <code class="code">&lt;x2&gt;A&lt;/x2&gt;&lt;x2&gt;A&lt;/x2&gt;</code>, and then as <code class="code">AAAA</code>.
 <p>
 
-    <b>IV.</b> The <code class="code">env_</code> and <code class="code">main</code> elements (see <a href="Xtmpl.html#VALtag_env"><code class="code">Xtmpl.tag_env</code></a> 
-    and <a href="Xtmpl.html#VALtag_main"><code class="code">Xtmpl.tag_main</code></a>) are a special case: both are automatically 
+    <b>IV.</b> The <code class="code">env_</code> and <code class="code">main</code> elements (see <a href="Xtmpl.html#VALtag_env"><code class="code">Xtmpl.tag_env</code></a>
+    and <a href="Xtmpl.html#VALtag_main"><code class="code">Xtmpl.tag_main</code></a>) are a special case: both are automatically
     replaced with their children (as if their callback was
-    <code class="code">(fun _ _ xml -&gt; xml)</code>). 
+    <code class="code">(fun _ _ xml -&gt; xml)</code>).
 <p>
 
-    First difference, <code class="code">main</code> is only available in the second 
-    templating engine variant (so, it is not available in <a href="Xtmpl.html#VALeval_xml"><code class="code">Xtmpl.eval_xml</code></a> 
-    and <a href="Xtmpl.html#VALapply_to_xmls"><code class="code">Xtmpl.apply_to_xmls</code></a>) but it may be manually defined or overriden. 
+    First difference, <code class="code">main</code> is only available in the second
+    templating engine variant (so, it is not available in <a href="Xtmpl.html#VALeval_xml"><code class="code">Xtmpl.eval_xml</code></a>
+    and <a href="Xtmpl.html#VALapply_to_xmls"><code class="code">Xtmpl.apply_to_xmls</code></a>) but it may be manually defined or overriden.
 <p>
 
     Second difference, <code class="code">env_</code> effectively changes the environment
     used when processing its children by adding the bindings defined by
-    its arguments (using <a href="Xtmpl.html#VALenv_add_att"><code class="code">Xtmpl.env_add_att</code></a>, hence the name). 
+    its arguments (using <a href="Xtmpl.html#VALenv_add_att"><code class="code">Xtmpl.env_add_att</code></a>, hence the name).
 <p>
 
     <i>Example</i>: <code class="code">&lt;env_ a="&amp;lt;b&amp;gt;A&amp;lt;/b&amp;gt;"&gt;&lt;a/&gt;&lt;/env_&gt;</code> is
-    replaced by <code class="code">&lt;a/&gt;</code>, which in turn is replaced by 
-    <code class="code">&lt;b&gt;A&lt;/b&gt;</code>. 
+    replaced by <code class="code">&lt;a/&gt;</code>, which in turn is replaced by
+    <code class="code">&lt;b&gt;A&lt;/b&gt;</code>.
 <p>
 
     <b>V.</b> If an element has a <code class="code">defer_</code> attribute (that is greater
     than zero), then it is not processed and the attribute is decremented
-    by one, and the processing recursively applies to its children. 
+    by one, and the processing recursively applies to its children.
 <p>
 
     <i>Example</i>: <code class="code">&lt;x2 defer_="1"&gt;&lt;x2&gt;A&lt;/x2&gt;&lt;/x2&gt;</code> is rewritten as
-    <code class="code">&lt;x2 defer_="0"&gt;AA&lt;/x2&gt;</code>. Applying the template engine on a 
+    <code class="code">&lt;x2 defer_="0"&gt;AA&lt;/x2&gt;</code>. Applying the template engine on a
     <b>second</b> iteration would rewrite this to <code class="code">AAAA</code>.<br>
 <pre><span id="VALeval_xml"><span class="keyword">val</span> eval_xml</span> : <code class="type"><a href="Xtmpl.html#TYPEenv">env</a> -> <a href="Xtmpl.html#TYPEtree">tree</a> -> <a href="Xtmpl.html#TYPEtree">tree</a> list</code></pre><div class="info">
-Apply <b>one</b> iteration of the rules to a piece of XML. 
+Apply <b>one</b> iteration of the rules to a piece of XML.
 <p>
 
     See above for how an iteration is applied.<br>
 </div>
 <pre><span id="VALapply"><span class="keyword">val</span> apply</span> : <code class="type"><a href="Xtmpl.html#TYPEenv">env</a> -> string -> string</code></pre><div class="info">
 Applies as many iterations as necessary to a piece of XML (represented
-    as an unparsed string) to reach a fixed point. 
+    as an unparsed string) to reach a fixed point.
 <p>
 
     See above for how an iteration is applied.<br>
@@ -249,7 +260,7 @@ As <a href="Xtmpl.html#VALapply"><code class="code">Xtmpl.apply</code></a>, but 
 As <a href="Xtmpl.html#VALeval_xml"><code class="code">Xtmpl.eval_xml</code></a>, but applies to a list.<br>
 </div>
 <pre><span id="VALapply_to_file"><span class="keyword">val</span> apply_to_file</span> : <code class="type">?head:string -> <a href="Xtmpl.html#TYPEenv">env</a> -> string -> string -> unit</code></pre><div class="info">
-As <a href="Xtmpl.html#VALapply_from_file"><code class="code">Xtmpl.apply_from_file</code></a>, but writes the result back to a file. 
+As <a href="Xtmpl.html#VALapply_from_file"><code class="code">Xtmpl.apply_from_file</code></a>, but writes the result back to a file.
 <p>
 
     For instance, <code class="code">apply_to_file env "source.xml" "desc.xml"</code>.<br>
@@ -261,27 +272,27 @@ As <a href="Xtmpl.html#VALapply_to_file"><code class="code">Xtmpl.apply_to_file<
     of a file.<br>
 </div>
 <br>
-<span id="2_Utilities"><h2>Utilities</h2></span> 
+<span id="2_Utilities"><h2>Utilities</h2></span>
 <p>
 
     Several useful functions when workin with XML.<br>
 <pre><span id="VALget_arg"><span class="keyword">val</span> get_arg</span> : <code class="type">(string * string) list -> string -> string option</code></pre><div class="info">
-Finds a binding in an associative list. 
+Finds a binding in an associative list.
 <p>
 
     This performs the same as <code class="code">List.assoc</code>, but returns an optional string
     instead of raising <code class="code">Not_found</code>.<br>
 </div>
 <pre><span id="VALstring_of_args"><span class="keyword">val</span> string_of_args</span> : <code class="type">(string * string) list -> string</code></pre><div class="info">
-A string representation of an argument list. 
+A string representation of an argument list.
 <p>
 
-    <code class="code">string_of_args ["a","x";"b","y"]</code> returns <code class="code">a="x" b="y"</code>. Note that 
+    <code class="code">string_of_args ["a","x";"b","y"]</code> returns <code class="code">a="x" b="y"</code>. Note that
     the argument names are output verbatim, but the argument values are
     escaped with the <code class="code">%S</code> format.<br>
 </div>
 <pre><span id="VALopt_arg"><span class="keyword">val</span> opt_arg</span> : <code class="type">(string * string) list -> ?def:string -> string -> string</code></pre><div class="info">
-Finds a binding in an associative list, or returns a default. 
+Finds a binding in an associative list, or returns a default.
 <p>
 
     This performs the same as <code class="code">List.assoc</code>, but returns the provided
