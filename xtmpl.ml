@@ -236,7 +236,11 @@ and eval_xml env = function
                    (* no change in node, eval children anyway *)
                    let subs = List.flatten (List.map (eval_xml env) subs) in
                    [ E (((uri, tag), atts), subs) ]
-               | Some xml -> List.flatten (List.map (eval_xml env) xml)
+               | Some xml ->
+                   (*prerr_endline
+                     (Printf.sprintf "=== Evaluated tag %s -> %s\n"
+                    tag (String.concat "" (List.map string_of_xml xml)));*)
+                   List.flatten (List.map (eval_xml env) xml)
               )
               (* eval f before subs *)
         | _ ->
@@ -288,7 +292,7 @@ let opt_arg args ?(def="") name =
 
 
 let env_of_list ?(env=env_empty) l =
-  List.fold_left (fun env (name, f) -> env_add name f env) env l
+  List.fold_right (fun (name, f) env -> env_add name f env) l env
 ;;
 
   

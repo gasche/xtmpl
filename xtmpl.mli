@@ -101,7 +101,9 @@ val env_add_att : string -> string -> env -> env
     {!val:env_add} several times yourself.
 
     [env_of_list ~env:env [ k1, f1 ; k2, f2 ]] is equivalent to
-    [env_add k2 f2 (env_add k1 f1 env)].
+    [env_add k1 f1 (env_add k2 f2 env)]. This means that one key
+    is present twice in the list, the first association in the list
+    will hide the second one in the resulting environment.
 
     @param env The environment to which bindings are added. If
     not provided, {!val:env_empty} is used.
@@ -110,7 +112,10 @@ val env_of_list : ?env:env -> (string * callback) list -> env
 
 (** {2 XML Manipulation} *)
 
-(** The main tag, currently ["main_"].
+(** A dummy tag, currently ["main_"]. It is used when parsing a
+   string as an XML tree, to ensure that we will parse a tree and
+   not a list of tree. For this purpose, the tag is used to enclosed
+   a string before parsing it.
 
     Used by {!val:env_add_att}, {!val:xml_of_string} and, most importantly,
     by the {!val:apply} functions.
