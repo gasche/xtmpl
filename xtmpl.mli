@@ -57,7 +57,8 @@ and tree =
     environments.
 *)
 
-(** An environment that contains no bindings.
+(** An environment that contains only one binding, associating
+  {val:tag_main} to a function returning its subnodes.
 *)
 val env_empty : env
 

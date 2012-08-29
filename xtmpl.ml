@@ -58,6 +58,10 @@ let file_of_string ~file s =
 
 module Str_map = Map.Make (struct type t = string let compare = compare end);;
 
+let tag_main = "main_";;
+let tag_env = "env_";;
+let att_defer = "defer_";;
+
 exception No_change
 type env = (env -> (string * string) list -> tree list -> tree list) Str_map.t
 and callback = env -> (string * string) list -> tree list -> tree list
@@ -67,12 +71,16 @@ and tree =
   | D of string
 
 
-let env_empty = Str_map.empty;;
 let env_add = Str_map.add;;
 let env_get s env =
   try Some (Str_map.find s env)
   with Not_found -> None
 ;;
+let env_empty =
+  let f_main env atts subs = subs in
+  env_add tag_main f_main Str_map.empty
+;;
+
 
 let rec fix_point ?(n=0) f x =
   (*
@@ -86,10 +94,6 @@ let rec fix_point ?(n=0) f x =
 let string_of_env env =
   String.concat ", " (Str_map.fold (fun s _ acc -> s :: acc) env [])
 ;;
-
-let tag_main = "main_";;
-let tag_env = "env_";;
-let att_defer = "defer_";;
 
 let string_of_xml tree =
   try
@@ -249,8 +253,6 @@ and eval_xml env = function
 
 and eval_string env s =
   let xml = xml_of_string s in
-  let f_main env atts subs = subs in
-  let env = env_add tag_main f_main env in
   String.concat "" (List.map string_of_xml (eval_xml env xml))
 ;;
 
