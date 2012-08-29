@@ -147,11 +147,11 @@ val xml_of_string : ?add_main:bool -> string -> tree
 (** {2 Templating engine}
 
     These functions apply one of two variants of the templating engine.
-    The first variant, used by {!val:eval_xml} and {!val:apply_to_xmls},
+    The first variant, used by {!val:eval_xml},
     applies one iteration of the templating rules, while the second variant,
-    used by {!val:apply}, {!val:apply_from_file}, {!val:apply_to_file} and
-    {!val:apply_string_to_file}, applies as many iterations as necessary
-    to reach a fixpoint.
+    used by {!val:apply}, {!val:apply_from_file}, {!val:apply_to_file},
+    {!val:apply_string_to_file} and {!val:apply_to_xmls} applies as many
+    iterations as necessary to reach a fix-point.
 
     {b I.} A single iteration descends recursively into the XML tree. If an
     element (without a namespace) appears in the environment, then the
@@ -187,11 +187,7 @@ val xml_of_string : ?add_main:bool -> string -> tree
     replaced with their children (as if their callback was
     [(fun _ _ xml -> xml)]).
 
-    First difference, [main] is only available in the second
-    templating engine variant (so, it is not available in {!val:eval_xml}
-    and {!val:apply_to_xmls}) but it may be manually defined or overriden.
-
-    Second difference, [env_] effectively changes the environment
+    [env_] effectively changes the environment
     used when processing its children by adding the bindings defined by
     its arguments (using {!val:env_add_att}, hence the name).
 
@@ -217,7 +213,7 @@ val eval_xml : env -> tree -> tree list
 (*val eval_string : env -> string -> string*)
 
 (** Applies as many iterations as necessary to a piece of XML (represented
-    as an unparsed string) to reach a fixed point.
+    as an unparsed string) to reach a fix-point.
 
     See above for how an iteration is applied.
 *)
@@ -226,7 +222,7 @@ val apply : env -> string -> string
 (** As {!val:apply}, but reads the XML from a file. *)
 val apply_from_file : env -> string -> string
 
-(** As {!val:eval_xml}, but applies to a list. *)
+(** As {!val:eval_xml}, but applies to a list until a fix-point is reached.. *)
 val apply_to_xmls : env -> tree list -> tree list
 
 (** As {!val:apply_from_file}, but writes the result back to a file.
