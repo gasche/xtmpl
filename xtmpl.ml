@@ -264,7 +264,8 @@ let apply_from_file env file =
 ;;
 
 let apply_to_xmls env l =
-  List.flatten (List.map (eval_xml env) l)
+  let f l = List.flatten (List.map (eval_xml env) l) in
+  fix_point f l
 ;;
 
 let apply_to_file ?head env file out_file =
