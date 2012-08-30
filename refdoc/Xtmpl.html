@@ -77,7 +77,8 @@ This exception can be raised by callbacks to indicate that the
     The environments are immutable, all mutating operations return new
     environments.<br>
 <pre><span id="VALenv_empty"><span class="keyword">val</span> env_empty</span> : <code class="type"><a href="Xtmpl.html#TYPEenv">env</a></code></pre><div class="info">
-An environment that contains no bindings.<br>
+An environment that contains only one binding, associating
+   to a function returning its subnodes.<br>
 </div>
 <pre><span id="VALenv_add"><span class="keyword">val</span> env_add</span> : <code class="type">string -> <a href="Xtmpl.html#TYPEcallback">callback</a> -> <a href="Xtmpl.html#TYPEenv">env</a> -> <a href="Xtmpl.html#TYPEenv">env</a></code></pre><div class="info">
 Add a binding to an environment.
@@ -167,11 +168,11 @@ Parses a string as XML.<br>
 <p>
 
     These functions apply one of two variants of the templating engine.
-    The first variant, used by <a href="Xtmpl.html#VALeval_xml"><code class="code">Xtmpl.eval_xml</code></a> and <a href="Xtmpl.html#VALapply_to_xmls"><code class="code">Xtmpl.apply_to_xmls</code></a>,
+    The first variant, used by <a href="Xtmpl.html#VALeval_xml"><code class="code">Xtmpl.eval_xml</code></a>,
     applies one iteration of the templating rules, while the second variant,
-    used by <a href="Xtmpl.html#VALapply"><code class="code">Xtmpl.apply</code></a>, <a href="Xtmpl.html#VALapply_from_file"><code class="code">Xtmpl.apply_from_file</code></a>, <a href="Xtmpl.html#VALapply_to_file"><code class="code">Xtmpl.apply_to_file</code></a> and
-    <a href="Xtmpl.html#VALapply_string_to_file"><code class="code">Xtmpl.apply_string_to_file</code></a>, applies as many iterations as necessary
-    to reach a fixpoint.
+    used by <a href="Xtmpl.html#VALapply"><code class="code">Xtmpl.apply</code></a>, <a href="Xtmpl.html#VALapply_from_file"><code class="code">Xtmpl.apply_from_file</code></a>, <a href="Xtmpl.html#VALapply_to_file"><code class="code">Xtmpl.apply_to_file</code></a>,
+    <a href="Xtmpl.html#VALapply_string_to_file"><code class="code">Xtmpl.apply_string_to_file</code></a> and <a href="Xtmpl.html#VALapply_to_xmls"><code class="code">Xtmpl.apply_to_xmls</code></a> applies as many
+    iterations as necessary to reach a fix-point.
 <p>
 
     <b>I.</b> A single iteration descends recursively into the XML tree. If an
@@ -217,12 +218,7 @@ Parses a string as XML.<br>
     <code class="code">(fun _ _ xml -&gt; xml)</code>).
 <p>
 
-    First difference, <code class="code">main</code> is only available in the second
-    templating engine variant (so, it is not available in <a href="Xtmpl.html#VALeval_xml"><code class="code">Xtmpl.eval_xml</code></a>
-    and <a href="Xtmpl.html#VALapply_to_xmls"><code class="code">Xtmpl.apply_to_xmls</code></a>) but it may be manually defined or overriden.
-<p>
-
-    Second difference, <code class="code">env_</code> effectively changes the environment
+    <code class="code">env_</code> effectively changes the environment
     used when processing its children by adding the bindings defined by
     its arguments (using <a href="Xtmpl.html#VALenv_add_att"><code class="code">Xtmpl.env_add_att</code></a>, hence the name).
 <p>
@@ -248,7 +244,7 @@ Apply <b>one</b> iteration of the rules to a piece of XML.
 </div>
 <pre><span id="VALapply"><span class="keyword">val</span> apply</span> : <code class="type"><a href="Xtmpl.html#TYPEenv">env</a> -> string -> string</code></pre><div class="info">
 Applies as many iterations as necessary to a piece of XML (represented
-    as an unparsed string) to reach a fixed point.
+    as an unparsed string) to reach a fix-point.
 <p>
 
     See above for how an iteration is applied.<br>
@@ -257,7 +253,7 @@ Applies as many iterations as necessary to a piece of XML (represented
 As <a href="Xtmpl.html#VALapply"><code class="code">Xtmpl.apply</code></a>, but reads the XML from a file.<br>
 </div>
 <pre><span id="VALapply_to_xmls"><span class="keyword">val</span> apply_to_xmls</span> : <code class="type"><a href="Xtmpl.html#TYPEenv">env</a> -> <a href="Xtmpl.html#TYPEtree">tree</a> list -> <a href="Xtmpl.html#TYPEtree">tree</a> list</code></pre><div class="info">
-As <a href="Xtmpl.html#VALeval_xml"><code class="code">Xtmpl.eval_xml</code></a>, but applies to a list.<br>
+As <a href="Xtmpl.html#VALeval_xml"><code class="code">Xtmpl.eval_xml</code></a>, but applies to a list until a fix-point is reached..<br>
 </div>
 <pre><span id="VALapply_to_file"><span class="keyword">val</span> apply_to_file</span> : <code class="type">?head:string -> <a href="Xtmpl.html#TYPEenv">env</a> -> string -> string -> unit</code></pre><div class="info">
 As <a href="Xtmpl.html#VALapply_from_file"><code class="code">Xtmpl.apply_from_file</code></a>, but writes the result back to a file.

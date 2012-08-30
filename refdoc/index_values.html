@@ -18,7 +18,7 @@
 <tr><td><a href="Xtmpl.html#VALapply">apply</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
 <td><div class="info">
 Applies as many iterations as necessary to a piece of XML (represented
-    as an unparsed string) to reach a fixed point.
+    as an unparsed string) to reach a fix-point.
 </div>
 </td></tr>
 <tr><td><a href="Xtmpl.html#VALapply_from_file">apply_from_file</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
@@ -39,7 +39,7 @@ As <a href="Xtmpl.html#VALapply_from_file"><code class="code">Xtmpl.apply_from_f
 </td></tr>
 <tr><td><a href="Xtmpl.html#VALapply_to_xmls">apply_to_xmls</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
 <td><div class="info">
-As <a href="Xtmpl.html#VALeval_xml"><code class="code">Xtmpl.eval_xml</code></a>, but applies to a list.
+As <a href="Xtmpl.html#VALeval_xml"><code class="code">Xtmpl.eval_xml</code></a>, but applies to a list until a fix-point is reached..
 </div>
 </td></tr>
 <tr><td align="left"><br>E</td></tr>
@@ -55,7 +55,8 @@ Bind a callback that returns some XML.
 </td></tr>
 <tr><td><a href="Xtmpl.html#VALenv_empty">env_empty</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
 <td><div class="info">
-An environment that contains no bindings.
+An environment that contains only one binding, associating
+   to a function returning its subnodes.
 </div>
 </td></tr>
 <tr><td><a href="Xtmpl.html#VALenv_get">env_get</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
