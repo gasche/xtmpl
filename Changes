@@ -1,3 +1,6 @@
+Next release:
+  - add: string_of_xmls
+
 Release 0.3 (2012/08/30):
   * mod: "empty" env now contains the main_ tag remover
   * fix: all eval functions now remove the main_ tag (because

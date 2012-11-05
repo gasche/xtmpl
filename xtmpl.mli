@@ -136,6 +136,10 @@ val tag_env : string
 *)
 val string_of_xml : tree -> string
 
+(** Use {!string_of_xml} to concatenate a list of xml trees into one string,
+  with no separator.*)
+val string_of_xmls : tree list -> string
+
 (** Parses a string as XML.
 
     @param add_main if true, adds [<main>..</main>] around the string

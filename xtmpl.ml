@@ -117,6 +117,8 @@ let string_of_xml tree =
       failwith msg
 ;;
 
+let string_of_xmls l = String.concat "" (List.map string_of_xml l);;
+
 let xml_of_string ?(add_main=true) s =
   let s =
     if add_main then
@@ -253,7 +255,7 @@ and eval_xml env = function
 
 and eval_string env s =
   let xml = xml_of_string s in
-  String.concat "" (List.map string_of_xml (eval_xml env xml))
+  string_of_xmls (eval_xml env xml)
 ;;
 
 let apply env s = fix_point (eval_string env) s;;
