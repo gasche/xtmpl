@@ -19,7 +19,8 @@
 <div class="navbar">&nbsp;<a class="up" href="index.html" title="Index">Up</a>
 &nbsp;</div>
 <h1>Module <a href="type_Xtmpl.html">Xtmpl</a></h1>
-<pre><span class="keyword">module</span> Xtmpl: <code class="code">sig</code> <a href="Xtmpl.html">..</a> <code class="code">end</code></pre>Xml templating library.
+<pre><span class="keyword">module</span> Xtmpl: <code class="code">sig</code> <a href="Xtmpl.html">..</a> <code class="code">end</code></pre><div class="info">
+Xml templating library.
 <p>
 
     Runs through an XML <a href="Xtmpl.html#TYPEtree"><code class="code">Xtmpl.tree</code></a> and alters it using <a href="Xtmpl.html#TYPEcallback"><code class="code">Xtmpl.callback</code></a> rules
@@ -28,6 +29,7 @@
 
     A complete description of the templating rules is available in the templating
     engine section below.<br>
+</div>
 <hr width="100%">
 <pre><span id="EXCEPTIONNo_change"><span class="keyword">exception</span> No_change</span></pre>
 <div class="info">
@@ -66,7 +68,7 @@ This exception can be raised by callbacks to indicate that the
 
 
 <br>
-<span id="2_Environment"><h2>Environment</h2></span>
+<h2 id="2_Environment">Environment</h2>
 <p>
 
     An <a href="Xtmpl.html#TYPEenv"><code class="code">Xtmpl.env</code></a> is a string-to-<a href="Xtmpl.html#TYPEcallback"><code class="code">Xtmpl.callback</code></a> associative map. In addition
@@ -133,7 +135,7 @@ Add several bindings at once.
 <div class="param_info"><code class="code">env</code> : The environment to which bindings are added. If
     not provided, <a href="Xtmpl.html#VALenv_empty"><code class="code">Xtmpl.env_empty</code></a> is used.</div>
 <br>
-<span id="2_XMLManipulation"><h2>XML Manipulation</h2></span><br>
+<h2 id="2_XMLManipulation">XML Manipulation</h2><br>
 <pre><span id="VALtag_main"><span class="keyword">val</span> tag_main</span> : <code class="type">string</code></pre><div class="info">
 A dummy tag, currently <code class="code">"main_"</code>. It is used when parsing a
    string as an XML tree, to ensure that we will parse a tree and
@@ -157,6 +159,10 @@ Outputs an XML string.
 
     Does not include the initial <code class="code">&lt;?xml ... ?&gt;</code>.<br>
 </div>
+<pre><span id="VALstring_of_xmls"><span class="keyword">val</span> string_of_xmls</span> : <code class="type"><a href="Xtmpl.html#TYPEtree">tree</a> list -> string</code></pre><div class="info">
+Use <a href="Xtmpl.html#VALstring_of_xml"><code class="code">Xtmpl.string_of_xml</code></a> to concatenate a list of xml trees into one string,
+  with no separator.<br>
+</div>
 <pre><span id="VALxml_of_string"><span class="keyword">val</span> xml_of_string</span> : <code class="type">?add_main:bool -> string -> <a href="Xtmpl.html#TYPEtree">tree</a></code></pre><div class="info">
 Parses a string as XML.<br>
 <b>Raises</b> <code>Failure</code> when a parsing error occurs, includes the source string.<br>
@@ -164,7 +170,7 @@ Parses a string as XML.<br>
 <div class="param_info"><code class="code">add_main</code> : if true, adds <code class="code">&lt;main&gt;..&lt;/main&gt;</code> around the string
     (see <a href="Xtmpl.html#VALtag_main"><code class="code">Xtmpl.tag_main</code></a>).</div>
 <br>
-<span id="2_Templatingengine"><h2>Templating engine</h2></span>
+<h2 id="2_Templatingengine">Templating engine</h2>
 <p>
 
     These functions apply one of two variants of the templating engine.
@@ -268,7 +274,7 @@ As <a href="Xtmpl.html#VALapply_to_file"><code class="code">Xtmpl.apply_to_file<
     of a file.<br>
 </div>
 <br>
-<span id="2_Utilities"><h2>Utilities</h2></span>
+<h2 id="2_Utilities">Utilities</h2>
 <p>
 
     Several useful functions when workin with XML.<br>
