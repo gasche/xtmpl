@@ -98,7 +98,8 @@ let string_of_env env =
 let string_of_xml tree =
   try
     let b = Buffer.create 256 in
-    let output = Xmlm.make_output ~decl: false (`Buffer b) in
+    let ns_prefix s = Some s in
+    let output = Xmlm.make_output ~ns_prefix ~decl: false (`Buffer b) in
     let frag = function
     | E (tag, childs) -> `El (tag, childs)
     | T (tag, atts, childs) ->
@@ -127,7 +128,8 @@ let xml_of_string ?(add_main=true) s =
       s
   in
   try
-    let input = Xmlm.make_input ~enc: (Some `UTF_8) (`String (0, s)) in
+    let ns s = Some s in
+    let input = Xmlm.make_input ~ns ~enc: (Some `UTF_8) (`String (0, s)) in
     let el tag childs = E (tag, childs)  in
     let data d = D d in
     let (_, tree) = Xmlm.input_doc_tree ~el ~data input in
