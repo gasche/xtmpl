@@ -66,7 +66,7 @@ exception No_change
 type env = (env -> (string * string) list -> tree list -> tree list) Str_map.t
 and callback = env -> (string * string) list -> tree list -> tree list
 and tree =
-    E of Xmlm.tag * tree list
+    E of Xmlm.name * Xmlm.attribute list * tree list
   | D of string
 
 
@@ -108,7 +108,7 @@ let string_of_xml tree =
     let ns_prefix s = Some s in
     let output = Xmlm.make_output ~ns_prefix ~decl: false (`Buffer b) in
     let frag = function
-    | E (tag, childs) -> `El (tag, childs)
+    | E (tag, atts, childs) -> `El ((tag, atts), childs)
     | D d -> `Data d
     in
     Xmlm.output_doc_tree frag output (None, tree);
@@ -133,7 +133,7 @@ let xml_of_string ?(add_main=true) s =
   try
     let ns s = Some s in
     let input = Xmlm.make_input ~ns ~enc: (Some `UTF_8) (`String (0, s)) in
-    let el tag childs = E (tag, childs)  in
+    let el (tag, atts) childs = E (tag, atts, childs)  in
     let data d = D d in
     let (_, tree) = Xmlm.input_doc_tree ~el ~data input in
     tree
@@ -193,7 +193,7 @@ and eval_xml env = function
     let (tag, atts, subs) =
       match other with
         D _ -> assert false
-      | E ((tag, atts), subs) -> (tag, atts, subs)
+      | E (tag, atts, subs) -> (tag, atts, subs)
     in
     let f = function
       (("",s), v) ->
@@ -232,7 +232,7 @@ and eval_xml env = function
                let subs = List.flatten (List.map (eval_xml env) subs) in
                let att_defer = (("",att_defer), string_of_int (defer-1)) in
                let atts = att_defer :: atts in
-               [ E (((prefix, tag), atts), subs) ]
+               [ E ((prefix, tag), atts, subs) ]
               )
             else
               (
@@ -244,7 +244,7 @@ and eval_xml env = function
                  None ->
                    (* no change in node, eval children anyway *)
                    let subs = List.flatten (List.map (eval_xml env) subs) in
-                   [ E (((prefix, tag), atts), subs) ]
+                   [ E ((prefix, tag), atts, subs) ]
                | Some xml ->
                    (*prerr_endline
                      (Printf.sprintf "=== Evaluated tag %s -> %s\n"
@@ -254,7 +254,7 @@ and eval_xml env = function
               (* eval f before subs *)
         | None ->
             let subs = List.flatten (List.map (eval_xml env) subs) in
-            [ E (((prefix, tag), atts), subs) ]
+            [ E ((prefix, tag), atts, subs) ]
 
 and eval_string env s =
   let xml = xml_of_string s in

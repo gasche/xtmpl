@@ -39,7 +39,7 @@ exception No_change
 type env
 and callback = env -> (string * string) list -> tree list -> tree list
 and tree =
-    E of Xmlm.tag * tree list
+    E of Xmlm.name * Xmlm.attribute list * tree list
   | D of string
 
 (** {2 Environment}
