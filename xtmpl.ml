@@ -56,7 +56,7 @@ let file_of_string ~file s =
   close_out oc
 (*/c==v=[File.file_of_string]=1.1====*)
 
-module Str_map = Map.Make (struct type t = string let compare = compare end);;
+module Str_map = Map.Make (struct type t = string * string let compare = compare end);;
 
 let tag_main = "main_";;
 let tag_env = "env_";;
@@ -71,9 +71,9 @@ and tree =
   | D of string
 
 
-let env_add = Str_map.add;;
-let env_get s env =
-  try Some (Str_map.find s env)
+let env_add ?(prefix="") name = Str_map.add (prefix, name) ;;
+let env_get k env =
+  try Some (Str_map.find k env)
   with Not_found -> None
 ;;
 let env_empty =
@@ -92,7 +92,15 @@ let rec fix_point ?(n=0) f x =
 ;;
 
 let string_of_env env =
-  String.concat ", " (Str_map.fold (fun s _ acc -> s :: acc) env [])
+  let f (prefix, name) _ acc =
+    let s =
+      match prefix with
+        "" -> name
+      | s -> s ^ ":" ^ name
+    in
+    s :: acc
+  in
+  String.concat ", " (Str_map.fold f env [])
 ;;
 
 let string_of_xml tree =
@@ -222,16 +230,16 @@ and eval_xml env = function
     in
     match tag with
       ("", t) when t = tag_env -> ((eval_env env atts subs) : tree list)
-    | (uri, tag) ->
-        match uri, env_get tag env with
-        | "", Some f ->
+    | (prefix, tag) ->
+        match env_get (prefix, tag) env with
+        | Some f ->
             if defer > 0 then
               (* defer evaluation, evaluate subs first *)
               (
                let subs = List.flatten (List.map (eval_xml env) subs) in
                let att_defer = (("",att_defer), string_of_int (defer-1)) in
                let atts = att_defer :: atts in
-               [ E (((uri, tag), atts), subs) ]
+               [ E (((prefix, tag), atts), subs) ]
               )
             else
               (
@@ -243,7 +251,7 @@ and eval_xml env = function
                  None ->
                    (* no change in node, eval children anyway *)
                    let subs = List.flatten (List.map (eval_xml env) subs) in
-                   [ E (((uri, tag), atts), subs) ]
+                   [ E (((prefix, tag), atts), subs) ]
                | Some xml ->
                    (*prerr_endline
                      (Printf.sprintf "=== Evaluated tag %s -> %s\n"
@@ -251,9 +259,9 @@ and eval_xml env = function
                    List.flatten (List.map (eval_xml env) xml)
               )
               (* eval f before subs *)
-        | _ ->
+        | None ->
             let subs = List.flatten (List.map (eval_xml env) subs) in
-            [ E (((uri, tag), atts), subs) ]
+            [ E (((prefix, tag), atts), subs) ]
 
 and eval_string env s =
   let xml = xml_of_string s in

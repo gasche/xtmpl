@@ -69,14 +69,16 @@ val env_empty : env
 
     If the same key was already bound, the previous binding is
     replaced.
+
+    @param prefix is [""] by default.
 *)
-val env_add : string -> callback -> env -> env
+val env_add : ?prefix: string -> string -> callback -> env -> env
 
 (** Get a binding from an environment.
 
     If the binding is not found, returns [None].
 *)
-val env_get : string -> env -> callback option
+val env_get : string * string -> env -> callback option
 
 (** String representation of all the keys in the environment. *)
 val string_of_env : env -> string
