@@ -37,7 +37,7 @@
 exception No_change
 
 type env
-and callback = env -> (string * string) list -> tree list -> tree list
+and callback = env -> Xmlm.attribute list -> tree list -> tree list
 and tree =
     E of Xmlm.name * Xmlm.attribute list * tree list
   | D of string
@@ -73,7 +73,7 @@ val env_add : ?prefix: string -> string -> callback -> env -> env
 
     If the binding is not found, returns [None].
 *)
-val env_get : string * string -> env -> callback option
+val env_get : Xmlm.name -> env -> callback option
 
 (** String representation of all the keys in the environment. *)
 val string_of_env : env -> string
@@ -85,13 +85,13 @@ val string_of_env : env -> string
     the XML subtree as a string.
 
     [env_add_att "logo" "<img src=\"logo.png\"/>" env] binds the key
-    "logo" to a callback that returns an XHTML image tag.
+    [("","logo")] to a callback that returns an XHTML image tag.
 
     Note that the provided XML is automatically wrapped in the
     {!val:tag_main} tag, which will cause the corresponding
     templating rules to be applied to it
 *)
-val env_add_att : string -> string -> env -> env
+val env_add_att : ?prefix:string -> string -> string -> env -> env
 
 (** Add several bindings at once.
 
@@ -106,7 +106,7 @@ val env_add_att : string -> string -> env -> env
     @param env The environment to which bindings are added. If
     not provided, {!val:env_empty} is used.
 *)
-val env_of_list : ?env:env -> (string * callback) list -> env
+val env_of_list : ?env:env -> (Xmlm.name * callback) list -> env
 
 (** {2 XML Manipulation} *)
 

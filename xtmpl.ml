@@ -63,8 +63,8 @@ let tag_env = "env_";;
 let att_defer = "defer_";;
 
 exception No_change
-type env = (env -> (string * string) list -> tree list -> tree list) Str_map.t
-and callback = env -> (string * string) list -> tree list -> tree list
+type env = (env -> Xmlm.attribute list -> tree list -> tree list) Str_map.t
+and callback = env -> Xmlm.attribute list -> tree list -> tree list
 and tree =
     E of Xmlm.name * Xmlm.attribute list * tree list
   | D of string
@@ -169,8 +169,8 @@ let re_amp = Str.regexp_string "&amp;";;
 let unescape_ampersand s = Str.global_replace re_amp "&" s;;
 
 
-let env_add_att a v env =
-  env_add a (fun _ _ _ -> [xml_of_string v]) env
+let env_add_att ?prefix a v env =
+  env_add ?prefix a (fun _ _ _ -> [xml_of_string v]) env
 ;;
 
 
@@ -180,9 +180,9 @@ let rec eval_env env atts subs =
       (String.concat "" (List.map string_of_xml subs)));
 *)
   let env = List.fold_left
-    (fun acc ((_,s),v) ->
+    (fun acc ((prefix,s),v) ->
 (*       prerr_endline (Printf.sprintf "env: %s=%s" s v);*)
-       env_add_att s v acc)
+       env_add_att ~prefix s v acc)
     env atts
   in
   List.flatten (List.map (eval_xml env) subs)
@@ -195,16 +195,14 @@ and eval_xml env = function
         D _ -> assert false
       | E (tag, atts, subs) -> (tag, atts, subs)
     in
-    let f = function
-      (("",s), v) ->
-        let v2 = eval_string env (escape_ampersand v) in
-        (*prerr_endline
-          (Printf.sprintf "att: %s -> %s -> %s -> %s"
+    let f ((prefix,s), v) =
+      let v2 = eval_string env (escape_ampersand v) in
+      (*prerr_endline
+         (Printf.sprintf "att: %s -> %s -> %s -> %s"
          v (escape_ampersand v) v2 (unescape_ampersand v2)
-        );*)
-        let v2 = unescape_ampersand v2 in
-        (("", s), v2)
-    | _ as att -> att
+         );*)
+      let v2 = unescape_ampersand v2 in
+      ((prefix, s), v2)
     in
     let atts = List.map f atts in
     let (defer,atts) = List.partition
@@ -237,7 +235,7 @@ and eval_xml env = function
             else
               (
                let xml =
-                 try Some (f env (List.map (fun ((_,s),v) -> (s,v)) atts) subs)
+                 try Some (f env atts subs)
                  with No_change -> None
                in
                match xml with
@@ -303,7 +301,7 @@ let opt_arg args ?(def="") name =
 
 
 let env_of_list ?(env=env_empty) l =
-  List.fold_right (fun (name, f) env -> env_add name f env) l env
+  List.fold_right (fun ((prefix,name), f) env -> env_add ~prefix name f env) l env
 ;;
 
   
