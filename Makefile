@@ -23,7 +23,7 @@
 #                                                                               #
 #################################################################################
 
-VERSION=0.4
+VERSION=0.5
 
 INCLUDES=`ocamlfind query -i-format xmlm`
 COMPFLAGS=$(INCLUDES) -annot -rectypes

@@ -67,7 +67,6 @@ type env = (env -> (string * string) list -> tree list -> tree list) Str_map.t
 and callback = env -> (string * string) list -> tree list -> tree list
 and tree =
     E of Xmlm.tag * tree list
-  | T of string * (string * string) list * tree list
   | D of string
 
 
@@ -110,10 +109,6 @@ let string_of_xml tree =
     let output = Xmlm.make_output ~ns_prefix ~decl: false (`Buffer b) in
     let frag = function
     | E (tag, childs) -> `El (tag, childs)
-    | T (tag, atts, childs) ->
-        let tag = ("", tag) in
-        let atts = List.map (fun (s,v) -> (("",s), v)) atts in
-        `El ((tag, atts), childs)
     | D d -> `Data d
     in
     Xmlm.output_doc_tree frag output (None, tree);
@@ -198,8 +193,6 @@ and eval_xml env = function
     let (tag, atts, subs) =
       match other with
         D _ -> assert false
-      | T (tag, atts, subs) ->
-        (("", tag), List.map (fun (s,v) -> (("",s), v)) atts, subs)
       | E ((tag, atts), subs) -> (tag, atts, subs)
     in
     let f = function

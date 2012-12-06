@@ -40,11 +40,6 @@ type env
 and callback = env -> (string * string) list -> tree list -> tree list
 and tree =
     E of Xmlm.tag * tree list
-  | T of string * (string * string) list * tree list (** Convenient notation for
-							 XML elements, without
-							 having to specify the
-							 namespace as in Xmlm.tag
-						     *)
   | D of string
 
 (** {2 Environment}
