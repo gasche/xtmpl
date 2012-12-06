@@ -291,7 +291,10 @@ let get_arg args name =
 ;;
 
 let string_of_args args =
-  String.concat " " (List.map (fun (s,v) -> Printf.sprintf "%s=%S" s v) args)
+  String.concat " "
+    (List.map (fun ((pref,s),v) -> Printf.sprintf "%s%s=%S"
+      (match pref with "" -> "" | p -> p^":") s v)
+    args)
 ;;
 
 let opt_arg args ?(def="") name =

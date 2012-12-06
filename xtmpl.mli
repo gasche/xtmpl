@@ -245,12 +245,12 @@ val apply_string_to_file : ?head:string -> env -> string -> string -> unit
     Several useful functions when workin with XML.
 *)
 
-(** Finds a binding in an associative list.
+(** Finds a binding in an attribute list.
 
     This performs the same as [List.assoc], but returns an optional string
     instead of raising [Not_found].
 *)
-val get_arg : (string * string) list -> string -> string option
+val get_arg : Xmlm.attribute list -> Xmlm.name -> string option
 
 (** A string representation of an argument list.
 
@@ -258,7 +258,7 @@ val get_arg : (string * string) list -> string -> string option
     the argument names are output verbatim, but the argument values are
     escaped with the [%S] format.
 *)
-val string_of_args : (string * string) list -> string
+val string_of_args : Xmlm.attribute list -> string
 
 (** Finds a binding in an associative list, or returns a default.
 
@@ -268,4 +268,4 @@ val string_of_args : (string * string) list -> string
     @param def Default value, returned for missing bindings. If not
     provided, an empty string is used.
 *)
-val opt_arg : (string * string) list -> ?def:string -> string -> string
+val opt_arg : Xmlm.attribute list -> ?def:string -> Xmlm.name -> string
