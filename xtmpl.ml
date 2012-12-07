@@ -262,28 +262,36 @@ and eval_string env s =
   string_of_xmls (eval_xml env xml)
 ;;
 
-let apply env s = fix_point (eval_string env) s;;
+let apply_to_xmls env xmls =
+  let f xmls = List.flatten (List.map (eval_xml env) xmls) in
+  fix_point f xmls
+;;
 
-let apply_from_file env file =
+let apply_to_xml env xml = apply_to_xmls env [xml] ;;
+
+let apply_to_string env s =
+  let xml = xml_of_string s in
+  apply_to_xml env xml
+;;
+
+let apply_to_file env file =
   let s = string_of_file file in
-  apply env s
+  let xml = xml_of_string s in
+  apply_to_xml env xml
 ;;
 
-let apply_to_xmls env l =
-  let f l = List.flatten (List.map (eval_xml env) l) in
-  fix_point f l
-;;
-
-let apply_to_file ?head env file out_file =
-  let s = apply_from_file env file in
+let apply_into_file ?head env ~infile ~outfile =
+  let xmls = apply_to_file env infile in
+  let s = string_of_xmls xmls in
   let s = match head with None -> s | Some h -> h^s in
-  file_of_string ~file: out_file s
+  file_of_string ~file: outfile s
 ;;
 
-let apply_string_to_file ?head env s out_file =
-  let s = apply env s in
+let apply_string_into_file ?head env ~outfile s =
+  let xmls = apply_to_string env s in
+  let s = string_of_xmls xmls in
   let s = match head with None -> s | Some h -> h^s in
-  file_of_string ~file: out_file s
+  file_of_string ~file: outfile s
 ;;
 
 let get_arg args name =

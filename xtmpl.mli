@@ -25,11 +25,11 @@
 
 (** Xml templating library.
 
-    Runs through an XML {!type:tree} and alters it using {!type:callback} rules
+    Rewrite XML {!type:tree}s using {!type:callback} rules
     provided by the {!type:env} environment.
 
-    A complete description of the templating rules is available in the templating
-    engine section below.
+    A complete description of the templating rules is available in the
+    {!section:engine} section below.
 *)
 
 (** This exception can be raised by callbacks to indicate that the
@@ -47,7 +47,7 @@ and tree =
 
 (** {2 Environment}
 
-    An {!type:env} is a string-to-{!type:callback} associative map. In addition
+    An {!type:env} is a {!type:name}-to-{!type:callback} associative map. In addition
     to basic manipulation functions, the functions {!val:env_add_att} and
     {!val:env_of_list} provide convenient shortcuts for common operations.
 
@@ -56,14 +56,17 @@ and tree =
 *)
 
 (** An environment that contains only one binding, associating
-  {val:tag_main} to a function returning its subnodes.
+  {!val:tag_main} to a function returning its subnodes.
 *)
 val env_empty : env
 
 (** Add a binding to an environment.
 
     [env_add "double" (fun _ _ xml -> xml @ xml)] binds the key
-    string ["double"] to a callback that doubles an XML subtree.
+    [("", "double")] to a callback that doubles an XML subtree.
+
+    [env_add ~prefix: "foo" "double" (fun _ _ xml -> xml @ xml)] does the same but
+    for the key  [("foo", "double")].
 
     If the same key was already bound, the previous binding is
     replaced.
@@ -101,8 +104,8 @@ val env_add_att : ?prefix:string -> string -> string -> env -> env
     This convenience function saves you the effort of calling
     {!val:env_add} several times yourself.
 
-    [env_of_list ~env:env [ k1, f1 ; k2, f2 ]] is equivalent to
-    [env_add k1 f1 (env_add k2 f2 env)]. This means that one key
+    [env_of_list ~env:env [ (ns1, k1), f1 ; (ns2, k2), f2 ]] is equivalent to
+    [env_add ~prefix: ns1 k1 f1 (env_add ~prefix: ns2 k2 f2 env)]. This means that one key
     is present twice in the list, the first association in the list
     will hide the second one in the resulting environment.
 
@@ -115,11 +118,11 @@ val env_of_list : ?env:env -> (name * callback) list -> env
 
 (** A dummy tag, currently ["main_"]. It is used when parsing a
    string as an XML tree, to ensure that we will parse a tree and
-   not a list of tree. For this purpose, the tag is used to enclosed
+   not a list of trees. For this purpose, the tag is used to enclosed
    a string before parsing it.
 
     Used by {!val:env_add_att}, {!val:xml_of_string} and, most importantly,
-    by the {!val:apply} functions.
+    by the [apply_*] functions.
 *)
 val tag_main : string
 
@@ -130,9 +133,9 @@ val tag_main : string
 *)
 val tag_env : string
 
-(** Outputs an XML string.
+(** Output an XML string.
 
-    Does not include the initial [<?xml ... ?>].
+    The returned string does not include the initial [<?xml ... ?>].
 *)
 val string_of_xml : tree -> string
 
@@ -142,24 +145,26 @@ val string_of_xmls : tree list -> string
 
 (** Parses a string as XML.
 
-    @param add_main if true, adds [<main>..</main>] around the string
+    @param add_main if true, adds [<main_>..</main_>] around the string
     (see {!val:tag_main}).
     @raise Failure when a parsing error occurs, includes the source string.
 *)
 val xml_of_string : ?add_main:bool -> string -> tree
 
-(** {2 Templating engine}
+(** {2:engine Templating engine}
 
-    These functions apply one of two variants of the templating engine.
-    The first variant, used by {!val:eval_xml},
-    applies one iteration of the templating rules, while the second variant,
-    used by {!val:apply}, {!val:apply_from_file}, {!val:apply_to_file},
-    {!val:apply_string_to_file} and {!val:apply_to_xmls} applies as many
-    iterations as necessary to reach a fix-point.
+    The [apply_*] functions apply a given environment to XML tree(s). These
+    trees are given as parameter ({!apply_to_xmls}) or can be read from a
+    file ({!apply_to_file}), or a string ({!apply_to_string}).
+
+    The functions return the result of the rewrite as XML trees, or
+    can write it to a file ({!apply_into_file}).
+
+    The rewrite rules are applied until a fix-point is reached.
 
     {b I.} A single iteration descends recursively into the XML tree. If an
-    element (without a namespace) appears in the environment, then the
-    environment callback is applied to its attributes and children.
+    element has a callback associated in the environment, then the
+    callback is applied to the node's attributes and children.
 
     {i Example}: consider the following XML:
 
@@ -168,10 +173,10 @@ val xml_of_string : ?add_main:bool -> string -> tree
   <track>Mein Teil</track>
 </album> v}
 
-    This would look for a callback bound to ["album"] in the environment
-    and call it using [callback env ["author","Rammstein";"name","Reise, Reise"] xml]
+    This would look for a callback bound to [("","album")] in the environment
+    and call it using [callback env [("","author"),"Rammstein"; ("","name"),"Reise, Reise"] xml]
     where [env] is the current environment and [xml] represents the
-    two child [ <track>..</track> ] elements.
+    two children [ <track>..</track> ] elements.
 
     {b II.} The callback returns a new list of elements that is used
     instead of the old element.
@@ -179,14 +184,14 @@ val xml_of_string : ?add_main:bool -> string -> tree
     {i Example}: assuming that [env_add "x2" (fun _ _ xml -> xml @ xml)],
     then [<x2>A</x2>] is rewritten as [AA].
 
-    {b III.} The engine then recursively descends into those replacement
+    {b III.} The engine then recursively descends into those replaced
     elements (this means that a poorly conceived rule set may well never
     terminate).
 
     {i Example}: [<x2><x2>A</x2></x2>] is first rewritten as
     [<x2>A</x2><x2>A</x2>], and then as [AAAA].
 
-    {b IV.} The [env_] and [main] elements (see {!val:tag_env}
+    {b IV.} The [env_] and [main_] elements (see {!val:tag_env}
     and {!val:tag_main}) are a special case: both are automatically
     replaced with their children (as if their callback was
     [(fun _ _ xml -> xml)]).
@@ -201,47 +206,38 @@ val xml_of_string : ?add_main:bool -> string -> tree
 
     {b V.} If an element has a [defer_] attribute (that is greater
     than zero), then it is not processed and the attribute is decremented
-    by one, and the processing recursively applies to its children.
+    by one, and the process recursively applies to its children.
 
     {i Example}: [<x2 defer_="1"><x2>A</x2></x2>] is rewritten as
-    [<x2 defer_="0">AA</x2>]. Applying the template engine on a
-    {b second} iteration would rewrite this to [AAAA].
+    [<x2 defer_="0">AA</x2>]. The {b next} iteration will effectively apply the
+    rule to the node and return [AAAA].
 *)
-
-(** Apply {b one} iteration of the rules to a piece of XML.
-
-    See above for how an iteration is applied.
-*)
-val eval_xml : env -> tree -> tree list
-
-(*val eval_string : env -> string -> string*)
 
 (** Applies as many iterations as necessary to a piece of XML (represented
     as an unparsed string) to reach a fix-point.
 
     See above for how an iteration is applied.
 *)
-val apply : env -> string -> string
+val apply_to_string : env -> string -> tree list
 
-(** As {!val:apply}, but reads the XML from a file. *)
-val apply_from_file : env -> string -> string
+(** As {!val:apply_to_string}, but reads the XML from a file. *)
+val apply_to_file : env -> string -> tree list
 
-(** As {!val:eval_xml}, but applies to a list until a fix-point is reached.. *)
+(** As {!val:apply_to_string}, but applies to a list of XML trees.*)
 val apply_to_xmls : env -> tree list -> tree list
 
-(** As {!val:apply_from_file}, but writes the result back to a file.
+(** As {!val:apply_to_file}, but writes the result back to a file.
 
-    For instance, [apply_to_file env "source.xml" "desc.xml"].
+    For instance, [apply_to_file env ~infile:"source.xml" ~outfile: "dest.xml"].
 
     @param head Prepend this string to the XML that is output
     to the file. By default, nothing is prepended.
 *)
-val apply_to_file : ?head:string -> env -> string -> string -> unit
+val apply_into_file : ?head:string -> env -> infile: string -> outfile: string -> unit
 
-(** As {!val:apply_to_file}, but reds the XML from a string instead
-    of a file.
+(** As {!val:apply_into_file}, but read the XML from a string instead of a file.
 *)
-val apply_string_to_file : ?head:string -> env -> string -> string -> unit
+val apply_string_into_file : ?head:string -> env -> outfile: string -> string -> unit
 
 (** {2 Utilities}
 
