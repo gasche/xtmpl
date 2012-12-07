@@ -25,6 +25,9 @@
 
 (** *)
 
+type name = string * string
+type attribute = (name * string)
+
 (*c==v=[File.string_of_file]=1.0====*)
 let string_of_file name =
   let chanin = open_in_bin name in
@@ -63,10 +66,10 @@ let tag_env = "env_";;
 let att_defer = "defer_";;
 
 exception No_change
-type env = (env -> Xmlm.attribute list -> tree list -> tree list) Str_map.t
-and callback = env -> Xmlm.attribute list -> tree list -> tree list
+type env = (env -> attribute list -> tree list -> tree list) Str_map.t
+and callback = env -> attribute list -> tree list -> tree list
 and tree =
-    E of Xmlm.name * Xmlm.attribute list * tree list
+    E of name * attribute list * tree list
   | D of string
 
 

@@ -36,10 +36,13 @@
   node to be rewritten remains unchanged. *)
 exception No_change
 
+type name = string * string
+type attribute = (name * string)
+
 type env
-and callback = env -> Xmlm.attribute list -> tree list -> tree list
+and callback = env -> attribute list -> tree list -> tree list
 and tree =
-    E of Xmlm.name * Xmlm.attribute list * tree list
+    E of name * attribute list * tree list
   | D of string
 
 (** {2 Environment}
@@ -73,7 +76,7 @@ val env_add : ?prefix: string -> string -> callback -> env -> env
 
     If the binding is not found, returns [None].
 *)
-val env_get : Xmlm.name -> env -> callback option
+val env_get : name -> env -> callback option
 
 (** String representation of all the keys in the environment. *)
 val string_of_env : env -> string
@@ -106,7 +109,7 @@ val env_add_att : ?prefix:string -> string -> string -> env -> env
     @param env The environment to which bindings are added. If
     not provided, {!val:env_empty} is used.
 *)
-val env_of_list : ?env:env -> (Xmlm.name * callback) list -> env
+val env_of_list : ?env:env -> (name * callback) list -> env
 
 (** {2 XML Manipulation} *)
 
@@ -250,7 +253,7 @@ val apply_string_to_file : ?head:string -> env -> string -> string -> unit
     This performs the same as [List.assoc], but returns an optional string
     instead of raising [Not_found].
 *)
-val get_arg : Xmlm.attribute list -> Xmlm.name -> string option
+val get_arg : attribute list -> name -> string option
 
 (** A string representation of an argument list.
 
@@ -258,7 +261,7 @@ val get_arg : Xmlm.attribute list -> Xmlm.name -> string option
     the argument names are output verbatim, but the argument values are
     escaped with the [%S] format.
 *)
-val string_of_args : Xmlm.attribute list -> string
+val string_of_args : attribute list -> string
 
 (** Finds a binding in an associative list, or returns a default.
 
@@ -268,4 +271,4 @@ val string_of_args : Xmlm.attribute list -> string
     @param def Default value, returned for missing bindings. If not
     provided, an empty string is used.
 *)
-val opt_arg : Xmlm.attribute list -> ?def:string -> Xmlm.name -> string
+val opt_arg : attribute list -> ?def:string -> name -> string
