@@ -151,6 +151,9 @@ val string_of_xmls : tree list -> string
 *)
 val xml_of_string : ?add_main:bool -> string -> tree
 
+(** Same as {!xml_of_string} but read from a file. *)
+val xml_of_file : string -> tree
+
 (** {2:engine Templating engine}
 
     The [apply_*] functions apply a given environment to XML tree(s). These

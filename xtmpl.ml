@@ -126,6 +126,24 @@ let string_of_xml tree =
 
 let string_of_xmls l = String.concat "" (List.map string_of_xml l);;
 
+let xml_of_source s_source source =
+ try
+    let ns s = Some s in
+    let input = Xmlm.make_input ~ns ~enc: (Some `UTF_8) source in
+    let el (tag, atts) childs = E (tag, atts, childs)  in
+    let data d = D d in
+    let (_, tree) = Xmlm.input_doc_tree ~el ~data input in
+    tree
+  with
+    Xmlm.Error ((line, col), error) ->
+      let msg = Printf.sprintf "%sLine %d, column %d: %s"
+        s_source line col (Xmlm.error_message error)
+      in
+      failwith msg
+  | Invalid_argument e ->
+      let msg = Printf.sprintf "%sInvalid_argumen(%s)" s_source e in
+      failwith msg
+
 let xml_of_string ?(add_main=true) s =
   let s =
     if add_main then
@@ -133,25 +151,22 @@ let xml_of_string ?(add_main=true) s =
     else
       s
   in
-  try
-    let ns s = Some s in
-    let input = Xmlm.make_input ~ns ~enc: (Some `UTF_8) (`String (0, s)) in
-    let el (tag, atts) childs = E (tag, atts, childs)  in
-    let data d = D d in
-    let (_, tree) = Xmlm.input_doc_tree ~el ~data input in
-    tree
-  with
-    Xmlm.Error ((line, col), error) ->
-      let msg = Printf.sprintf "Line %d, column %d: %s\n%s"
-        line col (Xmlm.error_message error) s
-      in
-      failwith msg
-  | Invalid_argument e ->
-      let msg = Printf.sprintf "%s:\n%s" e s in
-      failwith msg
+  xml_of_source (s^"\n") (`String (0, s))
 ;;
 
-
+let xml_of_file file =
+  let ic = open_in file in
+  try
+    let xml = xml_of_source
+      (Printf.sprintf "File %S, " file) (`Channel ic)
+    in
+    close_in ic;
+    xml
+  with
+    e ->
+      close_in ic;
+      raise e
+;;
 
 let re_escape = Str.regexp "&\\(\\([a-z]+\\)\\|\\(#[0-9]+\\)\\);";;
 
