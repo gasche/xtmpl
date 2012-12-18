@@ -15,31 +15,30 @@
 <h1>Index of values</h1>
 <table>
 <tr><td align="left"><br>A</td></tr>
-<tr><td><a href="Xtmpl.html#VALapply">apply</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
+<tr><td><a href="Xtmpl.html#VALapply_into_file">apply_into_file</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
+<td><div class="info">
+As <a href="Xtmpl.html#VALapply_to_file"><code class="code">Xtmpl.apply_to_file</code></a>, but writes the result back to a file.
+</div>
+</td></tr>
+<tr><td><a href="Xtmpl.html#VALapply_string_into_file">apply_string_into_file</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
+<td><div class="info">
+As <a href="Xtmpl.html#VALapply_into_file"><code class="code">Xtmpl.apply_into_file</code></a>, but read the XML from a string instead of a file.
+</div>
+</td></tr>
+<tr><td><a href="Xtmpl.html#VALapply_to_file">apply_to_file</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
+<td><div class="info">
+As <a href="Xtmpl.html#VALapply_to_string"><code class="code">Xtmpl.apply_to_string</code></a>, but reads the XML from a file.
+</div>
+</td></tr>
+<tr><td><a href="Xtmpl.html#VALapply_to_string">apply_to_string</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
 <td><div class="info">
 Applies as many iterations as necessary to a piece of XML (represented
     as an unparsed string) to reach a fix-point.
 </div>
 </td></tr>
-<tr><td><a href="Xtmpl.html#VALapply_from_file">apply_from_file</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
-<td><div class="info">
-As <a href="Xtmpl.html#VALapply"><code class="code">Xtmpl.apply</code></a>, but reads the XML from a file.
-</div>
-</td></tr>
-<tr><td><a href="Xtmpl.html#VALapply_string_to_file">apply_string_to_file</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
-<td><div class="info">
-As <a href="Xtmpl.html#VALapply_to_file"><code class="code">Xtmpl.apply_to_file</code></a>, but reds the XML from a string instead
-    of a file.
-</div>
-</td></tr>
-<tr><td><a href="Xtmpl.html#VALapply_to_file">apply_to_file</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
-<td><div class="info">
-As <a href="Xtmpl.html#VALapply_from_file"><code class="code">Xtmpl.apply_from_file</code></a>, but writes the result back to a file.
-</div>
-</td></tr>
 <tr><td><a href="Xtmpl.html#VALapply_to_xmls">apply_to_xmls</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
 <td><div class="info">
-As <a href="Xtmpl.html#VALeval_xml"><code class="code">Xtmpl.eval_xml</code></a>, but applies to a list until a fix-point is reached..
+As <a href="Xtmpl.html#VALapply_to_string"><code class="code">Xtmpl.apply_to_string</code></a>, but applies to a list of XML trees.
 </div>
 </td></tr>
 <tr><td align="left"><br>E</td></tr>
@@ -56,7 +55,7 @@ Bind a callback that returns some XML.
 <tr><td><a href="Xtmpl.html#VALenv_empty">env_empty</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
 <td><div class="info">
 An environment that contains only one binding, associating
-   to a function returning its subnodes.
+  <a href="Xtmpl.html#VALtag_main"><code class="code">Xtmpl.tag_main</code></a> to a function returning its subnodes.
 </div>
 </td></tr>
 <tr><td><a href="Xtmpl.html#VALenv_get">env_get</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
@@ -69,15 +68,10 @@ Get a binding from an environment.
 Add several bindings at once.
 </div>
 </td></tr>
-<tr><td><a href="Xtmpl.html#VALeval_xml">eval_xml</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
-<td><div class="info">
-Apply <b>one</b> iteration of the rules to a piece of XML.
-</div>
-</td></tr>
 <tr><td align="left"><br>G</td></tr>
 <tr><td><a href="Xtmpl.html#VALget_arg">get_arg</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
 <td><div class="info">
-Finds a binding in an associative list.
+Finds a binding in an attribute list.
 </div>
 </td></tr>
 <tr><td align="left"><br>O</td></tr>
@@ -99,7 +93,7 @@ String representation of all the keys in the environment.
 </td></tr>
 <tr><td><a href="Xtmpl.html#VALstring_of_xml">string_of_xml</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
 <td><div class="info">
-Outputs an XML string.
+Output an XML string.
 </div>
 </td></tr>
 <tr><td><a href="Xtmpl.html#VALstring_of_xmls">string_of_xmls</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
@@ -120,6 +114,11 @@ A dummy tag, currently <code class="code">"main_"</code>.
 </div>
 </td></tr>
 <tr><td align="left"><br>X</td></tr>
+<tr><td><a href="Xtmpl.html#VALxml_of_file">xml_of_file</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
+<td><div class="info">
+Same as <a href="Xtmpl.html#VALxml_of_string"><code class="code">Xtmpl.xml_of_string</code></a> but read from a file.
+</div>
+</td></tr>
 <tr><td><a href="Xtmpl.html#VALxml_of_string">xml_of_string</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
 <td><div class="info">
 Parses a string as XML.
