@@ -1,3 +1,11 @@
+Release 0.5:
+  - mod: do not use string representation to check for changes in
+    fixpoint computation
+  - API change: Xtmpl.E of tag * atts * subs
+  - API change: No more Xtmpl.T constructor
+  - API change: make API more homogeneous
+  - API change: handle prefix in nodes and attributes
+
 Release 0.4:
   - add: string_of_xmls
 
