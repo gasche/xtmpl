@@ -168,24 +168,6 @@ let xml_of_file file =
       raise e
 ;;
 
-let re_escape = Str.regexp "&\\(\\([a-z]+\\)\\|\\(#[0-9]+\\)\\);";;
-
-let escape_ampersand s =
-  let len = String.length s in
-  let b = Buffer.create len in
-  for i = 0 to len - 1 do
-    match s.[i] with
-      '&' when Str.string_match re_escape s i ->
-        Buffer.add_char b '&'
-    | '&' -> Buffer.add_string b "&amp;"
-    | c -> Buffer.add_char b c
-  done;
-  Buffer.contents b
-;;
-
-let re_amp = Str.regexp_string "&amp;";;
-let unescape_ampersand s = Str.global_replace re_amp "&" s;;
-
 
 let env_add_att ?prefix a v env =
   env_add ?prefix a (fun _ _ _ -> [xml_of_string v]) env
@@ -214,12 +196,11 @@ and eval_xml env = function
       | E (tag, atts, subs) -> (tag, atts, subs)
     in
     let f ((prefix,s), v) =
-      let v2 = eval_string env (escape_ampersand v) in
+      let v2 = eval_string env v in
       (*prerr_endline
          (Printf.sprintf "att: %s -> %s -> %s -> %s"
          v (escape_ampersand v) v2 (unescape_ampersand v2)
          );*)
-      let v2 = unescape_ampersand v2 in
       ((prefix, s), v2)
     in
     let atts = List.map f atts in
