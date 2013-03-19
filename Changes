@@ -1,3 +1,8 @@
+Release 0.6:
+  - do not (un)escape ampersand in attributes
+  - fix META version
+  - generate and install .cmxs file
+
 Release 0.5:
   - mod: do not use string representation to check for changes in
     fixpoint computation

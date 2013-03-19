@@ -1,7 +1,8 @@
-version = "0.2"
+version = "0.6"
 description = "OCaml XML templating library"
 requires = "str,xmlm"
 archive(toploop) = "xtmpl.cmo"
 archive(byte) = "xtmpl.cmo"
 archive(native) = "xtmpl.cmx"
+archive(native,plugin) = "xtmpl.cmxs"
 

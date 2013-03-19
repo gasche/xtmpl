@@ -23,7 +23,7 @@
 #                                                                               #
 #################################################################################
 
-VERSION=0.5
+VERSION=0.6
 
 INCLUDES=`ocamlfind query -i-format xmlm`
 COMPFLAGS=$(INCLUDES) -annot -rectypes
@@ -42,10 +42,13 @@ MKDIR=mkdir -p
 
 all: byte opt
 byte: xtmpl.cmo
-opt: xtmpl.cmx
+opt: xtmpl.cmx xtmpl.cmxs
 
 xtmpl.cmx: xtmpl.cmi xtmpl.ml
 	$(OCAMLOPT) -c $(COMPFLAGS) xtmpl.ml
+
+xtmpl.cmxs: xtmpl.cmx
+	$(OCAMLOPT) -shared -o $@ $(COMPFLAGS) xtmpl.cmx
 
 xtmpl.cmo: xtmpl.cmi xtmpl.ml
 	$(OCAMLC) -c $(COMPFLAGS) xtmpl.ml
@@ -67,7 +70,7 @@ webdoc: doc
 
 ##########
 install: xtmpl.cmo xtmpl.cmx
-	ocamlfind install xtmpl META LICENSE xtmpl.cmi xtmpl.mli xtmpl.cmo xtmpl.cmx xtmpl.o
+	ocamlfind install xtmpl META LICENSE xtmpl.cmi xtmpl.mli xtmpl.cmo xtmpl.cmx xtmpl.cmxs xtmpl.o
 
 uninstall:
 	ocamlfind remove xtmpl
