@@ -2,7 +2,6 @@ Next release:
   - re-introduce (un)escaping ampersands in attributes, when
     the attribute name is specified in attribute escamp_
 
-
 Release 0.6:
   - do not (un)escape ampersand in attributes
   - fix META version
