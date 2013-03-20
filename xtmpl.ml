@@ -52,6 +52,56 @@ let string_of_file name =
   Buffer.contents buf
 (*/c==v=[File.string_of_file]=1.0====*)
 
+(*c==v=[String.split_string]=1.1====*)
+let split_string ?(keep_empty=false) s chars =
+  let len = String.length s in
+  let rec iter acc pos =
+    if pos >= len then
+      match acc with
+        "" -> []
+      | _ -> [acc]
+    else
+      if List.mem s.[pos] chars then
+        match acc with
+          "" ->
+            if keep_empty then
+              "" :: iter "" (pos + 1)
+            else
+              iter "" (pos + 1)
+        | _ -> acc :: (iter "" (pos + 1))
+      else
+        iter (Printf.sprintf "%s%c" acc s.[pos]) (pos + 1)
+  in
+  iter "" 0
+(*/c==v=[String.split_string]=1.1====*)
+
+(*c==v=[String.strip_string]=1.0====*)
+let strip_string s =
+  let len = String.length s in
+  let rec iter_first n =
+    if n >= len then
+      None
+    else
+      match s.[n] with
+        ' ' | '\t' | '\n' | '\r' -> iter_first (n+1)
+      | _ -> Some n
+  in
+  match iter_first 0 with
+    None -> ""
+  | Some first ->
+      let rec iter_last n =
+        if n <= first then
+          None
+        else
+          match s.[n] with
+            ' ' | '\t' | '\n' | '\r' -> iter_last (n-1)
+          |	_ -> Some n
+      in
+      match iter_last (len-1) with
+        None -> String.sub s first 1
+      |	Some last -> String.sub s first ((last-first)+1)
+(*/c==v=[String.strip_string]=1.0====*)
+
 (*c==v=[File.file_of_string]=1.1====*)
 let file_of_string ~file s =
   let oc = open_out file in
@@ -64,6 +114,24 @@ module Str_map = Map.Make (struct type t = string * string let compare = compare
 let tag_main = "main_";;
 let tag_env = "env_";;
 let att_defer = "defer_";;
+let att_escamp = "escamp_";;
+
+let re_escape = Str.regexp "&\\(\\([a-z]+\\)\\|\\(#[0-9]+\\)\\);";;
+let escape_ampersand s =
+  let len = String.length s in
+  let b = Buffer.create len in
+  for i = 0 to len - 1 do
+    match s.[i] with
+      '&' when Str.string_match re_escape s i ->
+        Buffer.add_char b '&'
+    | '&' -> Buffer.add_string b "&amp;"
+    | c -> Buffer.add_char b c
+  done;
+  Buffer.contents b
+;;
+
+let re_amp = Str.regexp_string "&amp;";;
+let unescape_ampersand s = Str.global_replace re_amp "&" s;;
 
 exception No_change
 type env = (env -> attribute list -> tree list -> tree list) Str_map.t
@@ -168,11 +236,26 @@ let xml_of_file file =
       raise e
 ;;
 
-
 let env_add_att ?prefix a v env =
   env_add ?prefix a (fun _ _ _ -> [xml_of_string v]) env
 ;;
 
+let atts_to_escape env atts =
+  let key = ("", att_escamp) in
+  let spec =
+    try Some (List.assoc key atts)
+    with Not_found ->
+        match env_get ("", att_escamp) env with
+          None -> None
+        | Some f ->
+            Some (string_of_xmls (f env [] []))
+  in
+  match spec with
+    None -> []
+  | Some s ->
+      let l = split_string s [',' ; ';'] in
+      List.map strip_string l
+;;
 
 let rec eval_env env atts subs =
 (*  prerr_endline
@@ -195,12 +278,16 @@ and eval_xml env = function
         D _ -> assert false
       | E (tag, atts, subs) -> (tag, atts, subs)
     in
+    let atts_to_escape = atts_to_escape env atts in
     let f ((prefix,s), v) =
+      let escamp = List.mem s atts_to_escape in
+      let v = if escamp then escape_ampersand v else v in
       let v2 = eval_string env v in
       (*prerr_endline
          (Printf.sprintf "att: %s -> %s -> %s -> %s"
          v (escape_ampersand v) v2 (unescape_ampersand v2)
          );*)
+      let v2 = if escamp then unescape_ampersand v2 else v2 in
       ((prefix, s), v2)
     in
     let atts = List.map f atts in
