@@ -18,6 +18,18 @@ Xtmpl is <a href="https://github.com/zoggy/xtmpl">hosted on Github</a>.
 </p>
 <h3>Releases</h3>
 <ul>
+<li><a href="xtmpl-0.7.tar.gz">0.7</a>
+[2013-10-07]:
+<ul>
+<li>Re-introduce (un)escaping of ampersands, only in attributes
+ specified in attribute escamp_.
+ For example:
+   <div class="code">&lt;a escamp_="href" href="http://foo.net/x?t=1&amp;amp;sort=0"&gt;...&lt;/a&gt;</div>
+ Without <span class="code">escamp_="href"</code>, ampersand is not escaped,
+ producing an invalid XML code during rewrite process.
+</li>
+</ul>
+</li>
 <li><a href="xtmpl-0.6.tar.gz">0.6</a>
 [2013-03-19]:
 <ul>
