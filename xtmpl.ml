@@ -134,8 +134,8 @@ let re_amp = Str.regexp_string "&amp;";;
 let unescape_ampersand s = Str.global_replace re_amp "&" s;;
 
 exception No_change
-type env = (env -> attribute list -> tree list -> tree list) Str_map.t
-and callback = env -> attribute list -> tree list -> tree list
+type 'a env = ('a callback) Str_map.t
+and 'a callback = 'a -> 'a env -> attribute list -> tree list -> 'a * tree list
 and tree =
     E of name * attribute list * tree list
   | D of string
@@ -146,19 +146,18 @@ let env_get k env =
   try Some (Str_map.find k env)
   with Not_found -> None
 ;;
-let env_empty =
-  let f_main env atts subs = subs in
+let env_empty () =
+  let (f_main : 'a callback) = fun data env atts subs -> (data, subs) in
   env_add tag_main f_main Str_map.empty
 ;;
 
-
-let rec fix_point ?(n=0) f x =
+let rec fix_point_snd ?(n=0) f (data, x) =
   (*
   let file = Printf.sprintf "/tmp/fixpoint%d.txt" n in
   file_of_string ~file x;
   *)
-  let y = f x in
-  if y = x then x else fix_point ~n: (n+1) f y
+  let (data, y) = f (data, x) in
+  if y = x then (data, x) else fix_point_snd ~n: (n+1) f (data, y)
 ;;
 
 let string_of_env env =
@@ -237,27 +236,28 @@ let xml_of_file file =
 ;;
 
 let env_add_att ?prefix a v env =
-  env_add ?prefix a (fun _ _ _ -> [xml_of_string v]) env
+  env_add ?prefix a (fun data _ _ _ -> data, [xml_of_string v]) env
 ;;
 
-let atts_to_escape env atts =
+let (atts_to_escape : 'a -> 'a env -> attribute list -> 'a * string list) = fun data env atts ->
   let key = ("", att_escamp) in
   let spec =
-    try Some (List.assoc key atts)
+    try Some (data, List.assoc key atts)
     with Not_found ->
-        match env_get ("", att_escamp) env with
+        match env_get key env with
           None -> None
         | Some f ->
-            Some (string_of_xmls (f env [] []))
+            let (data, subs) = f data env [] [] in
+            Some (data, string_of_xmls subs)
   in
   match spec with
-    None -> []
-  | Some s ->
+    None -> (data, [])
+  | Some (data, s) ->
       let l = split_string s [',' ; ';'] in
-      List.map strip_string l
+      (data, List.map strip_string l)
 ;;
 
-let rec eval_env env atts subs =
+let rec eval_env data env atts subs =
 (*  prerr_endline
     (Printf.sprintf "env: subs=%s"
       (String.concat "" (List.map string_of_xml subs)));
@@ -266,31 +266,43 @@ let rec eval_env env atts subs =
     (fun acc ((prefix,s),v) ->
 (*       prerr_endline (Printf.sprintf "env: %s=%s" s v);*)
        env_add_att ~prefix s v acc)
-    env atts
+      env atts
   in
-  List.flatten (List.map (eval_xml env) subs)
+  eval_xmls data env subs
 
-and eval_xml env = function
-| (D _) as xml -> [ xml ]
+and eval_xmls data env xmls =
+  let (data, l) =
+    List.fold_left
+      (fun (data, acc) xml ->
+         let (data, subs) = eval_xml data env xml in
+         (data, subs :: acc)
+      )
+      (data, [])
+      xmls
+  in
+  (data, List.flatten (List.rev l))
+
+and eval_xml data env = function
+| (D _) as xml -> (data, [ xml ])
 | other ->
     let (tag, atts, subs) =
       match other with
         D _ -> assert false
       | E (tag, atts, subs) -> (tag, atts, subs)
     in
-    let atts_to_escape = atts_to_escape env atts in
-    let f ((prefix,s), v) =
+    let (data, atts_to_escape) = atts_to_escape data env atts in
+    let f (data, acc) ((prefix,s), v) =
       let escamp = List.mem s atts_to_escape in
       let v = if escamp then escape_ampersand v else v in
-      let v2 = eval_string env v in
+      let (data, v2) = eval_string data env v in
       (*prerr_endline
          (Printf.sprintf "att: %s -> %s -> %s -> %s"
          v (escape_ampersand v) v2 (unescape_ampersand v2)
          );*)
       let v2 = if escamp then unescape_ampersand v2 else v2 in
-      ((prefix, s), v2)
+      (data, ((prefix, s), v2) :: acc)
     in
-    let atts = List.map f atts in
+    let (data, atts) = List.fold_left f (data, []) atts in
     let (defer,atts) = List.partition
       (function
        | (("",s), n) when s = att_defer ->
@@ -306,75 +318,78 @@ and eval_xml env = function
       | ((_,_), n) :: _ -> int_of_string n
     in
     match tag with
-      ("", t) when t = tag_env -> ((eval_env env atts subs) : tree list)
+      ("", t) when t = tag_env -> eval_env data env atts subs
     | (prefix, tag) ->
         match env_get (prefix, tag) env with
         | Some f ->
             if defer > 0 then
               (* defer evaluation, evaluate subs first *)
               (
-               let subs = List.flatten (List.map (eval_xml env) subs) in
+               let (data, subs) = eval_xmls data env subs in
                let att_defer = (("",att_defer), string_of_int (defer-1)) in
                let atts = att_defer :: atts in
-               [ E ((prefix, tag), atts, subs) ]
+               (data, [ E ((prefix, tag), atts, subs) ])
               )
             else
               (
                let xml =
-                 try Some (f env atts subs)
+                 try Some (f data env atts subs)
                  with No_change -> None
                in
                match xml with
                  None ->
                    (* no change in node, eval children anyway *)
-                   let subs = List.flatten (List.map (eval_xml env) subs) in
-                   [ E ((prefix, tag), atts, subs) ]
-               | Some xml ->
+                   let (data, subs) = eval_xmls data env subs in
+                   (data, [ E ((prefix, tag), atts, subs) ])
+               | Some (data, xmls) ->
                    (*prerr_endline
                      (Printf.sprintf "=== Evaluated tag %s -> %s\n"
                     tag (String.concat "" (List.map string_of_xml xml)));*)
-                   List.flatten (List.map (eval_xml env) xml)
+                   eval_xmls data env xmls
               )
               (* eval f before subs *)
         | None ->
-            let subs = List.flatten (List.map (eval_xml env) subs) in
-            [ E ((prefix, tag), atts, subs) ]
+            let (data, subs) = eval_xmls data env subs in
+            (data, [ E ((prefix, tag), atts, subs) ])
 
-and eval_string env s =
+and (eval_string : 'a -> 'a env -> string -> 'a * string) = fun data env s ->
   let xml = xml_of_string s in
-  string_of_xmls (eval_xml env xml)
+  let (data, xmls) = eval_xml data env xml in
+  (data, string_of_xmls xmls)
 ;;
 
-let apply_to_xmls env xmls =
-  let f xmls = List.flatten (List.map (eval_xml env) xmls) in
-  fix_point f xmls
+let apply_to_xmls data env xmls =
+  let f (data, xmls) = eval_xmls data env xmls in
+  fix_point_snd f (data, xmls)
 ;;
 
-let apply_to_xml env xml = apply_to_xmls env [xml] ;;
+let apply_to_xml data env xml = apply_to_xmls data env [xml] ;;
 
-let apply_to_string env s =
+let (apply_to_string : 'a -> 'a env -> string -> 'a * tree list) = fun data env s ->
   let xml = xml_of_string s in
-  apply_to_xml env xml
+  apply_to_xml data env xml
 ;;
 
-let apply_to_file env file =
+let apply_to_file data env file =
   let s = string_of_file file in
   let xml = xml_of_string s in
-  apply_to_xml env xml
+  apply_to_xml data env xml
 ;;
 
-let apply_into_file ?head env ~infile ~outfile =
-  let xmls = apply_to_file env infile in
+let apply_into_file data ?head env ~infile ~outfile =
+  let (data, xmls) = apply_to_file data env infile in
   let s = string_of_xmls xmls in
   let s = match head with None -> s | Some h -> h^s in
-  file_of_string ~file: outfile s
+  file_of_string ~file: outfile s;
+  data
 ;;
 
-let apply_string_into_file ?head env ~outfile s =
-  let xmls = apply_to_string env s in
+let apply_string_into_file data ?head env ~outfile s =
+  let (data, xmls) = apply_to_string data env s in
   let s = string_of_xmls xmls in
   let s = match head with None -> s | Some h -> h^s in
-  file_of_string ~file: outfile s
+  file_of_string ~file: outfile s;
+  data
 ;;
 
 let get_arg args name =
@@ -394,7 +409,7 @@ let opt_arg args ?(def="") name =
 ;;
 
 
-let env_of_list ?(env=env_empty) l =
+let env_of_list ?(env=env_empty()) l =
   List.fold_right (fun ((prefix,name), f) env -> env_add ~prefix name f env) l env
 ;;
 

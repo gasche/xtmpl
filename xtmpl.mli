@@ -39,8 +39,8 @@ exception No_change
 type name = string * string
 type attribute = (name * string)
 
-type env
-and callback = env -> attribute list -> tree list -> tree list
+type 'a env
+and 'a callback = 'a -> 'a env -> attribute list -> tree list -> 'a * tree list
 and tree =
     E of name * attribute list * tree list
   | D of string
@@ -58,7 +58,7 @@ and tree =
 (** An environment that contains only one binding, associating
   {!val:tag_main} to a function returning its subnodes.
 *)
-val env_empty : env
+val env_empty : unit -> 'a env
 
 (** Add a binding to an environment.
 
@@ -73,16 +73,16 @@ val env_empty : env
 
     @param prefix is [""] by default.
 *)
-val env_add : ?prefix: string -> string -> callback -> env -> env
+val env_add : ?prefix: string -> string -> 'a callback -> 'a env -> 'a env
 
 (** Get a binding from an environment.
 
     If the binding is not found, returns [None].
 *)
-val env_get : name -> env -> callback option
+val env_get : name -> 'a env -> 'a callback option
 
 (** String representation of all the keys in the environment. *)
-val string_of_env : env -> string
+val string_of_env : 'a env -> string
 
 (** Bind a callback that returns some XML.
 
@@ -97,7 +97,7 @@ val string_of_env : env -> string
     {!val:tag_main} tag, which will cause the corresponding
     templating rules to be applied to it
 *)
-val env_add_att : ?prefix:string -> string -> string -> env -> env
+val env_add_att : ?prefix:string -> string -> string -> 'a env -> 'a env
 
 (** Add several bindings at once.
 
@@ -112,7 +112,7 @@ val env_add_att : ?prefix:string -> string -> string -> env -> env
     @param env The environment to which bindings are added. If
     not provided, {!val:env_empty} is used.
 *)
-val env_of_list : ?env:env -> (name * callback) list -> env
+val env_of_list : ?env: 'a env -> (name * 'a callback) list -> 'a env
 
 (** {2 XML Manipulation} *)
 
@@ -221,13 +221,13 @@ val xml_of_file : string -> tree
 
     See above for how an iteration is applied.
 *)
-val apply_to_string : env -> string -> tree list
+val apply_to_string : 'a -> 'a env -> string -> 'a * tree list
 
 (** As {!val:apply_to_string}, but reads the XML from a file. *)
-val apply_to_file : env -> string -> tree list
+val apply_to_file : 'a -> 'a env -> string -> 'a * tree list
 
 (** As {!val:apply_to_string}, but applies to a list of XML trees.*)
-val apply_to_xmls : env -> tree list -> tree list
+val apply_to_xmls : 'a -> 'a env -> tree list -> 'a * tree list
 
 (** As {!val:apply_to_file}, but writes the result back to a file.
 
@@ -236,11 +236,11 @@ val apply_to_xmls : env -> tree list -> tree list
     @param head Prepend this string to the XML that is output
     to the file. By default, nothing is prepended.
 *)
-val apply_into_file : ?head:string -> env -> infile: string -> outfile: string -> unit
+val apply_into_file : 'a -> ?head:string -> 'a env -> infile: string -> outfile: string -> 'a
 
 (** As {!val:apply_into_file}, but read the XML from a string instead of a file.
 *)
-val apply_string_into_file : ?head:string -> env -> outfile: string -> string -> unit
+val apply_string_into_file : 'a -> ?head:string -> 'a env -> outfile: string -> string -> 'a
 
 (** {2 Utilities}
 
