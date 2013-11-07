@@ -151,13 +151,22 @@ let env_empty () =
   env_add tag_main f_main Str_map.empty
 ;;
 
+let limit =
+  try Some (int_of_string (Sys.getenv "XTMPL_FIXPOINT_LIMIT"))
+  with _ -> None
+;;
+
 let rec fix_point_snd ?(n=0) f (data, x) =
-  (*
-  let file = Printf.sprintf "/tmp/fixpoint%d.txt" n in
-  file_of_string ~file x;
-  *)
-  let (data, y) = f (data, x) in
-  if y = x then (data, x) else fix_point_snd ~n: (n+1) f (data, y)
+  match limit with
+    Some l when n >= l ->
+      failwith ("Xtmpl fixpoint iteration limit reached ("^(string_of_int l)^")")
+  | _ ->
+      (*
+         let file = Printf.sprintf "/tmp/fixpoint%d.txt" n in
+         file_of_string ~file x;
+         *)
+      let (data, y) = f (data, x) in
+      if y = x then (data, x) else fix_point_snd ~n: (n+1) f (data, y)
 ;;
 
 let string_of_env env =
