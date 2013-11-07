@@ -141,46 +141,6 @@ and tree =
   | D of string
 
 
-let env_add ?(prefix="") name = Str_map.add (prefix, name) ;;
-let env_get k env =
-  try Some (Str_map.find k env)
-  with Not_found -> None
-;;
-let env_empty () =
-  let (f_main : 'a callback) = fun data env atts subs -> (data, subs) in
-  env_add tag_main f_main Str_map.empty
-;;
-
-let limit =
-  try Some (int_of_string (Sys.getenv "XTMPL_FIXPOINT_LIMIT"))
-  with _ -> None
-;;
-
-let rec fix_point_snd ?(n=0) f (data, x) =
-  match limit with
-    Some l when n >= l ->
-      failwith ("Xtmpl fixpoint iteration limit reached ("^(string_of_int l)^")")
-  | _ ->
-      (*
-         let file = Printf.sprintf "/tmp/fixpoint%d.txt" n in
-         file_of_string ~file x;
-         *)
-      let (data, y) = f (data, x) in
-      if y = x then (data, x) else fix_point_snd ~n: (n+1) f (data, y)
-;;
-
-let string_of_env env =
-  let f (prefix, name) _ acc =
-    let s =
-      match prefix with
-        "" -> name
-      | s -> s ^ ":" ^ name
-    in
-    s :: acc
-  in
-  String.concat ", " (Str_map.fold f env [])
-;;
-
 let string_of_xml tree =
   try
     let b = Buffer.create 256 in
@@ -201,6 +161,44 @@ let string_of_xml tree =
 ;;
 
 let string_of_xmls l = String.concat "" (List.map string_of_xml l);;
+
+let env_add ?(prefix="") name = Str_map.add (prefix, name) ;;
+let env_get k env =
+  try Some (Str_map.find k env)
+  with Not_found -> None
+;;
+let env_empty () =
+  let (f_main : 'a callback) = fun data env atts subs -> (data, subs) in
+  env_add tag_main f_main Str_map.empty
+;;
+
+let limit =
+  try Some (int_of_string (Sys.getenv "XTMPL_FIXPOINT_LIMIT"))
+  with _ -> None
+;;
+
+let rec fix_point_snd ?(n=0) f (data, x) =
+  match limit with
+    Some l when n >= l ->
+      failwith ("Xtmpl fixpoint iteration limit reached ("^(string_of_int l)^")")
+  | _ ->
+      let (data, y) = f (data, x) in
+      let file = Printf.sprintf "/tmp/fixpoint%d.txt" n in
+      file_of_string ~file (string_of_xmls y);
+      if y = x then (data, x) else fix_point_snd ~n: (n+1) f (data, y)
+;;
+
+let string_of_env env =
+  let f (prefix, name) _ acc =
+    let s =
+      match prefix with
+        "" -> name
+      | s -> s ^ ":" ^ name
+    in
+    s :: acc
+  in
+  String.concat ", " (Str_map.fold f env [])
+;;
 
 let xml_of_source s_source source =
  try
@@ -312,6 +310,7 @@ and eval_xml data env = function
       (data, ((prefix, s), v2) :: acc)
     in
     let (data, atts) = List.fold_left f (data, []) atts in
+    let atts = List.rev atts in
     let (defer,atts) = List.partition
       (function
        | (("",s), n) when s = att_defer ->
@@ -368,6 +367,7 @@ and (eval_string : 'a -> 'a env -> string -> 'a * string) = fun data env s ->
 ;;
 
 let apply_to_xmls data env xmls =
+  (*prerr_endline (string_of_env env);*)
   let f (data, xmls) = eval_xmls data env xmls in
   fix_point_snd f (data, xmls)
 ;;
