@@ -352,7 +352,7 @@ and eval_xml data env = function
                | Some (data, xmls) ->
                    (*prerr_endline
                      (Printf.sprintf "=== Evaluated tag %s -> %s\n"
-                    tag (String.concat "" (List.map string_of_xml xml)));*)
+                    tag (String.concat "" (List.map string_of_xml xmls)));*)
                    eval_xmls data env xmls
               )
               (* eval f before subs *)
