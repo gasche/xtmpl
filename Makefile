@@ -29,8 +29,8 @@ INCLUDES=`ocamlfind query -i-format xmlm`
 COMPFLAGS=$(INCLUDES) -annot -rectypes
 OCAMLPP=
 
-OCAMLC=ocamlc.opt -g
-OCAMLOPT=ocamlopt.opt -g
+OCAMLC=ocamlc.opt -g #ocamlcp -p a #
+OCAMLOPT=ocamlopt.opt -g #ocamloptp -p #
 OCAMLLIB:=`$(OCAMLC) -where`
 OCAMLDOC=ocamldoc.opt
 
@@ -70,7 +70,8 @@ webdoc: doc
 
 ##########
 install: xtmpl.cmo xtmpl.cmx
-	ocamlfind install xtmpl META LICENSE xtmpl.cmi xtmpl.mli xtmpl.cmo xtmpl.cmx xtmpl.cmxs xtmpl.o
+	ocamlfind install xtmpl META LICENSE \
+		xtmpl.cmi xtmpl.mli xtmpl.cmo xtmpl.cmx xtmpl.cmxs xtmpl.o
 
 uninstall:
 	ocamlfind remove xtmpl

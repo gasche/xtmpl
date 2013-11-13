@@ -115,6 +115,7 @@ let tag_main = "main_";;
 let tag_env = "env_";;
 let att_defer = "defer_";;
 let att_escamp = "escamp_";;
+let att_protect = "protect_";;
 
 let re_escape = Str.regexp "&\\(\\([a-z]+\\)\\|\\(#[0-9]+\\)\\);";;
 let escape_ampersand s =
@@ -132,6 +133,12 @@ let escape_ampersand s =
 
 let re_amp = Str.regexp_string "&amp;";;
 let unescape_ampersand s = Str.global_replace re_amp "&" s;;
+
+
+let get_arg args name =
+  try Some (List.assoc name args)
+  with Not_found -> None
+;;
 
 exception No_change
 type 'a env = ('a callback) Str_map.t
@@ -264,6 +271,21 @@ let (atts_to_escape : 'a -> 'a env -> attribute list -> 'a * string list) = fun 
       (data, List.map strip_string l)
 ;;
 
+let protect_in_env env atts =
+  match get_arg atts ("", att_protect) with
+    None -> env
+  | Some s ->
+      let f env s =
+        match split_string s [':'] with
+          [] -> env
+        | [s] | ["" ; s] -> Str_map.remove ("",s) env
+        | s1 :: q ->
+            let s2 = String.concat ":" q in
+            Str_map.remove (s1, s2) env
+      in
+      List.fold_left f env (split_string s [',' ; ';'])
+;;
+
 let rec eval_env data env atts subs =
 (*  prerr_endline
     (Printf.sprintf "env: subs=%s"
@@ -311,29 +333,37 @@ and eval_xml data env = function
     in
     let (data, atts) = List.fold_left f (data, []) atts in
     let atts = List.rev atts in
-    let (defer,atts) = List.partition
-      (function
-       | (("",s), n) when s = att_defer ->
-           (try ignore (int_of_string n); true
-            with _ -> false)
-       | _ -> false
-      )
-      atts
-    in
-    let defer =
-      match defer with
-        [] -> 0
-      | ((_,_), n) :: _ -> int_of_string n
-    in
+
+    let env_protect = protect_in_env env atts in
     match tag with
-      ("", t) when t = tag_env -> eval_env data env atts subs
+      ("", t) when t = tag_env -> eval_env data env_protect atts subs
     | (prefix, tag) ->
         match env_get (prefix, tag) env with
         | Some f ->
+            (*prerr_endline
+              ("applying rule for "^prefix^":"^tag^" "^
+               (String.concat ", "
+                 (List.map (fun ((p,s), v) -> p^":"^s^"="^v) atts)
+               )
+              );*)
+            let (defer,atts) = List.partition
+              (function
+               | (("",s), n) when s = att_defer ->
+                   (try ignore (int_of_string n); true
+                    with _ -> false)
+               | _ -> false
+              )
+                atts
+            in
+            let defer =
+              match defer with
+                [] -> 0
+              | ((_,_), n) :: _ -> int_of_string n
+            in
             if defer > 0 then
               (* defer evaluation, evaluate subs first *)
               (
-               let (data, subs) = eval_xmls data env subs in
+               let (data, subs) = eval_xmls data env_protect subs in
                let att_defer = (("",att_defer), string_of_int (defer-1)) in
                let atts = att_defer :: atts in
                (data, [ E ((prefix, tag), atts, subs) ])
@@ -341,23 +371,23 @@ and eval_xml data env = function
             else
               (
                let xml =
-                 try Some (f data env atts subs)
+                 try Some (f data env_protect atts subs)
                  with No_change -> None
                in
                match xml with
                  None ->
                    (* no change in node, eval children anyway *)
-                   let (data, subs) = eval_xmls data env subs in
+                   let (data, subs) = eval_xmls data env_protect subs in
                    (data, [ E ((prefix, tag), atts, subs) ])
                | Some (data, xmls) ->
                    (*prerr_endline
                      (Printf.sprintf "=== Evaluated tag %s -> %s\n"
                     tag (String.concat "" (List.map string_of_xml xmls)));*)
-                   eval_xmls data env xmls
+                   eval_xmls data env_protect xmls
               )
               (* eval f before subs *)
         | None ->
-            let (data, subs) = eval_xmls data env subs in
+            let (data, subs) = eval_xmls data env_protect subs in
             (data, [ E ((prefix, tag), atts, subs) ])
 
 and (eval_string : 'a -> 'a env -> string -> 'a * string) = fun data env s ->
@@ -401,10 +431,6 @@ let apply_string_into_file data ?head env ~outfile s =
   data
 ;;
 
-let get_arg args name =
-  try Some (List.assoc name args)
-  with Not_found -> None
-;;
 
 let string_of_args args =
   String.concat " "

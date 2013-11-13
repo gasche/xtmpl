@@ -1,4 +1,13 @@
-Next release:
+Release 0.8:
+  - new "protect_" attribute, to remove from environment the rules
+    in this attribute. For example: <foo protect_="title,id" ...>...</foo>
+    will prevent applying <title> and <id> rules in the node's children.
+  - the rewrite is now done as a fold, taking a data in parameter and
+    returning it.
+  - defer_ attribute is now handled only for nodes having a
+    matching rule in the environment.
+
+Release 0.7:
   - re-introduce (un)escaping ampersands in attributes, when
     the attribute name is specified in attribute escamp_
 
