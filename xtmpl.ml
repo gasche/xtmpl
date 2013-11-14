@@ -190,8 +190,8 @@ let rec fix_point_snd ?(n=0) f (data, x) =
       failwith ("Xtmpl fixpoint iteration limit reached ("^(string_of_int l)^")")
   | _ ->
       let (data, y) = f (data, x) in
-      let file = Printf.sprintf "/tmp/fixpoint%d.txt" n in
-      file_of_string ~file (string_of_xmls y);
+      (*let file = Printf.sprintf "/tmp/fixpoint%d.txt" n in
+      file_of_string ~file (string_of_xmls y);*)
       if y = x then (data, x) else fix_point_snd ~n: (n+1) f (data, y)
 ;;
 
