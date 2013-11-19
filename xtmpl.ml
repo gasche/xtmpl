@@ -147,6 +147,8 @@ and tree =
     E of name * attribute list * tree list
   | D of string
 
+type rewrite_stack = (name * attribute list * tree list) list
+exception Loop of  rewrite_stack
 
 let string_of_xml tree =
   try
@@ -168,6 +170,26 @@ let string_of_xml tree =
 ;;
 
 let string_of_xmls l = String.concat "" (List.map string_of_xml l);;
+
+
+let string_of_stack l =
+  let b = Buffer.create 256 in
+  let f ((prefix,t), atts, subs) =
+    Buffer.add_string b "==================\n";
+    Buffer.add_string b ("Apply <"^prefix^":"^t^">\nAttributes:");
+    List.iter
+      (fun ((p,s),v) ->
+         Buffer.add_string b "\n  ";
+         if p <> "" then Buffer.add_string b (p^":");
+         Printf.bprintf b "%s=%S " s v)
+      atts;
+    Buffer.add_string b "\nSubs=\n";
+    List.iter (fun xml -> Buffer.add_string b (string_of_xml xml)) subs;
+    Buffer.add_string b "\n"
+  in
+  List.iter f (List.rev l);
+  Buffer.contents b
+;;
 
 let env_add ?(prefix="") name = Str_map.add (prefix, name) ;;
 let env_get k env =
@@ -286,7 +308,20 @@ let protect_in_env env atts =
       List.fold_left f env (split_string s [',' ; ';'])
 ;;
 
-let rec eval_env data env atts subs =
+let max_rewrite_depth =
+  try int_of_string (Sys.getenv "XTMPL_REWRITE_DEPTH_LIMIT")
+  with _ -> 100
+;;
+
+let push stack tag atts subs =
+  let stack = (tag, atts, subs) :: stack in
+  if List.length stack > max_rewrite_depth then
+    raise (Loop stack)
+  else
+    stack
+;;
+
+let rec eval_env stack data env atts subs =
 (*  prerr_endline
     (Printf.sprintf "env: subs=%s"
       (String.concat "" (List.map string_of_xml subs)));
@@ -297,13 +332,13 @@ let rec eval_env data env atts subs =
        env_add_att ~prefix s v acc)
       env atts
   in
-  eval_xmls data env subs
+  eval_xmls stack data env subs
 
-and eval_xmls data env xmls =
+and eval_xmls stack data env xmls =
   let (data, l) =
     List.fold_left
       (fun (data, acc) xml ->
-         let (data, subs) = eval_xml data env xml in
+         let (data, subs) = eval_xml stack data env xml in
          (data, subs :: acc)
       )
       (data, [])
@@ -311,7 +346,7 @@ and eval_xmls data env xmls =
   in
   (data, List.flatten (List.rev l))
 
-and eval_xml data env = function
+and eval_xml stack data env = function
 | (D _) as xml -> (data, [ xml ])
 | other ->
     let (tag, atts, subs) =
@@ -323,7 +358,7 @@ and eval_xml data env = function
     let f (data, acc) ((prefix,s), v) =
       let escamp = List.mem s atts_to_escape in
       let v = if escamp then escape_ampersand v else v in
-      let (data, v2) = eval_string data env v in
+      let (data, v2) = eval_string stack data env v in
       (*prerr_endline
          (Printf.sprintf "att: %s -> %s -> %s -> %s"
          v (escape_ampersand v) v2 (unescape_ampersand v2)
@@ -336,7 +371,9 @@ and eval_xml data env = function
 
     let env_protect = protect_in_env env atts in
     match tag with
-      ("", t) when t = tag_env -> eval_env data env_protect atts subs
+      ("", t) when t = tag_env ->
+        let stack = push stack tag atts subs in
+        eval_env stack data env_protect atts subs
     | (prefix, tag) ->
         match env_get (prefix, tag) env with
         | Some f ->
@@ -363,7 +400,7 @@ and eval_xml data env = function
             if defer > 0 then
               (* defer evaluation, evaluate subs first *)
               (
-               let (data, subs) = eval_xmls data env_protect subs in
+               let (data, subs) = eval_xmls stack data env_protect subs in
                let att_defer = (("",att_defer), string_of_int (defer-1)) in
                let atts = att_defer :: atts in
                (data, [ E ((prefix, tag), atts, subs) ])
@@ -371,34 +408,37 @@ and eval_xml data env = function
             else
               (
                let xml =
-                 try Some (f data env_protect atts subs)
+                 try
+                   let stack = push stack (prefix,tag) atts subs in
+                   Some (stack, f data env_protect atts subs)
                  with No_change -> None
                in
                match xml with
                  None ->
                    (* no change in node, eval children anyway *)
-                   let (data, subs) = eval_xmls data env_protect subs in
+                   let (data, subs) = eval_xmls stack data env_protect subs in
                    (data, [ E ((prefix, tag), atts, subs) ])
-               | Some (data, xmls) ->
+               | Some (stack, (data, xmls)) ->
                    (*prerr_endline
                      (Printf.sprintf "=== Evaluated tag %s -> %s\n"
                     tag (String.concat "" (List.map string_of_xml xmls)));*)
-                   eval_xmls data env_protect xmls
+                   eval_xmls stack data env_protect xmls
               )
               (* eval f before subs *)
         | None ->
-            let (data, subs) = eval_xmls data env_protect subs in
+            let (data, subs) = eval_xmls stack data env_protect subs in
             (data, [ E ((prefix, tag), atts, subs) ])
 
-and (eval_string : 'a -> 'a env -> string -> 'a * string) = fun data env s ->
-  let xml = xml_of_string s in
-  let (data, xmls) = eval_xml data env xml in
-  (data, string_of_xmls xmls)
+and (eval_string : rewrite_stack -> 'a -> 'a env -> string -> 'a * string) =
+  fun stack data env s ->
+    let xml = xml_of_string s in
+    let (data, xmls) = eval_xml stack data env xml in
+    (data, string_of_xmls xmls)
 ;;
 
 let apply_to_xmls data env xmls =
   (*prerr_endline (string_of_env env);*)
-  let f (data, xmls) = eval_xmls data env xmls in
+  let f (data, xmls) = eval_xmls [] data env xmls in
   fix_point_snd f (data, xmls)
 ;;
 

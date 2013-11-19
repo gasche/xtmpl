@@ -45,6 +45,11 @@ and tree =
     E of name * attribute list * tree list
   | D of string
 
+type rewrite_stack = (name * attribute list * tree list) list
+exception Loop of  rewrite_stack
+
+val string_of_stack : rewrite_stack -> string
+
 (** {2 Environment}
 
     An {!type:env} is a {!type:name}-to-{!type:callback} associative map. In addition
