@@ -135,11 +135,6 @@ let re_amp = Str.regexp_string "&amp;";;
 let unescape_ampersand s = Str.global_replace re_amp "&" s;;
 *)
 
-let get_arg args name =
-  try Some (List.assoc name args)
-  with Not_found -> None
-;;
-
 exception No_change
 type 'a env = ('a callback) Str_map.t
 and 'a callback = 'a -> 'a env -> attribute list -> tree list -> 'a * tree list
@@ -151,6 +146,18 @@ and attribute = name * tree list
 
 type rewrite_stack = (name * attribute list * tree list) list
 exception Loop of  rewrite_stack
+
+
+let get_arg args name =
+  try Some (List.assoc name args)
+  with Not_found -> None
+;;
+
+let get_arg_cdata args name =
+  match get_arg args name with
+  | Some [D s] -> Some s
+  | _ -> None
+;;
 
 let rec string_of_xml tree =
   try

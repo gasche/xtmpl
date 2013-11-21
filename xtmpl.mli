@@ -259,6 +259,8 @@ val apply_string_into_file : 'a -> ?head:string -> 'a env -> outfile: string -> 
 *)
 val get_arg : attribute list -> name -> tree list option
 
+val get_arg_cdata : attribute list -> name -> string option
+
 (** A string representation of an argument list.
 
     [string_of_args ["a","x";"b","y"]] returns [a="x" b="y"]. Note that
