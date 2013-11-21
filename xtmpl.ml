@@ -153,11 +153,6 @@ let get_arg args name =
   with Not_found -> None
 ;;
 
-let get_arg_cdata args name =
-  match get_arg args name with
-  | Some [D s] -> Some s
-  | _ -> None
-;;
 
 let rec string_of_xml tree =
   try
@@ -184,6 +179,12 @@ and string_of_xml_atts l =
   List.map (fun (name,xmls) -> (name, string_of_xmls xmls)) l
 ;;
 
+let get_arg_cdata args name =
+  match get_arg args name with
+  | Some [D s] -> Some s
+  | Some xmls -> Some (string_of_xmls xmls)
+  | _ -> None
+;;
 
 let string_of_stack l =
   let b = Buffer.create 256 in
