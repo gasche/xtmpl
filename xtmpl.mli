@@ -148,6 +148,8 @@ val string_of_xml : tree -> string
   with no separator.*)
 val string_of_xmls : tree list -> string
 
+val string_of_xml_atts : attribute list -> (name * string) list
+
 (** Parses a string as XML.
 
     @param add_main if true, adds [<main_>..</main_>] around the string
@@ -155,6 +157,8 @@ val string_of_xmls : tree list -> string
     @raise Failure when a parsing error occurs, includes the source string.
 *)
 val xml_of_string : ?add_main:bool -> string -> tree
+
+val xmls_of_atts : (name * string) list -> attribute list
 
 (** Same as {!xml_of_string} but read from a file. *)
 val xml_of_file : string -> tree
