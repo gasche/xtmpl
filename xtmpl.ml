@@ -113,10 +113,9 @@ module Str_map = Map.Make (struct type t = string * string let compare = compare
 let tag_main = "main_";;
 let tag_env = "env_";;
 let att_defer = "defer_";;
-(*let att_escamp = "escamp_";;*)
+let att_escamp = "escamp_";;
 let att_protect = "protect_";;
 
-(*
 let re_escape = Str.regexp "&\\(\\([a-z]+\\)\\|\\(#[0-9]+\\)\\);";;
 let escape_ampersand s =
   let len = String.length s in
@@ -133,7 +132,7 @@ let escape_ampersand s =
 
 let re_amp = Str.regexp_string "&amp;";;
 let unescape_ampersand s = Str.global_replace re_amp "&" s;;
-*)
+
 
 exception No_change
 type 'a env = ('a callback) Str_map.t
@@ -148,11 +147,38 @@ type rewrite_stack = (name * attribute list * tree list) list
 exception Loop of  rewrite_stack
 
 
+let gen_atts_to_escape =
+  let key = ("", att_escamp) in
+  fun to_s atts ->
+    let spec =
+      try Some (List.assoc key atts)
+      with Not_found -> None
+    in
+    match spec with
+      None -> []
+    | Some x ->
+        let s = to_s x in
+        let l = split_string s [',' ; ';'] in
+        List.map
+          (fun s ->
+             let s = strip_string s in
+             match split_string s [':'] with
+               [] | [_] -> ("",s)
+             | p :: q -> (p, String.concat ":" q)
+          )
+          l
+
+;;
+
+let atts_to_escape = gen_atts_to_escape (fun x -> x);;
+let xml_atts_to_escape = gen_atts_to_escape
+  (function [D s] -> s
+   | _ -> failwith ("Invalid value for attribute "^att_escamp));;
+
 let get_arg args name =
   try Some (List.assoc name args)
   with Not_found -> None
 ;;
-
 
 let rec string_of_xml tree =
   try
@@ -175,8 +201,18 @@ let rec string_of_xml tree =
       failwith msg
 
 and string_of_xmls l = String.concat "" (List.map string_of_xml l)
-and string_of_xml_atts l =
-  List.map (fun (name,xmls) -> (name, string_of_xmls xmls)) l
+and string_of_xml_atts atts =
+      let atts_to_escape = xml_atts_to_escape atts in
+      let f acc (name, xmls) =
+        match name with
+          ("", s) when s = att_escamp -> acc
+        | _ ->
+            let s = string_of_xmls xmls in
+            let escamp = List.mem name atts_to_escape in
+            let s = if escamp then unescape_ampersand s else s in
+            (name, s) :: acc
+      in
+      List.rev (List.fold_left f [] atts)
 ;;
 
 let get_arg_cdata args name =
@@ -264,14 +300,17 @@ let rec xml_of_source s_source source =
       let msg = Printf.sprintf "%sInvalid_argumen(%s)" s_source e in
       failwith msg
 
-and xmls_of_atts l =
-  List.map
-    (fun (name, s) ->
-       match xml_of_string s with
-         E (_,_,xmls) -> (* remove main_ tag*) (name, xmls)
-       | _ -> assert false
-    )
-    l
+and xmls_of_atts atts =
+      let atts_to_escape = atts_to_escape atts in
+      List.map
+        (fun (name, s) ->
+           let escamp = List.mem name atts_to_escape in
+           let s = if escamp then escape_ampersand s else s in
+           match xml_of_string s with
+             E (_,_,xmls) -> (* remove main_ tag*) (name, xmls)
+           | _ -> assert false
+        )
+        atts
 
 and xml_of_string ?(add_main=true) s =
   let s =
@@ -301,26 +340,7 @@ let env_add_att ?prefix a v env =
   env_add ?prefix a (fun data _ _ _ -> data, v) env
 ;;
 
-(*
-let (atts_to_escape : 'a -> 'a env -> attribute list -> 'a * string list) = fun data env atts ->
-  let key = ("", att_escamp) in
-  let spec =
-    try Some (data, List.assoc key atts)
-    with Not_found ->
-        match env_get key env with
-          None -> None
-        | Some f ->
-            let (data, subs) = f data env [] [] in
-            Some (data, subs)
-  in
-  match spec with
-    None -> (data, [])
-  | Some (data, [D s]) ->
-      let l = split_string s [',' ; ';'] in
-      (data, List.map strip_string l)
-  | _ -> failwith ("Invalid value for attribute "^att_escamp)
-;;
-*)
+
 
 let protect_in_env env atts =
   match get_arg atts ("", att_protect) with
