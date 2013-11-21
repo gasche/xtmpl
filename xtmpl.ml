@@ -26,7 +26,6 @@
 (** *)
 
 type name = string * string
-type attribute = (name * string)
 
 (*c==v=[File.string_of_file]=1.0====*)
 let string_of_file name =
@@ -114,9 +113,10 @@ module Str_map = Map.Make (struct type t = string * string let compare = compare
 let tag_main = "main_";;
 let tag_env = "env_";;
 let att_defer = "defer_";;
-let att_escamp = "escamp_";;
+(*let att_escamp = "escamp_";;*)
 let att_protect = "protect_";;
 
+(*
 let re_escape = Str.regexp "&\\(\\([a-z]+\\)\\|\\(#[0-9]+\\)\\);";;
 let escape_ampersand s =
   let len = String.length s in
@@ -133,7 +133,7 @@ let escape_ampersand s =
 
 let re_amp = Str.regexp_string "&amp;";;
 let unescape_ampersand s = Str.global_replace re_amp "&" s;;
-
+*)
 
 let get_arg args name =
   try Some (List.assoc name args)
@@ -146,17 +146,21 @@ and 'a callback = 'a -> 'a env -> attribute list -> tree list -> 'a * tree list
 and tree =
     E of name * attribute list * tree list
   | D of string
+and attribute = name * tree list
+
 
 type rewrite_stack = (name * attribute list * tree list) list
 exception Loop of  rewrite_stack
 
-let string_of_xml tree =
+let rec string_of_xml tree =
   try
     let b = Buffer.create 256 in
     let ns_prefix s = Some s in
     let output = Xmlm.make_output ~ns_prefix ~decl: false (`Buffer b) in
     let frag = function
-    | E (tag, atts, childs) -> `El ((tag, atts), childs)
+    | E (tag, atts, childs) ->
+        let atts = string_of_xml_atts atts in
+        `El ((tag, atts), childs)
     | D d -> `Data d
     in
     Xmlm.output_doc_tree frag output (None, tree);
@@ -167,9 +171,11 @@ let string_of_xml tree =
         line col (Xmlm.error_message error)
       in
       failwith msg
-;;
 
-let string_of_xmls l = String.concat "" (List.map string_of_xml l);;
+and string_of_xmls l = String.concat "" (List.map string_of_xml l)
+and string_of_xml_atts l =
+  List.map (fun (name,xmls) -> (name, string_of_xmls xmls)) l
+;;
 
 
 let string_of_stack l =
@@ -181,7 +187,7 @@ let string_of_stack l =
       (fun ((p,s),v) ->
          Buffer.add_string b "\n  ";
          if p <> "" then Buffer.add_string b (p^":");
-         Printf.bprintf b "%s=%S " s v)
+         Printf.bprintf b "%s=%S " s (string_of_xmls v))
       atts;
     Buffer.add_string b "\nSubs=\n";
     List.iter (fun xml -> Buffer.add_string b (string_of_xml xml)) subs;
@@ -229,11 +235,14 @@ let string_of_env env =
   String.concat ", " (Str_map.fold f env [])
 ;;
 
-let xml_of_source s_source source =
+let rec xml_of_source s_source source =
  try
     let ns s = Some s in
     let input = Xmlm.make_input ~ns ~enc: (Some `UTF_8) source in
-    let el (tag, atts) childs = E (tag, atts, childs)  in
+    let el (tag, atts) childs =
+      let atts = xmls_of_atts atts in
+      E (tag, atts, childs)
+    in
     let data d = D d in
     let (_, tree) = Xmlm.input_doc_tree ~el ~data input in
     tree
@@ -247,7 +256,16 @@ let xml_of_source s_source source =
       let msg = Printf.sprintf "%sInvalid_argumen(%s)" s_source e in
       failwith msg
 
-let xml_of_string ?(add_main=true) s =
+and xmls_of_atts l =
+  List.map
+    (fun (name, s) ->
+       match xml_of_string s with
+         E (_,_,xmls) -> (* remove main_ tag*) (name, xmls)
+       | _ -> assert false
+    )
+    l
+
+and xml_of_string ?(add_main=true) s =
   let s =
     if add_main then
       Printf.sprintf "<%s>%s</%s>" tag_main s tag_main
@@ -272,9 +290,10 @@ let xml_of_file file =
 ;;
 
 let env_add_att ?prefix a v env =
-  env_add ?prefix a (fun data _ _ _ -> data, [xml_of_string v]) env
+  env_add ?prefix a (fun data _ _ _ -> data, v) env
 ;;
 
+(*
 let (atts_to_escape : 'a -> 'a env -> attribute list -> 'a * string list) = fun data env atts ->
   let key = ("", att_escamp) in
   let spec =
@@ -284,19 +303,21 @@ let (atts_to_escape : 'a -> 'a env -> attribute list -> 'a * string list) = fun 
           None -> None
         | Some f ->
             let (data, subs) = f data env [] [] in
-            Some (data, string_of_xmls subs)
+            Some (data, subs)
   in
   match spec with
     None -> (data, [])
-  | Some (data, s) ->
+  | Some (data, [D s]) ->
       let l = split_string s [',' ; ';'] in
       (data, List.map strip_string l)
+  | _ -> failwith ("Invalid value for attribute "^att_escamp)
 ;;
+*)
 
 let protect_in_env env atts =
   match get_arg atts ("", att_protect) with
     None -> env
-  | Some s ->
+  | Some [D s] ->
       let f env s =
         match split_string s [':'] with
           [] -> env
@@ -306,6 +327,7 @@ let protect_in_env env atts =
             Str_map.remove (s1, s2) env
       in
       List.fold_left f env (split_string s [',' ; ';'])
+  | _ -> failwith ("Invalid value for attribute "^att_protect)
 ;;
 
 let max_rewrite_depth =
@@ -346,6 +368,15 @@ and eval_xmls stack data env xmls =
   in
   (data, List.flatten (List.rev l))
 
+and eval_atts =
+  let f stack env (data, acc) (name, xmls) =
+    let (data, xmls) = eval_xmls stack data env xmls in
+    (data, (name, xmls) :: acc)
+  in
+  fun stack data env atts ->
+    let (data, atts) = List.fold_left (f stack env) (data,[]) atts in
+    (data, List.rev atts)
+
 and eval_xml stack data env = function
 | (D _) as xml -> (data, [ xml ])
 | other ->
@@ -354,8 +385,8 @@ and eval_xml stack data env = function
         D _ -> assert false
       | E (tag, atts, subs) -> (tag, atts, subs)
     in
-    let (data, atts_to_escape) = atts_to_escape data env atts in
-    let f (data, acc) ((prefix,s), v) =
+    (*let (data, atts_to_escape) = atts_to_escape data env atts in*)
+    (*let f (data, acc) ((prefix,s), v) =
       let escamp = List.mem s atts_to_escape in
       let v = if escamp then escape_ampersand v else v in
       let (data, v2) = eval_string stack data env v in
@@ -367,7 +398,8 @@ and eval_xml stack data env = function
       (data, ((prefix, s), v2) :: acc)
     in
     let (data, atts) = List.fold_left f (data, []) atts in
-    let atts = List.rev atts in
+    *)
+    let (data, atts) = eval_atts stack data env atts in
 
     let env_protect = protect_in_env env atts in
     match tag with
@@ -385,7 +417,7 @@ and eval_xml stack data env = function
               );*)
             let (defer,atts) = List.partition
               (function
-               | (("",s), n) when s = att_defer ->
+               | (("",s), [D n]) when s = att_defer ->
                    (try ignore (int_of_string n); true
                     with _ -> false)
                | _ -> false
@@ -394,14 +426,14 @@ and eval_xml stack data env = function
             in
             let defer =
               match defer with
-                [] -> 0
-              | ((_,_), n) :: _ -> int_of_string n
+              | ((_,_), [D n]) :: _ -> int_of_string n
+              | _ -> 0
             in
             if defer > 0 then
               (* defer evaluation, evaluate subs first *)
               (
                let (data, subs) = eval_xmls stack data env_protect subs in
-               let att_defer = (("",att_defer), string_of_int (defer-1)) in
+               let att_defer = (("",att_defer), [D (string_of_int (defer-1))]) in
                let atts = att_defer :: atts in
                (data, [ E ((prefix, tag), atts, subs) ])
               )
@@ -475,11 +507,11 @@ let apply_string_into_file data ?head env ~outfile s =
 let string_of_args args =
   String.concat " "
     (List.map (fun ((pref,s),v) -> Printf.sprintf "%s%s=%S"
-      (match pref with "" -> "" | p -> p^":") s v)
+      (match pref with "" -> "" | p -> p^":") s (string_of_xmls v))
     args)
 ;;
 
-let opt_arg args ?(def="") name =
+let opt_arg args ?(def=[]) name =
   match get_arg args name with None -> def | Some s -> s
 ;;
 

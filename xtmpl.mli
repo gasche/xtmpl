@@ -37,13 +37,13 @@
 exception No_change
 
 type name = string * string
-type attribute = (name * string)
 
 type 'a env
 and 'a callback = 'a -> 'a env -> attribute list -> tree list -> 'a * tree list
 and tree =
     E of name * attribute list * tree list
   | D of string
+and attribute = name * tree list
 
 type rewrite_stack = (name * attribute list * tree list) list
 exception Loop of  rewrite_stack
@@ -102,7 +102,7 @@ val string_of_env : 'a env -> string
     {!val:tag_main} tag, which will cause the corresponding
     templating rules to be applied to it
 *)
-val env_add_att : ?prefix:string -> string -> string -> 'a env -> 'a env
+val env_add_att : ?prefix:string -> string -> tree list -> 'a env -> 'a env
 
 (** Add several bindings at once.
 
@@ -257,7 +257,7 @@ val apply_string_into_file : 'a -> ?head:string -> 'a env -> outfile: string -> 
     This performs the same as [List.assoc], but returns an optional string
     instead of raising [Not_found].
 *)
-val get_arg : attribute list -> name -> string option
+val get_arg : attribute list -> name -> tree list option
 
 (** A string representation of an argument list.
 
@@ -275,4 +275,4 @@ val string_of_args : attribute list -> string
     @param def Default value, returned for missing bindings. If not
     provided, an empty string is used.
 *)
-val opt_arg : attribute list -> ?def:string -> name -> string
+val opt_arg : attribute list -> ?def:tree list -> name -> tree list
