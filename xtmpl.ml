@@ -518,13 +518,17 @@ let string_of_args args =
     args)
 ;;
 
+let env_of_list ?(env=env_empty()) l =
+  List.fold_right (fun ((prefix,name), f) env -> env_add ~prefix name f env) l env
+;;
+
 let opt_arg args ?(def=[]) name =
   match get_arg args name with None -> def | Some s -> s
 ;;
 
 
-let env_of_list ?(env=env_empty()) l =
-  List.fold_right (fun ((prefix,name), f) env -> env_add ~prefix name f env) l env
+let opt_arg_cdata args ?(def="") name =
+  match get_arg_cdata args name with None -> def | Some s -> s
 ;;
 
   

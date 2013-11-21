@@ -278,3 +278,5 @@ val string_of_args : attribute list -> string
     provided, an empty string is used.
 *)
 val opt_arg : attribute list -> ?def:tree list -> name -> tree list
+
+val opt_arg_cdata : attribute list -> ?def:string -> name -> string
