@@ -1,4 +1,6 @@
 Release 0.8:
+  - API change: attributes are now associated to xml tree list instead
+    of string, for performance reason
   - new "protect_" attribute, to remove from environment the rules
     in this attribute. For example: <foo protect_="title,id" ...>...</foo>
     will prevent applying <title> and <id> rules in the node's children.
