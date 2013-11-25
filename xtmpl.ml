@@ -139,8 +139,8 @@ exception No_change
 module Name_ord = struct
   type t = name
   let compare (p1,s1) (p2,s2) =
-    match String.compare p1 p2 with
-      0 -> String.compare s1 s2
+    match String.compare s1 s2 with
+      0 -> String.compare p1 p2
     | n -> n
   end
 ;;
