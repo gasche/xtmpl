@@ -157,7 +157,7 @@ and attributes = tree list Name_map.t
 type rewrite_stack = (name * attributes * tree list) list
 exception Loop of  rewrite_stack
 
-let empty_atts = Name_map.empty
+let atts_empty = Name_map.empty
 
 let gen_atts_to_escape =
   let key = ("", att_escamp) in
@@ -574,10 +574,10 @@ let opt_arg_cdata args ?(def="") name =
 
 let atts_of_list =
   let f acc (name,v) = Name_map.add name v acc in
-  fun ?(atts=empty_atts) l -> List.fold_left f atts l
+  fun ?(atts=atts_empty) l -> List.fold_left f atts l
 ;;
 
-let one_att ?(atts=empty_atts) name v = Name_map.add name v atts;;
-let replace_att = Name_map.add;;
-let remove_att = Name_map.remove;;
+let atts_one ?(atts=atts_empty) name v = Name_map.add name v atts;;
+let atts_replace = Name_map.add;;
+let atts_remove = Name_map.remove;;
   
