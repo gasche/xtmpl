@@ -38,17 +38,23 @@ exception No_change
 
 type name = string * string
 
-type 'a env
-and 'a callback = 'a -> 'a env -> attribute list -> tree list -> 'a * tree list
-and tree =
-    E of name * attribute list * tree list
-  | D of string
-and attribute = name * tree list
+module Name_ord : Map.OrderedType with type t = name
+module Name_map : Map.S with type key = name
+module Name_set : Set.S with type elt = name
 
-type rewrite_stack = (name * attribute list * tree list) list
+type 'a env
+and 'a callback = 'a -> 'a env -> attributes -> tree list -> 'a * tree list
+and tree =
+    E of name * attributes * tree list
+  | D of string
+and attributes = tree list Name_map.t
+
+type rewrite_stack = (name * attributes * tree list) list
 exception Loop of  rewrite_stack
 
 val string_of_stack : rewrite_stack -> string
+
+val empty_atts : attributes
 
 (** {2 Environment}
 
@@ -148,7 +154,7 @@ val string_of_xml : tree -> string
   with no separator.*)
 val string_of_xmls : tree list -> string
 
-val string_of_xml_atts : attribute list -> (name * string) list
+val string_of_xml_atts : attributes -> (name * string) list
 
 (** Parses a string as XML.
 
@@ -158,7 +164,7 @@ val string_of_xml_atts : attribute list -> (name * string) list
 *)
 val xml_of_string : ?add_main:bool -> string -> tree
 
-val xmls_of_atts : (name * string) list -> attribute list
+val xmls_of_atts : (name * string) list -> attributes
 
 (** Same as {!xml_of_string} but read from a file. *)
 val xml_of_file : string -> tree
@@ -261,9 +267,9 @@ val apply_string_into_file : 'a -> ?head:string -> 'a env -> outfile: string -> 
     This performs the same as [List.assoc], but returns an optional string
     instead of raising [Not_found].
 *)
-val get_arg : attribute list -> name -> tree list option
+val get_arg : attributes -> name -> tree list option
 
-val get_arg_cdata : attribute list -> name -> string option
+val get_arg_cdata : attributes -> name -> string option
 
 (** A string representation of an argument list.
 
@@ -271,7 +277,7 @@ val get_arg_cdata : attribute list -> name -> string option
     the argument names are output verbatim, but the argument values are
     escaped with the [%S] format.
 *)
-val string_of_args : attribute list -> string
+val string_of_args : attributes -> string
 
 (** Finds a binding in an associative list, or returns a default.
 
@@ -281,6 +287,11 @@ val string_of_args : attribute list -> string
     @param def Default value, returned for missing bindings. If not
     provided, an empty string is used.
 *)
-val opt_arg : attribute list -> ?def:tree list -> name -> tree list
+val opt_arg : attributes -> ?def:tree list -> name -> tree list
 
-val opt_arg_cdata : attribute list -> ?def:string -> name -> string
+val opt_arg_cdata : attributes -> ?def:string -> name -> string
+
+val atts_of_list : ?atts: attributes -> (name * tree list) list -> attributes
+val one_att : ?atts: attributes -> name -> tree list -> attributes
+val remove_att : name -> attributes -> attributes
+val replace_att : name -> tree list -> attributes -> attributes

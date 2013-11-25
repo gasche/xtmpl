@@ -135,37 +135,53 @@ let unescape_ampersand s = Str.global_replace re_amp "&" s;;
 
 
 exception No_change
+
+module Name_ord = struct
+  type t = name
+  let compare (p1,s1) (p2,s2) =
+    match String.compare p1 p2 with
+      0 -> String.compare s1 s2
+    | n -> n
+  end
+;;
+module Name_map = Map.Make (Name_ord)
+module Name_set = Set.Make (Name_ord)
+
 type 'a env = ('a callback) Str_map.t
-and 'a callback = 'a -> 'a env -> attribute list -> tree list -> 'a * tree list
+and 'a callback = 'a -> 'a env -> attributes -> tree list -> 'a * tree list
 and tree =
-    E of name * attribute list * tree list
+    E of name * attributes * tree list
   | D of string
-and attribute = name * tree list
+and attributes = tree list Name_map.t
 
-
-type rewrite_stack = (name * attribute list * tree list) list
+type rewrite_stack = (name * attributes * tree list) list
 exception Loop of  rewrite_stack
 
+let empty_atts = Name_map.empty
 
 let gen_atts_to_escape =
   let key = ("", att_escamp) in
   fun to_s atts ->
     let spec =
-      try Some (List.assoc key atts)
+      try Some (Name_map.find key atts)
       with Not_found -> None
     in
     match spec with
-      None -> []
+      None -> Name_set.empty
     | Some x ->
         let s = to_s x in
         let l = split_string s [',' ; ';'] in
-        List.map
-          (fun s ->
+        List.fold_left
+          (fun set s ->
              let s = strip_string s in
-             match split_string s [':'] with
-               [] | [_] -> ("",s)
-             | p :: q -> (p, String.concat ":" q)
+             let name =
+               match split_string s [':'] with
+                 [] | [_] -> ("",s)
+               | p :: q -> (p, String.concat ":" q)
+             in
+             Name_set.add name set
           )
+          Name_set.empty
           l
 
 ;;
@@ -176,7 +192,7 @@ let xml_atts_to_escape = gen_atts_to_escape
    | _ -> failwith ("Invalid value for attribute "^att_escamp));;
 
 let get_arg args name =
-  try Some (List.assoc name args)
+  try Some (Name_map.find name args)
   with Not_found -> None
 ;;
 
@@ -203,16 +219,16 @@ let rec string_of_xml tree =
 and string_of_xmls l = String.concat "" (List.map string_of_xml l)
 and string_of_xml_atts atts =
       let atts_to_escape = xml_atts_to_escape atts in
-      let f acc (name, xmls) =
+      let f name xmls acc =
         match name with
           ("", s) when s = att_escamp -> acc
         | _ ->
             let s = string_of_xmls xmls in
-            let escamp = List.mem name atts_to_escape in
+            let escamp = Name_set.mem name atts_to_escape in
             let s = if escamp then unescape_ampersand s else s in
             (name, s) :: acc
       in
-      List.rev (List.fold_left f [] atts)
+      List.rev (Name_map.fold f atts [])
 ;;
 
 let get_arg_cdata args name =
@@ -227,8 +243,8 @@ let string_of_stack l =
   let f ((prefix,t), atts, subs) =
     Buffer.add_string b "==================\n";
     Buffer.add_string b ("Apply <"^prefix^":"^t^">\nAttributes:");
-    List.iter
-      (fun ((p,s),v) ->
+    Name_map.iter
+      (fun (p,s) v ->
          Buffer.add_string b "\n  ";
          if p <> "" then Buffer.add_string b (p^":");
          Printf.bprintf b "%s=%S " s (string_of_xmls v))
@@ -301,13 +317,17 @@ let rec xml_of_source s_source source =
       failwith msg
 
 and xmls_of_atts atts =
+      let atts = List.fold_left
+        (fun map (name, s) -> Name_map.add name s map)
+        Name_map.empty atts
+      in
       let atts_to_escape = atts_to_escape atts in
-      List.map
-        (fun (name, s) ->
-           let escamp = List.mem name atts_to_escape in
+      Name_map.mapi
+        (fun name s ->
+           let escamp = Name_set.mem name atts_to_escape in
            let s = if escamp then escape_ampersand s else s in
            match xml_of_string s with
-             E (_,_,xmls) -> (* remove main_ tag*) (name, xmls)
+             E (_,_,xmls) -> (* remove main_ tag*) xmls
            | _ -> assert false
         )
         atts
@@ -376,11 +396,11 @@ let rec eval_env stack data env atts subs =
     (Printf.sprintf "env: subs=%s"
       (String.concat "" (List.map string_of_xml subs)));
 *)
-  let env = List.fold_left
-    (fun acc ((prefix,s),v) ->
-(*       prerr_endline (Printf.sprintf "env: %s=%s" s v);*)
+  let env = Name_map.fold
+    (fun (prefix,s) v acc ->
+       (*       prerr_endline (Printf.sprintf "env: %s=%s" s v);*)
        env_add_att ~prefix s v acc)
-      env atts
+      atts env
   in
   eval_xmls stack data env subs
 
@@ -397,13 +417,12 @@ and eval_xmls stack data env xmls =
   (data, List.flatten (List.rev l))
 
 and eval_atts =
-  let f stack env (data, acc) (name, xmls) =
+  let f stack env name xmls (data, map) =
     let (data, xmls) = eval_xmls stack data env xmls in
-    (data, (name, xmls) :: acc)
+    (data, Name_map.add name xmls map)
   in
   fun stack data env atts ->
-    let (data, atts) = List.fold_left (f stack env) (data,[]) atts in
-    (data, List.rev atts)
+    Name_map.fold (f stack env) atts (data,Name_map.empty)
 
 and eval_xml stack data env = function
 | (D _) as xml -> (data, [ xml ])
@@ -443,26 +462,21 @@ and eval_xml stack data env = function
                  (List.map (fun ((p,s), v) -> p^":"^s^"="^v) atts)
                )
               );*)
-            let (defer,atts) = List.partition
-              (function
-               | (("",s), [D n]) when s = att_defer ->
-                   (try ignore (int_of_string n); true
-                    with _ -> false)
-               | _ -> false
-              )
-                atts
-            in
-            let defer =
-              match defer with
-              | ((_,_), [D n]) :: _ -> int_of_string n
-              | _ -> 0
+            let (defer,atts) =
+              match get_arg_cdata atts ("",att_defer) with
+                None -> (0, atts)
+              | Some s ->
+                  try
+                    let n = int_of_string s in
+                    (n, Name_map.remove ("", att_defer) atts)
+                  with
+                    _ -> (0, atts)
             in
             if defer > 0 then
               (* defer evaluation, evaluate subs first *)
               (
                let (data, subs) = eval_xmls stack data env_protect subs in
-               let att_defer = (("",att_defer), [D (string_of_int (defer-1))]) in
-               let atts = att_defer :: atts in
+               let atts = Name_map.add ("",att_defer) [D (string_of_int (defer-1))] atts in
                (data, [ E ((prefix, tag), atts, subs) ])
               )
             else
@@ -534,9 +548,15 @@ let apply_string_into_file data ?head env ~outfile s =
 
 let string_of_args args =
   String.concat " "
-    (List.map (fun ((pref,s),v) -> Printf.sprintf "%s%s=%S"
-      (match pref with "" -> "" | p -> p^":") s (string_of_xmls v))
-    args)
+    (Name_map.fold
+     (fun (pref,s) v acc ->
+        let s = Printf.sprintf "%s%s=%S"
+          (match pref with "" -> "" | p -> p^":") s (string_of_xmls v)
+        in
+        s :: acc
+     )
+       args []
+    )
 ;;
 
 let env_of_list ?(env=env_empty()) l =
@@ -552,4 +572,12 @@ let opt_arg_cdata args ?(def="") name =
   match get_arg_cdata args name with None -> def | Some s -> s
 ;;
 
+let atts_of_list =
+  let f acc (name,v) = Name_map.add name v acc in
+  fun ?(atts=empty_atts) l -> List.fold_left f atts l
+;;
+
+let one_att ?(atts=empty_atts) name v = Name_map.add name v atts;;
+let replace_att = Name_map.add;;
+let remove_att = Name_map.remove;;
   
