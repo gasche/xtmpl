@@ -222,6 +222,7 @@ and string_of_xml_atts atts =
       let f name xmls acc =
         match name with
           ("", s) when s = att_escamp -> acc
+        | ("", s) when s = att_protect -> acc
         | _ ->
             let s = string_of_xmls xmls in
             let escamp = Name_set.mem name atts_to_escape in

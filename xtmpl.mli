@@ -37,7 +37,7 @@
 exception No_change
 
 (** A name is a pair [(prefix, s)], where prefix can be the empty string.
-  When the prefix is not empty, it correspond to the notation [prefix:foo]
+  When the prefix is not empty, it corresponds to the notation [prefix:foo]
   for XML tags and attribute names.*)
 type name = string * string
 
@@ -53,8 +53,8 @@ type 'a env
 and 'a callback = 'a -> 'a env -> attributes -> tree list -> 'a * tree list
   (** A ['a callback] takes data of type ['a], a ['a env], attributes and XML nodes.
     It returns a potentially new data of type ['a] and XML nodes. The attributes are
-    the attributes of the node being rewritten, and the XML nodes in parameter are the
-    XML children of this node. The environment must is a ['a env] to that
+    the attributes of the node being rewritten, and the XML trees in parameter are the
+    XML children of this node. The environment must be a ['a env] so that
     if can be used in the callback to perform rewriting, returning a
     new data of type ['a]. *)
 
@@ -62,17 +62,20 @@ and tree =
     E of name * attributes * tree list
   | D of string
 and attributes = tree list Name_map.t
+  (** Attributes of a XML node. Note that the content value of an attribute is
+      a list of XML trees, not just a string. *)
 
 (** To catch eventual infinite loops in rewriting, we keep a
-  stack of the rules called.*)
+  stack of the rules called. *)
 type rewrite_stack = (name * attributes * tree list) list
 
 (** The [Loop] exception is raised when the rewrite stack
   is higher than a default value of 100. This value can be changed
-  by setting the [XTMPL_REWRITE_DEPTH_LIMIT] environment variable. *)
+  by setting the [XTMPL_REWRITE_DEPTH_LIMIT] environment variable.
+  Default value is [100]. *)
 exception Loop of  rewrite_stack
 
-(** This functions return a string representation of the given rewrite stack. *)
+(** String representation of the given rewrite stack. *)
 val string_of_stack : rewrite_stack -> string
 
 (** {2 Attributes}
@@ -84,6 +87,7 @@ val atts_empty : attributes
 
 (** [atts_of_list list] returns an {!attributes} structure from the given
   list of pairs [(name, xml tree list) ; (name, xml tree list) ; ...].
+  The last  pair of the list is added first (using [List.fold_right]).
   @param atts can be used to specify an existing {!attributes} structure to
   add bindings to, instead of starting from an empty one. *)
 val atts_of_list : ?atts: attributes -> (name * tree list) list -> attributes
@@ -97,7 +101,9 @@ val atts_remove : name -> attributes -> attributes
 
 (** [atts_replace name xmls attributes] adds a new bindings from [name] to
   [xmls] in [attributes]. If [name] was previously bound, the previous
-  binding is removed. *)
+  binding is removed.
+  [atts_replace ~atts name xmls] is equivalent to [atts_replace name xmls atts].
+*)
 val atts_replace : name -> tree list -> attributes -> attributes
 
 (** [get_arg attributes name] returns the xml tree list bound to [name] in
@@ -105,7 +111,7 @@ val atts_replace : name -> tree list -> attributes -> attributes
 val get_arg : attributes -> name -> tree list option
 
 (** Same as {!get_arg} but return a string [s] only if [name] is bound to
-  a single CDATA XML node ([[C s]]).
+  a single CDATA XML node ([[D s]]).
   In particular, if [name] is bound to a list of XML tree, or to
   a single tree which is not a CDATA, the function returns [None]. *)
 val get_arg_cdata : attributes -> name -> string option
@@ -140,7 +146,8 @@ val string_of_args : attributes -> string
 *)
 
 (** An environment that contains only one binding, associating
-  {!val:tag_main} to a function returning its subnodes.
+  {!val:tag_main} to a function such as [(fun data _env _atts subs -> (data, subs))],
+  i.e. only returning the given data and subnodes.
 *)
 val env_empty : unit -> 'a env
 
@@ -191,7 +198,7 @@ val env_add_att : ?prefix:string -> string -> tree list -> 'a env -> 'a env
     will hide the second one in the resulting environment.
 
     @param env The environment to which bindings are added. If
-    not provided, {!val:env_empty} is used.
+    not provided, {!val:env_empty}[ ()] is used.
 *)
 val env_of_list : ?env: 'a env -> (name * 'a callback) list -> 'a env
 
@@ -203,14 +210,14 @@ val env_of_list : ?env: 'a env -> (name * 'a callback) list -> 'a env
    a string before parsing it.
 
    Used by {!val:xml_of_string} and, most importantly, by the
-     {!apply_to_string}, {!apply_to_file}, {!apply_info_file} and
-     {!apply_string_info_file} functions.
+     {!apply_to_string}, {!apply_to_file}, {!apply_into_file} and
+     {!apply_string_into_file} functions.
 *)
 val tag_main : string
 
 (** The environment tag, currently ["env_"].
 
-    See the template rules in the templating engine section below for more
+    See the template rules in the {!section:engine} section below for more
     information about this tag.
 *)
 val tag_env : string
@@ -234,12 +241,14 @@ val att_defer : string
   or [';'] as separator, as in
   [ <a escamp_="href, foo, gee:buz" href="..." ...>...</a> ].
 
-  This treatment is done in {!xml_of_atts} (escaping) and {!string_of_xmls_atts} (unescaping).
+  This treatment is done in {!xmls_of_atts} (escaping) and {!string_of_xml_atts} (unescaping).
 *)
 val att_escamp : string
 
 (** The protect attribute, currently "protect_". See the engine section
-  for details. *)
+  for details. This attribute is removed when a XML tree is converted
+  to a string, as for {!att_escamp}.
+*)
 val att_protect : string
 
 (** Output an XML string.
@@ -257,13 +266,14 @@ val string_of_xml_atts : attributes -> (name * string) list
 
 (** Parses a string as XML.
 
-    @param add_main if true, adds [<main_>..</main_>] around the string
+    @param add_main if true (default), adds [<main_>..</main_>] around the string
     (see {!val:tag_main}).
-    @raise Failure when a parsing error occurs, includes the source string.
+    @raise Failure when a parsing error occurs, including the source string.
 *)
 val xml_of_string : ?add_main:bool -> string -> tree
 
-(** Convert "string attributes" to an {!attributes} structure. *)
+(** Convert "string attributes" to an {!attributes} structure. The value
+  associated to each name must be valid XML. See also {!att_escamp}. *)
 val xmls_of_atts : (name * string) list -> attributes
 
 (** Same as {!xml_of_string} but read from a file. *)
@@ -278,7 +288,7 @@ val xml_of_file : string -> tree
     The functions return the result of the rewrite as XML trees, or
     can write it to a file ({!apply_into_file}). They also return data
     as the result of the callbacks called, as in a classic fold function (callbacks
-    take the data in parameter, as the environment, and the attributes and subnodes
+    take the data in parameter, as the environment, the attributes and subnodes
     of the rewritten node).
 
     The rewrite rules are applied until a fix-point is reached.
@@ -286,7 +296,8 @@ val xml_of_file : string -> tree
     it is used as a fix-point limit: if no fix-point is reached in [n] iterations,
     then a [Failure] exception is raised.
 
-    {b I.} A single iteration descends recursively into the XML tree. If an
+{ol
+{- A single iteration descends recursively into the XML tree. If an
     element has a callback associated in the environment, then the
     callback is applied to the current data and the node's attributes and children.
 
@@ -299,25 +310,25 @@ val xml_of_file : string -> tree
 
     This would look for a callback bound to [("","album")] in the environment
     and call it using
-    [callback data env {("","author")->[ C "Rammstein"]|("","name")->[C "Reise, Reise"]} xml]
+    [callback data env {("","author")->[ D "Rammstein"]|("","name")->[D "Reise, Reise"]} xml]
     where [env] is the current environment and [xml] represents the
     two children [ <track>..</track> ] elements.
-
-    {b II.} The callback returns a pair composed of (maybe new) data
+}
+{- The callback returns a pair composed of (maybe new) data
      and a new list of elements that is used instead of the old element.
 
     {i Example}: assuming that the environnement was build using
     [env_add "x2" (fun data _ _ xml -> (data, xml @ xml)) env],
     then [<x2>A</x2>] is rewritten as [AA].
-
-    {b III.} The engine then recursively descends into those replaced
+}
+{- The engine then recursively descends into those replaced
     elements (this means that a poorly conceived rule set may well never
     terminate).
 
     {i Example}: [<x2><x2>A</x2></x2>] is first rewritten as
     [<x2>A</x2><x2>A</x2>], and then as [AAAA].
-
-    {b IV.} The [env_] and [main_] elements (see {!val:tag_env}
+}
+{-  The [env_] and [main_] elements (see {!val:tag_env}
     and {!val:tag_main}) are a special case: both are automatically
     replaced with their children (as if their callback was
     [(fun data _ _ xml -> (data, xml))]).
@@ -329,19 +340,21 @@ val xml_of_file : string -> tree
     {i Example}: [<env_ a="&lt;b&gt;A&lt;/b&gt;"><a/></env_>] is
     replaced by [<a/>], which in turn is replaced by
     [<b>A</b>].
-
-    {b V.} If an element has a [defer_] attribute (that is greater
+}
+{- If an element has a [defer_] attribute (that is greater
     than zero), then it is not processed and the attribute is decremented
     by one, and the process recursively applies to its children.
 
     {i Example}: [<x2 defer_="1"><x2>A</x2></x2>] is rewritten as
     [<x2 defer_="0">AA</x2>]. The {b next} iteration will effectively apply the
     rule to the node and return [AAAA].
-
-    {b VI.} If an element has a [protect_] attribute, then the value
+}
+{-  If an element has a [protect_] attribute, then the value
     must be CDATA and contains a list of names to remove from the environment
     when descending in the children. The names are separated by [','] or [';'],
     for example: [<foo protect_="title,id,foo:bar" ..>...</foo>].
+}
+}
 *)
 
 (** Applies as many iterations as necessary to a piece of XML (represented
