@@ -41,6 +41,49 @@ Applies as many iterations as necessary to a piece of XML (represented
 As <a href="Xtmpl.html#VALapply_to_string"><code class="code">Xtmpl.apply_to_string</code></a>, but applies to a list of XML trees.
 </div>
 </td></tr>
+<tr><td><a href="Xtmpl.html#VALatt_defer">att_defer</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
+<td><div class="info">
+The defer attribute, currently <code class="code">"defer_"</code>.
+</div>
+</td></tr>
+<tr><td><a href="Xtmpl.html#VALatt_escamp">att_escamp</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
+<td><div class="info">
+The escamp attribute, currently <code class="code">"escamp_"</code>.
+</div>
+</td></tr>
+<tr><td><a href="Xtmpl.html#VALatt_protect">att_protect</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
+<td><div class="info">
+The protect attribute, currently "protect_".
+</div>
+</td></tr>
+<tr><td><a href="Xtmpl.html#VALatts_empty">atts_empty</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
+<td><div class="info">
+Empty <a href="Xtmpl.html#TYPEattributes"><code class="code">Xtmpl.attributes</code></a> structure.
+</div>
+</td></tr>
+<tr><td><a href="Xtmpl.html#VALatts_of_list">atts_of_list</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
+<td><div class="info">
+<code class="code">atts_of_list list</code> returns an <a href="Xtmpl.html#TYPEattributes"><code class="code">Xtmpl.attributes</code></a> structure from the given
+  list of pairs <code class="code">(name, xml tree list) ; (name, xml tree list) ; ...</code>.
+</div>
+</td></tr>
+<tr><td><a href="Xtmpl.html#VALatts_one">atts_one</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
+<td><div class="info">
+<code class="code">atts_one ?atts name xmls</code> is like <a href="Xtmpl.html#VALatts_of_list"><code class="code">Xtmpl.atts_of_list</code></a> but for one attribute.
+</div>
+</td></tr>
+<tr><td><a href="Xtmpl.html#VALatts_remove">atts_remove</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
+<td><div class="info">
+<code class="code">atts_remove name attributes</code> removes the binding to <code class="code">name</code> from the
+  <code class="code">attributes</code>.
+</div>
+</td></tr>
+<tr><td><a href="Xtmpl.html#VALatts_replace">atts_replace</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
+<td><div class="info">
+<code class="code">atts_replace name xmls attributes</code> adds a new bindings from <code class="code">name</code> to
+  <code class="code">xmls</code> in <code class="code">attributes</code>.
+</div>
+</td></tr>
 <tr><td align="left"><br>E</td></tr>
 <tr><td><a href="Xtmpl.html#VALenv_add">env_add</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
 <td><div class="info">
@@ -55,7 +98,8 @@ Bind a callback that returns some XML.
 <tr><td><a href="Xtmpl.html#VALenv_empty">env_empty</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
 <td><div class="info">
 An environment that contains only one binding, associating
-  <a href="Xtmpl.html#VALtag_main"><code class="code">Xtmpl.tag_main</code></a> to a function returning its subnodes.
+  <a href="Xtmpl.html#VALtag_main"><code class="code">Xtmpl.tag_main</code></a> to a function such as <code class="code">(fun data _env _atts subs -&gt; (data, subs))</code>,
+  i.e.
 </div>
 </td></tr>
 <tr><td><a href="Xtmpl.html#VALenv_get">env_get</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
@@ -71,19 +115,34 @@ Add several bindings at once.
 <tr><td align="left"><br>G</td></tr>
 <tr><td><a href="Xtmpl.html#VALget_arg">get_arg</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
 <td><div class="info">
-Finds a binding in an attribute list.
+<code class="code">get_arg attributes name</code> returns the xml tree list bound to <code class="code">name</code> in
+  <code class="code">attributes</code>.
+</div>
+</td></tr>
+<tr><td><a href="Xtmpl.html#VALget_arg_cdata">get_arg_cdata</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
+<td><div class="info">
+Same as <a href="Xtmpl.html#VALget_arg"><code class="code">Xtmpl.get_arg</code></a> but return a string <code class="code">s</code> only if <code class="code">name</code> is bound to
+  a single CDATA XML node (<code class="code">[D s]</code>).
 </div>
 </td></tr>
 <tr><td align="left"><br>O</td></tr>
 <tr><td><a href="Xtmpl.html#VALopt_arg">opt_arg</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
 <td><div class="info">
-Finds a binding in an associative list, or returns a default.
+<code class="code">opt_arg attributes ?def name</code> returns the tree list associated to <code class="code">name</code>
+  in the <code class="code">attributes</code> or a default value.
+</div>
+</td></tr>
+<tr><td><a href="Xtmpl.html#VALopt_arg_cdata">opt_arg_cdata</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
+<td><div class="info">
+Same as <a href="Xtmpl.html#VALopt_arg"><code class="code">Xtmpl.opt_arg</code></a> but looking for CDATA bounded values, as in
+  <a href="Xtmpl.html#VALget_arg_cdata"><code class="code">Xtmpl.get_arg_cdata</code></a>.
 </div>
 </td></tr>
 <tr><td align="left"><br>S</td></tr>
 <tr><td><a href="Xtmpl.html#VALstring_of_args">string_of_args</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
 <td><div class="info">
-A string representation of an argument list.
+Return a string representation of attributes, in the form
+    <code class="code">a="foo" b="bar" ...</code>.
 </div>
 </td></tr>
 <tr><td><a href="Xtmpl.html#VALstring_of_env">string_of_env</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
@@ -91,9 +150,19 @@ A string representation of an argument list.
 String representation of all the keys in the environment.
 </div>
 </td></tr>
+<tr><td><a href="Xtmpl.html#VALstring_of_stack">string_of_stack</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
+<td><div class="info">
+String representation of the given rewrite stack.
+</div>
+</td></tr>
 <tr><td><a href="Xtmpl.html#VALstring_of_xml">string_of_xml</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
 <td><div class="info">
 Output an XML string.
+</div>
+</td></tr>
+<tr><td><a href="Xtmpl.html#VALstring_of_xml_atts">string_of_xml_atts</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
+<td><div class="info">
+Return a list of strings to represent the given attributes.
 </div>
 </td></tr>
 <tr><td><a href="Xtmpl.html#VALstring_of_xmls">string_of_xmls</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
@@ -122,6 +191,11 @@ Same as <a href="Xtmpl.html#VALxml_of_string"><code class="code">Xtmpl.xml_of_st
 <tr><td><a href="Xtmpl.html#VALxml_of_string">xml_of_string</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
 <td><div class="info">
 Parses a string as XML.
+</div>
+</td></tr>
+<tr><td><a href="Xtmpl.html#VALxmls_of_atts">xmls_of_atts</a> [<a href="Xtmpl.html">Xtmpl</a>]</td>
+<td><div class="info">
+Convert "string attributes" to an <a href="Xtmpl.html#TYPEattributes"><code class="code">Xtmpl.attributes</code></a> structure.
 </div>
 </td></tr>
 </table>

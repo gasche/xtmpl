@@ -18,6 +18,24 @@ Xtmpl is <a href="https://github.com/zoggy/xtmpl">hosted on Github</a>.
 </p>
 <h3>Releases</h3>
 <ul>
+<li><a href="xtmpl-0.8.tar.gz">0.8</a>
+[2014-01-15]:
+<ul>
+<li>An attribute value is now a list Xml trees, to improve performance
+    (before, attribute values were continously parsed as XML and printed back
+    as string),</li>
+<li>New <code>protect_</code> attribute, to remove from environment the rules
+    in this attribute. For example:
+    <code>&lt;foo protect_="title,id" ...&gt;...&lt;/foo&gt;</code>
+    will prevent applying <code>&lt;title&gt;</code> and
+    <code>&lt;id&gt;</code> rules in the node's children,
+</li>
+<li>The rewrite is now done as a fold, taking a data in parameter and
+    returning it or another value of same type.
+</li>
+</ul>
+</li>
+
 <li><a href="xtmpl-0.7.tar.gz">0.7</a>
 [2013-10-07]:
 <ul>
@@ -30,6 +48,7 @@ Xtmpl is <a href="https://github.com/zoggy/xtmpl">hosted on Github</a>.
 </li>
 </ul>
 </li>
+
 <li><a href="xtmpl-0.6.tar.gz">0.6</a>
 [2013-03-19]:
 <ul>
