@@ -65,6 +65,9 @@ and attributes = tree list Name_map.t
   (** Attributes of a XML node. Note that the content value of an attribute is
       a list of XML trees, not just a string. *)
 
+(** Recursively merge sibling [D] nodes into one [D] node. *)
+val merge_cdata : tree -> tree
+
 (** To catch eventual infinite loops in rewriting, we keep a
   stack of the rules called. *)
 type rewrite_stack = (name * attributes * tree list) list

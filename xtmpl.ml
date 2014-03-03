@@ -511,6 +511,24 @@ and (eval_string : rewrite_stack -> 'a -> 'a env -> string -> 'a * string) =
     (data, string_of_xmls xmls)
 ;;
 
+let merge_cdata =
+  let rec f acc = function
+    [] -> List.rev acc
+  | (D s1) :: (D s2) :: q -> f acc ((D (s1^s2)) :: q)
+  | ((D _) as x) :: q -> f (x :: acc) q
+  | (E (t, atts, subs)) :: q ->
+      let subs = f [] subs in
+      f ((E (t, atts, subs)) :: acc) q
+  in
+  f []
+;;
+let merge_cdata t =
+  match t with
+  | D _ -> t
+  | E (tag, atts, subs) -> E (tag, atts, merge_cdata subs)
+;;
+
+
 let apply_to_xmls data env xmls =
   (*prerr_endline (string_of_env env);*)
   let f (data, xmls) = eval_xmls [] data env xmls in

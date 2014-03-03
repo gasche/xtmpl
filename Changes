@@ -1,3 +1,6 @@
+Next release:
+  - Add Xtmpl.merge_cdata
+
 Release 0.8:
   - API change: attributes are now associated to xml tree list instead
     of string, for performance reason
