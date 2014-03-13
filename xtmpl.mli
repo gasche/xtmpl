@@ -68,6 +68,9 @@ and attributes = tree list Name_map.t
 (** Recursively merge sibling [D] nodes into one [D] node. *)
 val merge_cdata : tree -> tree
 
+(** Same as {!merge_cdata} but taking a {!tree} list. *)
+val merge_cdata_list : tree list -> tree list
+
 (** To catch eventual infinite loops in rewriting, we keep a
   stack of the rules called. *)
 type rewrite_stack = (name * attributes * tree list) list

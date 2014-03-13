@@ -511,7 +511,7 @@ and (eval_string : rewrite_stack -> 'a -> 'a env -> string -> 'a * string) =
     (data, string_of_xmls xmls)
 ;;
 
-let merge_cdata =
+let merge_cdata_list =
   let rec f acc = function
     [] -> List.rev acc
   | (D s1) :: (D s2) :: q -> f acc ((D (s1^s2)) :: q)
@@ -525,7 +525,7 @@ let merge_cdata =
 let merge_cdata t =
   match t with
   | D _ -> t
-  | E (tag, atts, subs) -> E (tag, atts, merge_cdata subs)
+  | E (tag, atts, subs) -> E (tag, atts, merge_cdata_list subs)
 ;;
 
 
