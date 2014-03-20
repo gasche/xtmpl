@@ -23,7 +23,8 @@
 #                                                                               #
 #################################################################################
 
-VERSION=0.8
+# DO NOT FORGET TO UPDATE META FILE
+VERSION=0.9
 
 INCLUDES=`ocamlfind query -i-format xmlm`
 COMPFLAGS=$(INCLUDES) -annot -rectypes
