@@ -82,6 +82,8 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">E</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="constructor">Xtmpl</span>.name&nbsp;*&nbsp;<span class="constructor">Xtmpl</span>.attributes&nbsp;*&nbsp;<span class="constructor">Xtmpl</span>.tree&nbsp;list<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">D</span>&nbsp;<span class="keyword">of</span>&nbsp;string<br>
 &nbsp;&nbsp;<span class="keyword">and</span>&nbsp;attributes&nbsp;=&nbsp;<span class="constructor">Xtmpl</span>.tree&nbsp;list&nbsp;<span class="constructor">Xtmpl</span>.<span class="constructor">Name_map</span>.t<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;merge_cdata&nbsp;:&nbsp;<span class="constructor">Xtmpl</span>.tree&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Xtmpl</span>.tree<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;merge_cdata_list&nbsp;:&nbsp;<span class="constructor">Xtmpl</span>.tree&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Xtmpl</span>.tree&nbsp;list<br>
 &nbsp;&nbsp;<span class="keyword">type</span>&nbsp;rewrite_stack&nbsp;=&nbsp;(<span class="constructor">Xtmpl</span>.name&nbsp;*&nbsp;<span class="constructor">Xtmpl</span>.attributes&nbsp;*&nbsp;<span class="constructor">Xtmpl</span>.tree&nbsp;list)&nbsp;list<br>
 &nbsp;&nbsp;<span class="keyword">exception</span>&nbsp;<span class="constructor">Loop</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="constructor">Xtmpl</span>.rewrite_stack<br>
 &nbsp;&nbsp;<span class="keyword">val</span>&nbsp;string_of_stack&nbsp;:&nbsp;<span class="constructor">Xtmpl</span>.rewrite_stack&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string<br>

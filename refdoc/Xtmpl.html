@@ -95,6 +95,14 @@ Attributes of a XML node. Note that the content value of an attribute is
 </div>
 
 
+<pre><span id="VALmerge_cdata"><span class="keyword">val</span> merge_cdata</span> : <code class="type"><a href="Xtmpl.html#TYPEtree">tree</a> -> <a href="Xtmpl.html#TYPEtree">tree</a></code></pre><div class="info ">
+Recursively merge sibling <code class="code">D</code> nodes into one <code class="code">D</code> node.<br>
+</div>
+
+<pre><span id="VALmerge_cdata_list"><span class="keyword">val</span> merge_cdata_list</span> : <code class="type"><a href="Xtmpl.html#TYPEtree">tree</a> list -> <a href="Xtmpl.html#TYPEtree">tree</a> list</code></pre><div class="info ">
+Same as <a href="Xtmpl.html#VALmerge_cdata"><code class="code">Xtmpl.merge_cdata</code></a> but taking a <a href="Xtmpl.html#TYPEtree"><code class="code">Xtmpl.tree</code></a> list.<br>
+</div>
+
 <pre><span id="TYPErewrite_stack"><span class="keyword">type</span> <code class="type"></code>rewrite_stack</span> = <code class="type">(<a href="Xtmpl.html#TYPEname">name</a> * <a href="Xtmpl.html#TYPEattributes">attributes</a> * <a href="Xtmpl.html#TYPEtree">tree</a> list) list</code> </pre>
 <div class="info ">
 To catch eventual infinite loops in rewriting, we keep a
