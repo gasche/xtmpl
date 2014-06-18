@@ -260,15 +260,19 @@ val att_protect : string
 (** Output an XML string.
 
     The returned string does not include the initial [<?xml ... ?>].
+
+    @param xml_atts indicates whether the code in attributes remains valid XML
+    of not. Default is [true] but it should be set to [false] when outputting
+    final documents like HTML pages.
 *)
-val string_of_xml : tree -> string
+val string_of_xml : ?xml_atts: bool -> tree -> string
 
 (** Use {!string_of_xml} to concatenate a list of xml trees into one string,
   with no separator.*)
-val string_of_xmls : tree list -> string
+val string_of_xmls : ?xml_atts: bool -> tree list -> string
 
 (** Return a list of strings to represent the given attributes. *)
-val string_of_xml_atts : attributes -> (name * string) list
+val string_of_xml_atts : ?xml_atts: bool -> attributes -> (name * string) list
 
 (** Parses a string as XML.
 

@@ -1,3 +1,12 @@
+Next release:
+  - new parameter ~xml_atts for Xtmpl.string_of_{xml,xmls,xml_atts}
+    to indicate whether or not to keep valid XML in attributes when
+    printing an XML tree. Default is true, to be backward-compatible.
+    When it is true, Xtmpl tries to unescape some entities. Only
+    lt, gt, amp, quot and apos named entities are unescaped.
+    When an entity is given by its character code, only the ones
+    with code between 0 and 255 are unescaped.
+
 Release 0.9:
   - Add Xtmpl.merge_cdata
   - Add Xtmpl.merge_cdata_list

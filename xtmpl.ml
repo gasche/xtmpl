@@ -196,14 +196,47 @@ let get_arg args name =
   with Not_found -> None
 ;;
 
-let rec string_of_xml tree =
+(* This function only unescape some common named entities
+  and characters with code between 0 and 255. *)
+let unescape_entities =
+  let re = Str.regexp "&\\([a-zA-Z]+\\|\\(x?[0-9a-fA-F]+\\)\\);" in
+(*  let re_num = Str.regexp "&#\\(x?[0-9a-fA-F]+\\);" in*)
+  let str_of_char_code default code =
+    if code >= 256 then
+      default
+    else
+      String.make 1 (Char.chr code)
+  in
+  let f s =
+    let matched = Str.matched_string s in
+    let group = Str.matched_group 1 s in
+    match
+      try
+        let s = "0"^matched in
+        Some (int_of_string s)
+      with _ -> None
+    with
+      Some code -> str_of_char_code matched code
+    | None ->
+        match group with
+          "lt" -> "<"
+        | "gt" -> ">"
+        | "amp" -> "&"
+        | "quot" -> "\""
+        | "apos" -> "'"
+        | _ -> matched
+  in
+  fun s -> Str.global_substitute re f s
+;;
+
+let rec string_of_xml ?xml_atts tree =
   try
     let b = Buffer.create 256 in
     let ns_prefix s = Some s in
     let output = Xmlm.make_output ~ns_prefix ~decl: false (`Buffer b) in
     let frag = function
     | E (tag, atts, childs) ->
-        let atts = string_of_xml_atts atts in
+        let atts = string_of_xml_atts ?xml_atts atts in
         `El ((tag, atts), childs)
     | D d -> `Data d
     in
@@ -216,8 +249,8 @@ let rec string_of_xml tree =
       in
       failwith msg
 
-and string_of_xmls l = String.concat "" (List.map string_of_xml l)
-and string_of_xml_atts atts =
+and string_of_xmls ?xml_atts l = String.concat "" (List.map (string_of_xml ?xml_atts) l)
+and string_of_xml_atts ?(xml_atts=true) atts =
       let atts_to_escape = xml_atts_to_escape atts in
       let f name xmls acc =
         match name with
@@ -227,6 +260,7 @@ and string_of_xml_atts atts =
             let s = string_of_xmls xmls in
             let escamp = Name_set.mem name atts_to_escape in
             let s = if escamp then unescape_ampersand s else s in
+            let s = if xml_atts then s else unescape_entities s in
             (name, s) :: acc
       in
       List.rev (Name_map.fold f atts [])
