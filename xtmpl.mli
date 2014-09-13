@@ -186,7 +186,7 @@ val string_of_env : 'a env -> string
     constant XML subtrees. This convenience function lets you provide
     the XML subtrees.
 
-    [env_add_att "logo" [ E (("","img"), atts_one ("","src") [C "logo.png"], [] ] env]
+    [env_add_att "logo" [ E (("","img"), atts_one ("","src") [D "logo.png"], []) ] env]
     binds the key [("","logo")] to a callback that returns an XHTML image tag.
 
     @prefix can be used to specify a prefix for the rule name. Default is [""].
