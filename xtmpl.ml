@@ -31,7 +31,7 @@ type name = string * string
 let string_of_file name =
   let chanin = open_in_bin name in
   let len = 1024 in
-  let s = String.create len in
+  let s = Bytes.create len in
   let buf = Buffer.create len in
   let rec iter () =
     try
@@ -40,7 +40,7 @@ let string_of_file name =
         ()
       else
         (
-         Buffer.add_substring buf s 0 n;
+         Buffer.add_subbytes buf s 0 n;
          iter ()
         )
     with
