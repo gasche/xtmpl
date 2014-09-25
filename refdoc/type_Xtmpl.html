@@ -72,16 +72,14 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;choose&nbsp;:&nbsp;t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;elt<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;split&nbsp;:&nbsp;elt&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;t&nbsp;*&nbsp;bool&nbsp;*&nbsp;t<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;find&nbsp;:&nbsp;elt&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;elt<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;of_list&nbsp;:&nbsp;elt&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;t<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br>
 &nbsp;&nbsp;<span class="keyword">type</span>&nbsp;<span class="keywordsign">'</span>a&nbsp;env<br>
-&nbsp;&nbsp;<span class="keyword">and</span>&nbsp;<span class="keywordsign">'</span>a&nbsp;callback&nbsp;=<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">'</span>a&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">'</span>a&nbsp;<span class="constructor">Xtmpl</span>.env&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Xtmpl</span>.attributes&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Xtmpl</span>.tree&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="keywordsign">'</span>a&nbsp;*&nbsp;<span class="constructor">Xtmpl</span>.tree&nbsp;list<br>
+&nbsp;&nbsp;<span class="keyword">and</span>&nbsp;<span class="keywordsign">'</span>a&nbsp;callback&nbsp;=&nbsp;<span class="keywordsign">'</span>a&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="keywordsign">'</span>a&nbsp;env&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;attributes&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;tree&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="keywordsign">'</span>a&nbsp;*&nbsp;tree&nbsp;list<br>
 &nbsp;&nbsp;<span class="keyword">and</span>&nbsp;tree&nbsp;=<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">E</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="constructor">Xtmpl</span>.name&nbsp;*&nbsp;<span class="constructor">Xtmpl</span>.attributes&nbsp;*&nbsp;<span class="constructor">Xtmpl</span>.tree&nbsp;list<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">D</span>&nbsp;<span class="keyword">of</span>&nbsp;string<br>
-&nbsp;&nbsp;<span class="keyword">and</span>&nbsp;attributes&nbsp;=&nbsp;<span class="constructor">Xtmpl</span>.tree&nbsp;list&nbsp;<span class="constructor">Xtmpl</span>.<span class="constructor">Name_map</span>.t<br>
+&nbsp;&nbsp;<span class="keyword">and</span>&nbsp;attributes&nbsp;=&nbsp;tree&nbsp;list&nbsp;<span class="constructor">Xtmpl</span>.<span class="constructor">Name_map</span>.t<br>
 &nbsp;&nbsp;<span class="keyword">val</span>&nbsp;merge_cdata&nbsp;:&nbsp;<span class="constructor">Xtmpl</span>.tree&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Xtmpl</span>.tree<br>
 &nbsp;&nbsp;<span class="keyword">val</span>&nbsp;merge_cdata_list&nbsp;:&nbsp;<span class="constructor">Xtmpl</span>.tree&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Xtmpl</span>.tree&nbsp;list<br>
 &nbsp;&nbsp;<span class="keyword">type</span>&nbsp;rewrite_stack&nbsp;=&nbsp;(<span class="constructor">Xtmpl</span>.name&nbsp;*&nbsp;<span class="constructor">Xtmpl</span>.attributes&nbsp;*&nbsp;<span class="constructor">Xtmpl</span>.tree&nbsp;list)&nbsp;list<br>
@@ -120,9 +118,10 @@
 &nbsp;&nbsp;<span class="keyword">val</span>&nbsp;att_defer&nbsp;:&nbsp;string<br>
 &nbsp;&nbsp;<span class="keyword">val</span>&nbsp;att_escamp&nbsp;:&nbsp;string<br>
 &nbsp;&nbsp;<span class="keyword">val</span>&nbsp;att_protect&nbsp;:&nbsp;string<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;string_of_xml&nbsp;:&nbsp;<span class="constructor">Xtmpl</span>.tree&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;string_of_xmls&nbsp;:&nbsp;<span class="constructor">Xtmpl</span>.tree&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;string_of_xml_atts&nbsp;:&nbsp;<span class="constructor">Xtmpl</span>.attributes&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;(<span class="constructor">Xtmpl</span>.name&nbsp;*&nbsp;string)&nbsp;list<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;string_of_xml&nbsp;:&nbsp;?xml_atts:bool&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Xtmpl</span>.tree&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;string_of_xmls&nbsp;:&nbsp;?xml_atts:bool&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Xtmpl</span>.tree&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;string_of_xml_atts&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;?xml_atts:bool&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Xtmpl</span>.attributes&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;(<span class="constructor">Xtmpl</span>.name&nbsp;*&nbsp;string)&nbsp;list<br>
 &nbsp;&nbsp;<span class="keyword">val</span>&nbsp;xml_of_string&nbsp;:&nbsp;?add_main:bool&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Xtmpl</span>.tree<br>
 &nbsp;&nbsp;<span class="keyword">val</span>&nbsp;xmls_of_atts&nbsp;:&nbsp;(<span class="constructor">Xtmpl</span>.name&nbsp;*&nbsp;string)&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Xtmpl</span>.attributes<br>
 &nbsp;&nbsp;<span class="keyword">val</span>&nbsp;xml_of_file&nbsp;:&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Xtmpl</span>.tree<br>

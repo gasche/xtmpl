@@ -59,7 +59,7 @@ Sets of names.
 <pre><span id="TYPEenv"><span class="keyword">type</span> <code class="type">'a</code> env</span> </pre>
 
 
-<pre><span id="TYPEcallback"><span class="keyword">type</span> <code class="type">'a</code> callback</span> = <code class="type">'a -><br>       'a <a href="Xtmpl.html#TYPEenv">env</a> -> <a href="Xtmpl.html#TYPEattributes">attributes</a> -> <a href="Xtmpl.html#TYPEtree">tree</a> list -> 'a * <a href="Xtmpl.html#TYPEtree">tree</a> list</code> </pre>
+<pre><span id="TYPEcallback"><span class="keyword">type</span> <code class="type">'a</code> callback</span> = <code class="type">'a -> 'a env -> attributes -> tree list -> 'a * tree list</code> </pre>
 <div class="info ">
 A <code class="code">'a callback</code> takes data of type <code class="code">'a</code>, a <code class="code">'a env</code>, attributes and XML nodes.
     It returns a potentially new data of type <code class="code">'a</code> and XML nodes. The attributes are
@@ -88,7 +88,7 @@ A <code class="code">'a callback</code> takes data of type <code class="code">'a
 
 
 
-<pre><span id="TYPEattributes"><span class="keyword">type</span> <code class="type"></code>attributes</span> = <code class="type"><a href="Xtmpl.html#TYPEtree">tree</a> list Name_map.t</code> </pre>
+<pre><span id="TYPEattributes"><span class="keyword">type</span> <code class="type"></code>attributes</span> = <code class="type">tree list Name_map.t</code> </pre>
 <div class="info ">
 Attributes of a XML node. Note that the content value of an attribute is
       a list of XML trees, not just a string.<br>
@@ -313,19 +313,22 @@ The protect attribute, currently "protect_". See the engine section
   to a string, as for <a href="Xtmpl.html#VALatt_escamp"><code class="code">Xtmpl.att_escamp</code></a>.<br>
 </div>
 
-<pre><span id="VALstring_of_xml"><span class="keyword">val</span> string_of_xml</span> : <code class="type"><a href="Xtmpl.html#TYPEtree">tree</a> -> string</code></pre><div class="info ">
+<pre><span id="VALstring_of_xml"><span class="keyword">val</span> string_of_xml</span> : <code class="type">?xml_atts:bool -> <a href="Xtmpl.html#TYPEtree">tree</a> -> string</code></pre><div class="info ">
 Output an XML string.
 <p>
 
     The returned string does not include the initial <code class="code">&lt;?xml ... ?&gt;</code>.<br>
 </div>
+<div class="param_info"><code class="code">xml_atts</code> : indicates whether the code in attributes remains valid XML
+    of not. Default is <code class="code">true</code> but it should be set to <code class="code">false</code> when outputting
+    final documents like HTML pages.</div>
 
-<pre><span id="VALstring_of_xmls"><span class="keyword">val</span> string_of_xmls</span> : <code class="type"><a href="Xtmpl.html#TYPEtree">tree</a> list -> string</code></pre><div class="info ">
+<pre><span id="VALstring_of_xmls"><span class="keyword">val</span> string_of_xmls</span> : <code class="type">?xml_atts:bool -> <a href="Xtmpl.html#TYPEtree">tree</a> list -> string</code></pre><div class="info ">
 Use <a href="Xtmpl.html#VALstring_of_xml"><code class="code">Xtmpl.string_of_xml</code></a> to concatenate a list of xml trees into one string,
   with no separator.<br>
 </div>
 
-<pre><span id="VALstring_of_xml_atts"><span class="keyword">val</span> string_of_xml_atts</span> : <code class="type"><a href="Xtmpl.html#TYPEattributes">attributes</a> -> (<a href="Xtmpl.html#TYPEname">name</a> * string) list</code></pre><div class="info ">
+<pre><span id="VALstring_of_xml_atts"><span class="keyword">val</span> string_of_xml_atts</span> : <code class="type">?xml_atts:bool -> <a href="Xtmpl.html#TYPEattributes">attributes</a> -> (<a href="Xtmpl.html#TYPEname">name</a> * string) list</code></pre><div class="info ">
 Return a list of strings to represent the given attributes.<br>
 </div>
 
