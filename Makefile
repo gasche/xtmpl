@@ -27,7 +27,7 @@
 VERSION=0.9
 
 INCLUDES=`ocamlfind query -i-format xmlm`
-COMPFLAGS=$(INCLUDES) -annot -rectypes
+COMPFLAGS=$(INCLUDES) -annot -rectypes -safe-string
 OCAMLPP=
 
 OCAMLC=ocamlc.opt -g #ocamlcp -p a #

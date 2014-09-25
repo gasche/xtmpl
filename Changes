@@ -1,4 +1,5 @@
 Next release:
+  - use safe-string mode
   - new parameter ~xml_atts for Xtmpl.string_of_{xml,xmls,xml_atts}
     to indicate whether or not to keep valid XML in attributes when
     printing an XML tree. Default is true, to be backward-compatible.
