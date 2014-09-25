@@ -18,6 +18,23 @@ Xtmpl is <a href="https://github.com/zoggy/xtmpl">hosted on Github</a>.
 </p>
 <h3>Releases</h3>
 <ul>
+<li><a href="xtmpl-0.10.tar.gz">0.10</a>
+[2014-09-25]:
+<ul>
+<li>Use safe-string mode (require OCaml &gt;= 4.02),</li>
+<li>new parameter <code>~xml_atts</code> for
+    <code>Xtmpl.string_of_{xml,xmls,xml_atts}</code>
+    to indicate whether or not to keep valid XML in attributes when
+    printing an XML tree. Default is true, to be backward-compatible.
+    When it is true, Xtmpl tries to unescape some entities. Only
+    lt, gt, amp, quot and apos named entities are unescaped.
+    When an entity is given by its character code, only the ones
+    with code between 0 and 255 are unescaped.
+</li>
+</ul>
+</li>
+
+
 <li><a href="xtmpl-0.9.tar.gz">0.9</a>
 [2014-03-20]:
 <ul>
