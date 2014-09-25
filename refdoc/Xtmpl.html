@@ -239,7 +239,7 @@ Bind a callback that returns some XML.
     the XML subtrees.
 <p>
 
-    <code class="code">env_add_att "logo" [ E (("","img"), atts_one ("","src") [C "logo.png"], [] ] env</code>
+    <code class="code">env_add_att "logo" [ E (("","img"), atts_one ("","src") [D "logo.png"], []) ] env</code>
     binds the key <code class="code">("","logo")</code> to a callback that returns an XHTML image tag.<br>
 </div>
 
