@@ -24,3 +24,62 @@
 (*********************************************************************************)
 
 (** *)
+
+module E = Sedlexing.Latin1
+
+let add_lexeme buf lexbuf =
+  Buffer.add_string buf (E.lexeme lexbuf)
+
+let rec main buf lexbuf =
+  match%sedlex lexbuf with
+  | "<:" -> start buf lexbuf; main buf lexbuf
+  | eof -> ()
+  | any -> add_lexeme buf lexbuf; main buf lexbuf
+  | _ -> assert false
+
+and start buf lexbuf =
+  match%sedlex lexbuf with
+  | Plus('a'..'z'|'A'..'Z') ->
+      let id = E.lexeme lexbuf in
+      Printf.bprintf buf "(Xtmpl.E((\"\",%S)," id ;
+      start_arg buf lexbuf
+  | _ ->
+      Buffer.add_string buf "(Xtmpl.E((\"\",\"\")," ;
+      start_arg buf lexbuf
+
+and start_arg buf lexbuf =
+  match%sedlex lexbuf with
+  | '<' ->
+      Buffer.add_string buf "Xtmpl.atts_empty, [ ";
+      xml_items buf lexbuf ;
+      Buffer.add_string buf "]))"
+  | _ -> main buf lexbuf
+
+and xml_items buf lexbuf =
+  match%sedlex lexbuf with
+  | ">>" -> ()
+  | "<:" ->
+      start buf lexbuf ;
+      Buffer.add_string buf " ; ";
+      xml_items buf lexbuf
+  | "[[" ->
+      Buffer.add_string buf "(Xtmpl.D (";
+      pcdata buf lexbuf ;
+      Buffer.add_string buf " ; ";
+      xml_items buf lexbuf
+  | any -> add_lexeme buf lexbuf; xml_items buf lexbuf
+  | _ -> assert false
+
+and pcdata buf lexbuf =
+  match%sedlex lexbuf with
+  | "]]" -> Buffer.add_string buf "))"
+  | any -> add_lexeme buf lexbuf; pcdata buf lexbuf
+  | _ -> assert false
+
+
+let lex lb =
+  let buf = Buffer.create 256 in
+  main buf lb;
+  Buffer.contents buf
+
+let () = print_string (lex (E.from_channel stdin))
