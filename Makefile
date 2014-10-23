@@ -34,6 +34,7 @@ OCAMLC=ocamlc.opt -g #ocamlcp -p a #
 OCAMLOPT=ocamlopt.opt -g #ocamloptp -p #
 OCAMLLIB:=`$(OCAMLC) -where`
 OCAMLDOC=ocamldoc.opt
+OCAMLFIND=ocamlfind
 
 INSTALLDIR=$(OCAMLLIB)
 
@@ -42,8 +43,8 @@ CP=cp -f
 MKDIR=mkdir -p
 
 all: byte opt
-byte: xtmpl.cmo
-opt: xtmpl.cmx xtmpl.cmxs
+byte: xtmpl.cmo pp_xml.byte
+opt: xtmpl.cmx xtmpl.cmxs pp_xml
 
 xtmpl.cmx: xtmpl.cmi xtmpl.ml
 	$(OCAMLOPT) -c $(COMPFLAGS) xtmpl.ml
@@ -56,6 +57,12 @@ xtmpl.cmo: xtmpl.cmi xtmpl.ml
 
 xtmpl.cmi: xtmpl.mli
 	$(OCAMLC) -c $(COMPFLAGS) $<
+
+pp_xml: pp_xml.ml
+	$(OCAMLFIND) ocamlopt -o $@ -package sedlex -linkpkg $^
+
+pp_xml.byte: pp_xml.ml
+	$(OCAMLFIND) ocamlc -o $@ -package sedlex -linkpkg $^
 
 ##########
 .PHONY: doc
