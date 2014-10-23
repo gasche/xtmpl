@@ -3,3 +3,5 @@
 *.annot
 .chamo*
 doc
+pp_xml
+pp_xml.byte
