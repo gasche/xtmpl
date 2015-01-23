@@ -189,7 +189,7 @@ val string_of_env : 'a env -> string
     [env_add_att "logo" [ E (("","img"), atts_one ("","src") [D "logo.png"], []) ] env]
     binds the key [("","logo")] to a callback that returns an XHTML image tag.
 
-    @prefix can be used to specify a prefix for the rule name. Default is [""].
+    @param prefix can be used to specify a prefix for the rule name. Default is [""].
 *)
 val env_add_att : ?prefix:string -> string -> tree list -> 'a env -> 'a env
 
