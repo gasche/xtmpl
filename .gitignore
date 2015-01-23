@@ -3,3 +3,6 @@
 *.annot
 .chamo*
 doc
+ppx_xtmpl
+ppx_xtmpl.byte
+
