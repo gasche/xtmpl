@@ -163,7 +163,25 @@ let fun_of_param loc name p body =
   let (label, default) =
     match p.default with
       None -> id, None
-    | Some v -> ("?"^id, None) (* FIXME: handle optional parameters *)
+    | Some v ->
+        let label = "?"^id in
+        let def =
+          match p.typ, v with
+          | `CData, [Xtmpl.D v] -> Exp.constant (Const_string (v, None))
+          | `CData, [] -> Exp.constant (Const_string ("", None))
+          | `CData, _ ->
+              error loc
+                (Printf.sprintf "Parameter %s should have CData default value"
+                 (string_of_name name))
+          | `Xmls, xmls -> Exp.ident (lid loc ("__default_"^id))
+          | `Other _, [Xtmpl.D code] ->
+              parse_ocaml_expression loc code
+          | `Other _, _ ->
+              error loc
+                (Printf.sprintf "Parameter %s should have OCaml code as default value (given as CDATA)"
+                 (string_of_name name))
+        in
+        (label, Some def)
   in
   let pat = Pat.var ~loc (Location.mkloc id loc) in
   Exp.fun_ ~loc label default pat body
@@ -189,6 +207,21 @@ let env_of_param loc ((prefix,str) as name) p exp =
   in
   [%expr let env = [%e def] in [%e exp]]
 
+let defaults_of_params loc params exp =
+  let f name p exp =
+    match p.typ, p.default with
+    | `Xmls, Some xmls ->
+        let const_tmpl = Exp.constant ~loc (Const_string (Xtmpl.string_of_xmls xmls, None)) in
+        let id = "__default_"^(id_of_param_name name) in
+        Exp.let_ Nonrecursive
+          [Vb.mk (Pat.var (Location.mkloc id loc))
+            [%expr [Xtmpl.xml_of_string [%e const_tmpl]]]
+          ]
+          exp
+    | _ -> exp
+  in
+  Xtmpl.Name_map.fold f params exp
+
 let map_xtmpl exp =
   let loc = exp.pexp_loc in
   let file = file_path exp in
@@ -198,9 +231,9 @@ let map_xtmpl exp =
   let lid_xml_of_string = lid loc "Xtmpl.xml_of_string" in
   let call = [%expr let (_, res) = Xtmpl.apply_to_xmls () env [tmpl_] in res] in
   let envs = Xtmpl.Name_map.fold (env_of_param loc) params call in
-  let body = envs in
-  let funs = funs_of_params loc params body in
-  let exp_tmpl = [%expr let tmpl_ = [%e (Exp.ident lid_xml_of_string)] [%e const_tmpl] in [%e funs]] in
+  let funs = funs_of_params loc params envs in
+  let defaults = defaults_of_params loc params funs in
+  let exp_tmpl = [%expr let tmpl_ = [%e (Exp.ident lid_xml_of_string)] [%e const_tmpl] in [%e defaults]] in
   exp_tmpl
 
 
