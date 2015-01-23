@@ -26,14 +26,11 @@
 # DO NOT FORGET TO UPDATE META FILE
 VERSION=0.10
 
-INCLUDES=`ocamlfind query -i-format xmlm`
-COMPFLAGS=$(INCLUDES) -annot -rectypes -safe-string
+OCAMLFIND=ocamlfind
+PACKAGES=xmlm
+COMPFLAGS=-annot -rectypes -safe-string -g
 OCAMLPP=
-
-OCAMLC=ocamlc.opt -g #ocamlcp -p a #
-OCAMLOPT=ocamlopt.opt -g #ocamloptp -p #
 OCAMLLIB:=`$(OCAMLC) -where`
-OCAMLDOC=ocamldoc.opt
 
 INSTALLDIR=$(OCAMLLIB)
 
@@ -46,22 +43,26 @@ byte: xtmpl.cmo
 opt: xtmpl.cmx xtmpl.cmxs
 
 xtmpl.cmx: xtmpl.cmi xtmpl.ml
-	$(OCAMLOPT) -c $(COMPFLAGS) xtmpl.ml
+	$(OCAMLFIND) ocamlopt -c -package $(PACKAGES) $(COMPFLAGS) xtmpl.ml
 
 xtmpl.cmxs: xtmpl.cmx
-	$(OCAMLOPT) -shared -o $@ $(COMPFLAGS) xtmpl.cmx
+	$(OCAMLFIND) ocamlopt -shared -o $@ -package $(PACKAGES) $(COMPFLAGS) xtmpl.cmx
 
 xtmpl.cmo: xtmpl.cmi xtmpl.ml
-	$(OCAMLC) -c $(COMPFLAGS) xtmpl.ml
+	$(OCAMLFIND) ocamlc -c -package $(PACKAGES) $(COMPFLAGS) xtmpl.ml
 
 xtmpl.cmi: xtmpl.mli
-	$(OCAMLC) -c $(COMPFLAGS) $<
+	$(OCAMLFIND) ocamlc -c -package $(PACKAGES) $(COMPFLAGS) $<
+
+ppx_xtmpl: ppx_xtmpl.ml
+	$(OCAMLFIND) ocamlopt -o $@ -package ppx_tools.metaquot,str,$(PACKAGES) \
+	$(COMPFLAGS) -linkpkg xtmpl.cmx $<
 
 ##########
 .PHONY: doc
 doc:
 	$(MKDIR) doc
-	$(OCAMLDOC) $(INCLUDES) xtmpl.mli -t Xtmpl -d doc -html
+	$(OCAMLFIND) ocamldoc -package $(PACKAGES) xtmpl.mli -t Xtmpl -d doc -html
 
 webdoc: doc
 	$(MKDIR) ../xtmpl-gh-pages/refdoc
@@ -71,7 +72,7 @@ webdoc: doc
 
 ##########
 install: xtmpl.cmo xtmpl.cmx
-	ocamlfind install xtmpl META LICENSE \
+	$(OCAMLFIND) install xtmpl META LICENSE \
 		xtmpl.cmi xtmpl.mli xtmpl.cmo xtmpl.cmx xtmpl.cmxs xtmpl.o
 
 uninstall:
