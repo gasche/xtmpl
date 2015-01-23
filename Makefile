@@ -39,8 +39,8 @@ CP=cp -f
 MKDIR=mkdir -p
 
 all: byte opt
-byte: xtmpl.cmo
-opt: xtmpl.cmx xtmpl.cmxs
+byte: xtmpl.cmo ppx_xtmpl.byte
+opt: xtmpl.cmx xtmpl.cmxs ppx_xtmpl
 
 xtmpl.cmx: xtmpl.cmi xtmpl.ml
 	$(OCAMLFIND) ocamlopt -c -package $(PACKAGES) $(COMPFLAGS) xtmpl.ml
@@ -57,6 +57,10 @@ xtmpl.cmi: xtmpl.mli
 ppx_xtmpl: ppx_xtmpl.ml
 	$(OCAMLFIND) ocamlopt -o $@ -package ppx_tools.metaquot,str,$(PACKAGES) \
 	$(COMPFLAGS) -linkpkg xtmpl.cmx $<
+
+ppx_xtmpl.byte: ppx_xtmpl.ml
+	$(OCAMLFIND) ocamlc -o $@ -package ppx_tools.metaquot,str,$(PACKAGES) \
+	$(COMPFLAGS) -linkpkg xtmpl.cmo $<
 
 ##########
 .PHONY: doc
