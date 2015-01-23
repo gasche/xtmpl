@@ -24,7 +24,7 @@
 #################################################################################
 
 # DO NOT FORGET TO UPDATE META FILE
-VERSION=0.10
+VERSION=0.11
 
 OCAMLFIND=ocamlfind
 PACKAGES=xmlm
@@ -77,7 +77,8 @@ webdoc: doc
 ##########
 install: xtmpl.cmo xtmpl.cmx
 	$(OCAMLFIND) install xtmpl META LICENSE \
-		xtmpl.cmi xtmpl.mli xtmpl.cmo xtmpl.cmx xtmpl.cmxs xtmpl.o
+		xtmpl.cmi xtmpl.mli xtmpl.cmo xtmpl.cmx xtmpl.cmxs xtmpl.o \
+		ppx_xtmpl ppx_xtmpl.byte
 
 uninstall:
 	ocamlfind remove xtmpl
