@@ -1,4 +1,6 @@
 Next release:
+
+Release 0.10:
   - use safe-string mode
   - new parameter ~xml_atts for Xtmpl.string_of_{xml,xmls,xml_atts}
     to indicate whether or not to keep valid XML in attributes when
