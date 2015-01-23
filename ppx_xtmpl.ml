@@ -130,6 +130,7 @@ let gather_params loc xmls =
         match Xtmpl.get_arg_cdata atts ("","param") with
         | Some "true" -> add_param acc tag atts subs
         | _ ->
+            let (acc, atts) = iter_atts acc atts in
             let (acc, subs) = iter_list acc subs in
             (acc, Xtmpl.E(tag,atts,subs))
   and iter_list acc xmls =
@@ -141,6 +142,11 @@ let gather_params loc xmls =
               (acc, []) xmls
     in
     (acc, List.rev xmls)
+  and iter_atts acc atts =
+     Xtmpl.Name_map.fold iter_att atts (acc, Xtmpl.Name_map.empty)
+  and iter_att name v (acc, atts) =
+    let (acc, xmls) = iter_list acc v in
+    (acc, Xtmpl.Name_map.add name xmls atts)
   in
   iter_list Xtmpl.Name_map.empty xmls
 
