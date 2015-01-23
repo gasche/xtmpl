@@ -80,7 +80,7 @@ let read_template loc file =
   try
     let str = string_of_file file in
     match Xtmpl.xml_of_string str with
-      Xtmpl.E(_,_,xmls) -> (str, xmls)
+      Xtmpl.E(_,_,xmls) -> xmls
     | _ -> assert false
   with
     Sys_error msg -> error loc (Printf.sprintf "File %S: %s" file msg)
@@ -93,6 +93,10 @@ type parameter =
 let string_of_name = function
   "", s -> s
 | p, s -> Printf.sprintf "%s:%s" p s
+
+let prune_param_atts =
+  List.fold_right Xtmpl.atts_remove
+    [ "", "param" ; "", "optional" ; "", "type" ; "", "to_xml"]
 
 let gather_params loc xmls =
   let rec add_param acc tag atts subs =
@@ -117,6 +121,7 @@ let gather_params loc xmls =
             `Other (typ, code)
     in
     let acc = Xtmpl.Name_map.add tag { default ; typ } acc in
+    let atts = prune_param_atts atts in
     (acc, Xtmpl.E (tag, atts, []))
   and iter acc xml =
     match xml with
@@ -130,7 +135,7 @@ let gather_params loc xmls =
   and iter_list acc xmls =
     let (acc, xmls) = List.fold_left
               (fun (acc, acc_xmls) xml ->
-                 let (acc, xmls) = iter acc xml in
+                 let (acc, xml) = iter acc xml in
                  (acc, xml :: acc_xmls)
               )
               (acc, []) xmls
@@ -225,15 +230,14 @@ let defaults_of_params loc params exp =
 let map_xtmpl exp =
   let loc = exp.pexp_loc in
   let file = file_path exp in
-  let (str, tmpl) = read_template loc file in
+  let tmpl = read_template loc file in
   let (params, tmpl) = gather_params loc tmpl in
   let const_tmpl = Exp.constant ~loc (Const_string (Xtmpl.string_of_xmls tmpl, None)) in
-  let lid_xml_of_string = lid loc "Xtmpl.xml_of_string" in
   let call = [%expr let (_, res) = Xtmpl.apply_to_xmls () env [tmpl_] in res] in
   let envs = Xtmpl.Name_map.fold (env_of_param loc) params call in
   let funs = funs_of_params loc params envs in
   let defaults = defaults_of_params loc params funs in
-  let exp_tmpl = [%expr let tmpl_ = [%e (Exp.ident lid_xml_of_string)] [%e const_tmpl] in [%e defaults]] in
+  let exp_tmpl = [%expr let tmpl_ = Xtmpl.xml_of_string [%e const_tmpl] in [%e defaults]] in
   exp_tmpl
 
 
