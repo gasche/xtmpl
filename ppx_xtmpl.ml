@@ -85,23 +85,123 @@ let read_template loc file =
   with
     Sys_error msg -> error loc (Printf.sprintf "File %S: %s" file msg)
 
-let gather_params xmls =
-  ([], xmls)
+type parameter =
+  { default : Xtmpl.tree list option ;
+    typ : [ `CData | `Xmls | `Other of string * string ] ;
+  }
 
-let make_funs params body =
-  body
+let string_of_name = function
+  "", s -> s
+| p, s -> Printf.sprintf "%s:%s" p s
+
+let gather_params loc xmls =
+  let rec add_param acc tag atts subs =
+    let (acc, default) =
+      match Xtmpl.get_arg_cdata atts ("","optional") with
+      | Some "true" ->
+          let (acc, subs) = iter_list acc subs in
+          (acc, Some subs)
+      | _ ->
+          (acc, None)
+    in
+    let typ =
+      match Xtmpl.get_arg_cdata atts ("","type") with
+        None | Some "cdata" -> `CData
+      | Some "xml" -> `Xmls
+      | Some typ ->
+          match Xtmpl.get_arg_cdata atts ("","to_xml") with
+            None -> error loc
+              (Printf.sprintf "Missing to_xml attribute for param %S of type %S"
+                 (string_of_name tag) typ)
+          | Some code ->
+            `Other (typ, code)
+    in
+    let acc = Xtmpl.Name_map.add tag { default ; typ } acc in
+    (acc, Xtmpl.E (tag, atts, []))
+  and iter acc xml =
+    match xml with
+      Xtmpl.D _ -> (acc, xml)
+    | Xtmpl.E (tag, atts, subs) ->
+        match Xtmpl.get_arg_cdata atts ("","param") with
+        | Some "true" -> add_param acc tag atts subs
+        | _ ->
+            let (acc, subs) = iter_list acc subs in
+            (acc, Xtmpl.E(tag,atts,subs))
+  and iter_list acc xmls =
+    let (acc, xmls) = List.fold_left
+              (fun (acc, acc_xmls) xml ->
+                 let (acc, xmls) = iter acc xml in
+                 (acc, xml :: acc_xmls)
+              )
+              (acc, []) xmls
+    in
+    (acc, List.rev xmls)
+  in
+  iter_list Xtmpl.Name_map.empty xmls
+
+let parse_ocaml_expression loc str =
+  let lexbuf = Lexing.from_string str in
+  try Parser.parse_expression Lexer.token_with_comments lexbuf
+  with e ->
+    error loc
+        (Printf.sprintf "Error while parsing the following OCaml code:\n%s\n%s"
+         str (Printexc.to_string e))
+
+let to_id = String.map
+  (function
+   | 'a'..'z' as c -> c
+   | '0'..'9' as c -> c
+   | 'A'..'Z' as c -> Char.lowercase c
+   | _ -> '_')
+
+let id_of_param_name = function
+| "", s -> to_id s
+| p,s -> to_id p ^ "_" ^ to_id s
+
+let fun_of_param loc name p body =
+  let id = id_of_param_name name in
+  let (label, default) =
+    match p.default with
+      None -> id, None
+    | Some v -> ("?"^id, None) (* FIXME: handle optional parameters *)
+  in
+  let pat = Pat.var ~loc (Location.mkloc id loc) in
+  Exp.fun_ ~loc label default pat body
+
+let funs_of_params loc params body =
+  let exp = [%expr fun () -> [%e body]] in
+  let exp = Xtmpl.Name_map.fold (fun_of_param loc) params exp in
+  [%expr fun ?(env=Xtmpl.env_empty()) -> [%e exp]]
+
+let env_of_param loc ((prefix,str) as name) p exp =
+  let e_prefix = Exp.constant (Const_string (prefix,None)) in
+  let e_str = Exp.constant (Const_string (str,None)) in
+  let id = id_of_param_name name in
+  let e_id = Exp.ident (lid loc id) in
+  let def =
+    match p.typ with
+    | `CData -> [%expr Xtmpl.env_add_att ~prefix: [%e e_prefix] [%e e_str] [Xtmpl.D [%e e_id]] env]
+    | `Xmls -> [%expr Xtmpl.env_add_att ~prefix: [%e e_prefix] [%e e_str] [%e e_id] env]
+    | `Other (typ, f)->
+        let to_xml = parse_ocaml_expression loc f in
+        [%expr let v_ = ([%e to_xml]) [%e e_id] in
+               Xtmpl.env_add_att ~prefix: [%e e_prefix] [%e e_str] v_ env]
+  in
+  [%expr let env = [%e def] in [%e exp]]
 
 let map_xtmpl exp =
   let loc = exp.pexp_loc in
   let file = file_path exp in
   let (str, tmpl) = read_template loc file in
-  let (params, tmpl) = gather_params tmpl in
-  let const_tmpl = Exp.constant ~loc (Const_string (str, None)) in
+  let (params, tmpl) = gather_params loc tmpl in
+  let const_tmpl = Exp.constant ~loc (Const_string (Xtmpl.string_of_xmls tmpl, None)) in
   let lid_xml_of_string = lid loc "Xtmpl.xml_of_string" in
-  let body = assert false in
-  let funs = make_funs params body in
+  let call = [%expr let (_, res) = Xtmpl.apply_to_xmls () env [tmpl_] in res] in
+  let envs = Xtmpl.Name_map.fold (env_of_param loc) params call in
+  let body = envs in
+  let funs = funs_of_params loc params body in
   let exp_tmpl = [%expr let tmpl_ = [%e (Exp.ident lid_xml_of_string)] [%e const_tmpl] in [%e funs]] in
-  assert false
+  exp_tmpl
 
 
 let getenv_mapper argv =
