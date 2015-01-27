@@ -57,8 +57,8 @@ let string_of_file name =
   Buffer.contents buf
 (*/c==v=[File.string_of_file]=1.1====*)
 
-let error loc msg =
-  raise (Location.Error (Location.error ~loc msg))
+let error loc msg = raise (Location.Error (Location.error ~loc msg))
+let kerror loc = Printf.ksprintf (error loc)
 
 let file_path exp =
   let loc = exp.pexp_loc in
@@ -155,7 +155,15 @@ let parse_ocaml_expression loc str =
   try Parser.parse_expression Lexer.token_with_comments lexbuf
   with e ->
     error loc
-        (Printf.sprintf "Error while parsing the following OCaml code:\n%s\n%s"
+        (Printf.sprintf "Error while parsing the following OCaml expression:\n%s\n%s"
+         str (Printexc.to_string e))
+
+let parse_ocaml_type loc str =
+  let lexbuf = Lexing.from_string str in
+  try Parser.parse_core_type Lexer.token_with_comments lexbuf
+  with e ->
+    error loc
+        (Printf.sprintf "Error while parsing the following OCaml type:\n%s\n%s"
          str (Printexc.to_string e))
 
 let to_id = String.map
@@ -182,14 +190,14 @@ let fun_of_param loc name p body =
           | `CData, [] -> Exp.constant (Const_string ("", None))
           | `CData, _ ->
               error loc
-                (Printf.sprintf "Parameter %s should have CData default value"
+                (Printf.sprintf "Parameter %S should have CData default value"
                  (string_of_name name))
           | `Xmls, xmls -> Exp.ident (lid loc ("__default_"^id))
           | `Other _, [Xtmpl.D code] ->
               parse_ocaml_expression loc code
           | `Other _, _ ->
               error loc
-                (Printf.sprintf "Parameter %s should have OCaml code as default value (given as CDATA)"
+                (Printf.sprintf "Parameter %S should have OCaml code as default value (given as CDATA)"
                  (string_of_name name))
         in
         (label, Some def)
@@ -243,18 +251,19 @@ let map_tmpl loc tmpl =
   let exp_tmpl = [%expr let tmpl_ = Xtmpl.xml_of_string [%e const_tmpl] in [%e defaults]] in
   exp_tmpl
 
+let template_of_inline_string loc node exp =
+  match exp.pexp_desc with
+  | Pexp_constant (Const_string (str, _)) ->
+      begin
+        match Xtmpl.xml_of_string str with
+          Xtmpl.E(_,_,xmls) -> xmls
+        | _ -> assert false
+      end
+  | _ -> kerror loc "String constant expected in %s extension node" node
+
 let map_xtmpl_string exp =
   let loc = exp.pexp_loc in
-  let tmpl =
-    match exp.pexp_desc with
-    | Pexp_constant (Const_string (str, _)) ->
-        begin
-          match Xtmpl.xml_of_string str with
-            Xtmpl.E(_,_,xmls) -> xmls
-          | _ -> assert false
-        end
-    | _ -> error loc "String constant expected in %xtmpl.string extension node"
-  in
+  let tmpl = template_of_inline_string loc "xtmpl.string" exp in
   map_tmpl loc tmpl
 
 let map_xtmpl exp =
@@ -263,29 +272,76 @@ let map_xtmpl exp =
   let tmpl = read_template loc file in
   map_tmpl loc tmpl
 
+let typ_of_params loc params =
+  let f name p acc =
+    let opt = p.default <> None in
+    let label = Printf.sprintf "%s%s"
+      (if opt then "?" else "")
+      (id_of_param_name name)
+    in
+    let typ =
+      let str = match p.typ with
+        | `CData -> "string"
+        | `Xmls -> "Xtmpl.tree list"
+        | `Other (typ, _) -> typ
+      in
+      let typ = parse_ocaml_type loc str in
+      if opt then
+        let lid_option = Location.mkloc (Ldot (Lident "*predef*","option")) loc in
+        Typ.constr lid_option [typ]
+      else
+        typ
+    in
+    Typ.arrow label typ acc
+  in
+  let typ = Xtmpl.Name_map.fold f params [%type: unit -> Xtmpl.tree list] in
+  [%type: ?env: unit Xtmpl.env -> [%t typ] ]
+
+let map_xtmpl_string_type exp =
+  let loc = exp.pexp_loc in
+  let tmpl = template_of_inline_string loc "xtmpl.string.type" exp in
+  let (params, tmpl) = gather_params loc tmpl in
+  typ_of_params loc params
+
+let typ_mapper mapper typ =
+  match typ.ptyp_desc with
+  | Ptyp_extension ({ txt = "xtmpl.string.type" ; loc }, pstr) ->
+      begin
+        match pstr with
+        | PStr [{ pstr_desc = Pstr_eval (exp, _) }] ->
+            (* we expect an expression *)
+            map_xtmpl_string_type exp
+        | _ ->
+            error loc "[%xtmpl.string.type] accepts a string"
+      end
+  | _ -> default_mapper.typ mapper typ
+
+let expr_mapper mapper expr =
+  match expr with
+  | { pexp_desc = Pexp_extension ({ txt = "xtmpl"; loc }, pstr)} ->
+      begin
+        match pstr with
+        | PStr [{ pstr_desc = Pstr_eval (exp, _) }] ->
+            (* we expect an expression *)
+            map_xtmpl exp
+        | _ ->
+            error loc "[%xtmpl] accepts a string"
+      end
+  | { pexp_desc = Pexp_extension ({ txt = "xtmpl.string"; loc }, pstr)} ->
+      begin
+        match pstr with
+        | PStr [{ pstr_desc = Pstr_eval (exp, _) }] ->
+            (* we expect an expression *)
+            map_xtmpl_string exp
+        | _ ->
+            error loc "[%xtmpl.string] accepts a string"
+      end
+  | x -> default_mapper.expr mapper x
+
 let xtmpl_mapper argv =
   { default_mapper with
-    expr = fun mapper expr ->
-      match expr with
-      | { pexp_desc = Pexp_extension ({ txt = "xtmpl"; loc }, pstr)} ->
-          begin
-            match pstr with
-            | PStr [{ pstr_desc = Pstr_eval (exp, _) }] ->
-                (* we expect an expression *)
-                map_xtmpl exp
-            | _ ->
-                error loc "[%xtmpl] accepts a string"
-          end
-      | { pexp_desc = Pexp_extension ({ txt = "xtmpl.string"; loc }, pstr)} ->
-          begin
-            match pstr with
-            | PStr [{ pstr_desc = Pstr_eval (exp, _) }] ->
-                (* we expect an expression *)
-                map_xtmpl_string exp
-            | _ ->
-                error loc "[%xtmpl.string] accepts a string"
-          end
-      | x -> default_mapper.expr mapper x;
+    typ = typ_mapper ;
+    expr = expr_mapper ;
   }
 
 let () = register "xtmpl" xtmpl_mapper
