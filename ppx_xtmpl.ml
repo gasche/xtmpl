@@ -263,7 +263,7 @@ let map_xtmpl exp =
   let tmpl = read_template loc file in
   map_tmpl loc tmpl
 
-let getenv_mapper argv =
+let xtmpl_mapper argv =
   { default_mapper with
     expr = fun mapper expr ->
       match expr with
@@ -288,4 +288,4 @@ let getenv_mapper argv =
       | x -> default_mapper.expr mapper x;
   }
 
-let () = register "xtmpl" getenv_mapper
+let () = register "xtmpl" xtmpl_mapper
