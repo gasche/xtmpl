@@ -233,10 +233,7 @@ let defaults_of_params loc params exp =
   in
   Xtmpl.Name_map.fold f params exp
 
-let map_xtmpl exp =
-  let loc = exp.pexp_loc in
-  let file = file_path exp in
-  let tmpl = read_template loc file in
+let map_tmpl loc tmpl =
   let (params, tmpl) = gather_params loc tmpl in
   let const_tmpl = Exp.constant ~loc (Const_string (Xtmpl.string_of_xmls tmpl, None)) in
   let call = [%expr let (_, res) = Xtmpl.apply_to_xmls () env [tmpl_] in res] in
@@ -246,6 +243,25 @@ let map_xtmpl exp =
   let exp_tmpl = [%expr let tmpl_ = Xtmpl.xml_of_string [%e const_tmpl] in [%e defaults]] in
   exp_tmpl
 
+let map_xtmpl_string exp =
+  let loc = exp.pexp_loc in
+  let tmpl =
+    match exp.pexp_desc with
+    | Pexp_constant (Const_string (str, _)) ->
+        begin
+          match Xtmpl.xml_of_string str with
+            Xtmpl.E(_,_,xmls) -> xmls
+          | _ -> assert false
+        end
+    | _ -> error loc "String constant expected in %xtmpl.string extension node"
+  in
+  map_tmpl loc tmpl
+
+let map_xtmpl exp =
+  let loc = exp.pexp_loc in
+  let file = file_path exp in
+  let tmpl = read_template loc file in
+  map_tmpl loc tmpl
 
 let getenv_mapper argv =
   { default_mapper with
@@ -259,6 +275,15 @@ let getenv_mapper argv =
                 map_xtmpl exp
             | _ ->
                 error loc "[%xtmpl] accepts a string"
+          end
+      | { pexp_desc = Pexp_extension ({ txt = "xtmpl.string"; loc }, pstr)} ->
+          begin
+            match pstr with
+            | PStr [{ pstr_desc = Pstr_eval (exp, _) }] ->
+                (* we expect an expression *)
+                map_xtmpl_string exp
+            | _ ->
+                error loc "[%xtmpl.string] accepts a string"
           end
       | x -> default_mapper.expr mapper x;
   }

@@ -24,9 +24,10 @@
 (************************************************************************************)
 
 let page = [%xtmpl "page.tmpl"]
+let h2 = [%xtmpl.string {|<h2><foo param_="true"/></h2>|} ]
 
 let p = page ~page_title: "The page title"
-  ~contents: [Xtmpl.D "Hello world !"]
+  ~contents: (h2 ~foo: "Hello world !" ())
   ~value: 3
   ()
 let () = print_endline (Xtmpl.string_of_xmls p)

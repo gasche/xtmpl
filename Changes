@@ -2,6 +2,7 @@ Release 0.11:
 - add ppx_xtmpl: this preprocessor creates function from template
   files, with the parameter described in the template.
   Usage: let doc = [%xtmpl "file.xml"]
+         let doc = [%xtmpl.string {| <div>...</div> |} ]
 
 Release 0.10:
   - use safe-string mode
