@@ -96,12 +96,12 @@ let string_of_name = function
 
 let prune_param_atts =
   List.fold_right Xtmpl.atts_remove
-    [ "", "param" ; "", "optional" ; "", "type" ; "", "to_xml"]
+    [ "", "param_" ; "", "optional_" ; "", "type_" ; "", "to_xml_"]
 
 let gather_params loc xmls =
   let rec add_param acc tag atts subs =
     let (acc, default) =
-      match Xtmpl.get_arg_cdata atts ("","optional") with
+      match Xtmpl.get_arg_cdata atts ("","optional_") with
       | Some "true" ->
           let (acc, subs) = iter_list acc subs in
           (acc, Some subs)
@@ -109,11 +109,11 @@ let gather_params loc xmls =
           (acc, None)
     in
     let typ =
-      match Xtmpl.get_arg_cdata atts ("","type") with
+      match Xtmpl.get_arg_cdata atts ("","type_") with
         None | Some "cdata" -> `CData
       | Some "xml" -> `Xmls
       | Some typ ->
-          match Xtmpl.get_arg_cdata atts ("","to_xml") with
+          match Xtmpl.get_arg_cdata atts ("","to_xml_") with
             None -> error loc
               (Printf.sprintf "Missing to_xml attribute for param %S of type %S"
                  (string_of_name tag) typ)
@@ -127,7 +127,7 @@ let gather_params loc xmls =
     match xml with
       Xtmpl.D _ -> (acc, xml)
     | Xtmpl.E (tag, atts, subs) ->
-        match Xtmpl.get_arg_cdata atts ("","param") with
+        match Xtmpl.get_arg_cdata atts ("","param_") with
         | Some "true" -> add_param acc tag atts subs
         | _ ->
             let (acc, atts) = iter_atts acc atts in

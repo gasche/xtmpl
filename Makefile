@@ -62,6 +62,16 @@ ppx_xtmpl.byte: ppx_xtmpl.ml
 	$(OCAMLFIND) ocamlc -o $@ -package ppx_tools.metaquot,str,$(PACKAGES) \
 	$(COMPFLAGS) -linkpkg xtmpl.cmo $<
 
+.PHONY: test_ppx_xtmpl
+
+test: test_ppx_xtmpl
+
+test_ppx_xtmpl: ppx_xtmpl test_ppx_xtmpl.ml
+	$(OCAMLFIND) ocamlopt -o $@ -dsource -rectypes -package xmlm,str -linkpkg \
+	-ppx ./ppx_xtmpl xtmpl.cmx test_ppx_xtmpl.ml
+	@echo "======"
+	./$@
+
 ##########
 .PHONY: doc
 doc:
