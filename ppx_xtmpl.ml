@@ -111,7 +111,8 @@ let gather_params loc xmls =
     let typ =
       match Xtmpl.get_arg_cdata atts ("","type_") with
         None | Some "cdata" -> `CData
-      | Some "xml" -> `Xmls
+      | Some "xml"
+      | Some "xmls" -> `Xmls
       | Some typ ->
           match Xtmpl.get_arg_cdata atts ("","to_xml_") with
             None -> error loc
