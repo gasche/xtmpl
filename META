@@ -5,6 +5,6 @@ archive(toploop) = "xtmpl.cmo"
 archive(byte) = "xtmpl.cmo"
 archive(native) = "xtmpl.cmx"
 archive(native,plugin) = "xtmpl.cmxs"
-ppx(native)="./ppx_xtmpl"
+ppx(-byte)="./ppx_xtmpl"
 ppx(byte)="./ppx_xtmpl.byte"
 
