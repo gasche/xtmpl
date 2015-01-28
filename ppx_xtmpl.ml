@@ -86,8 +86,10 @@ let read_template loc file =
     Sys_error msg -> error loc (Printf.sprintf "File %S: %s" file msg)
 
 type parameter =
-  { default : Xtmpl.tree list option ;
+  { name : Xtmpl.name ;
+    default : Xtmpl.tree list option ;
     typ : [ `CData | `Xmls | `Other of string * string ] ;
+    mlname : string option ;
   }
 
 let string_of_name = function
@@ -96,7 +98,7 @@ let string_of_name = function
 
 let prune_param_atts =
   List.fold_right Xtmpl.atts_remove
-    [ "", "param_" ; "", "optional_" ; "", "type_" ; "", "to_xml_"]
+    [ "", "param_" ; "", "optional_" ; "", "type_" ; "", "to_xml_" ; "name_"]
 
 let gather_params loc xmls =
   let rec add_param acc tag atts subs =
@@ -121,7 +123,8 @@ let gather_params loc xmls =
           | Some code ->
             `Other (typ, code)
     in
-    let acc = Xtmpl.Name_map.add tag { default ; typ } acc in
+    let mlname = Xtmpl.get_arg_cdata atts ("", "name_") in
+    let acc = Xtmpl.Name_map.add tag { name = tag ; default ; typ ; mlname } acc in
     let atts = prune_param_atts atts in
     (acc, Xtmpl.E (tag, atts, []))
   and iter acc xml =
@@ -174,12 +177,16 @@ let to_id = String.map
    | 'A'..'Z' as c -> Char.lowercase c
    | _ -> '_')
 
-let id_of_param_name = function
-| "", s -> to_id s
-| p,s -> to_id p ^ "_" ^ to_id s
+let ml_id_of_param p =
+  match p.mlname with
+    Some s -> s
+  | None ->
+      match p.name with
+      | "", s -> to_id s
+      | p,s -> to_id p ^ "_" ^ to_id s
 
 let fun_of_param loc name p body =
-  let id = id_of_param_name name in
+  let id = ml_id_of_param p in
   let label =
     match p.default with
       None -> id
@@ -198,7 +205,7 @@ let env_or_defaults loc params exp =
     let (prefix, str) = name in
     let e_prefix = Exp.constant (Const_string (prefix,None)) in
     let e_str = Exp.constant (Const_string (str,None)) in
-    let id = id_of_param_name name in
+    let id = ml_id_of_param p in
     let e_id = Exp.ident (lid loc id) in
     let e_name =
       let (p,s) = name in
@@ -239,12 +246,9 @@ let env_or_defaults loc params exp =
             match [%e e_id] with
               Some v -> [%e add_to_env (Exp.ident (lid loc "v"))]
             | None ->
-                let xmls = [Xtmpl.E([%e e_name], Xtmpl.atts_empty, [])] in
-                if xmls <> snd (Xtmpl.apply_to_xmls () env xmls) then
-                  env
-                else
-                  [%e add_to_env (default_def default_xmls)]
-
+                match Xtmpl.env_get [%e e_name] env with
+                  Some _ -> env
+                | None -> [%e add_to_env (default_def default_xmls)]
           in
           [%e exp]
         ]
@@ -256,7 +260,7 @@ let defaults_of_params loc params exp =
     match p.typ, p.default with
     | `Xmls, Some xmls ->
         let const_tmpl = Exp.constant ~loc (Const_string (Xtmpl.string_of_xmls xmls, None)) in
-        let id = "__default_"^(id_of_param_name name) in
+        let id = "__default_"^(ml_id_of_param p) in
         Exp.let_ Nonrecursive
           [Vb.mk (Pat.var (Location.mkloc id loc))
             [%expr [Xtmpl.xml_of_string [%e const_tmpl]]]
@@ -303,7 +307,7 @@ let typ_of_params loc params =
     let opt = p.default <> None in
     let label = Printf.sprintf "%s%s"
       (if opt then "?" else "")
-      (id_of_param_name name)
+      (ml_id_of_param p)
     in
     let typ =
       let str = match p.typ with
