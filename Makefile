@@ -39,10 +39,10 @@ CP=cp -f
 MKDIR=mkdir -p
 
 LIB=xtmpl.cmxa
-LIB_CMXS=$(LIB:.cmxa:.cmxs)
-LIB_A=$(LIB:.cmxa:.a)
+LIB_CMXS=$(LIB:.cmxa=.cmxs)
+LIB_A=$(LIB:.cmxa=.a)
 LIB_BYTE=$(LIB:.cmxa=.cma)
-LIB_CMI=$(LIB:.cmxa:.cmi)
+LIB_CMI=$(LIB:.cmxa=.cmi)
 
 LIB_CMXFILES=xtmpl.cmx xtmpl_xhtml.cmx
 LIB_CMOFILES=$(LIB_CMXFILES:.cmx=.cmo)
@@ -105,7 +105,8 @@ webdoc: doc
 ##########
 install: xtmpl.cmo xtmpl.cmx
 	$(OCAMLFIND) install xtmpl META LICENSE \
-		xtmpl.cmi xtmpl.mli xtmpl.cmo xtmpl.cmx xtmpl.cmxs xtmpl.o \
+		$(LIB) $(LIB_CMXS) $(LIB_OFILES) $(LIB_CMXFILES) $(LIB_A) \
+		$(LIB_BYTE) $(LIB_CMIFILES) \
 		ppx_xtmpl ppx_xtmpl.byte
 
 uninstall:

@@ -214,12 +214,12 @@ let env_or_defaults loc params exp =
     in
     let add_to_env exp =
       match p.typ with
-      | `CData -> [%expr Xtmpl.env_add_att ~prefix: [%e e_prefix] [%e e_str] [Xtmpl.D [%e exp]] env]
-      | `Xmls -> [%expr Xtmpl.env_add_att ~prefix: [%e e_prefix] [%e e_str] [%e exp] env]
+      | `CData -> [%expr Xtmpl.env_add_xml ~prefix: [%e e_prefix] [%e e_str] [Xtmpl.D [%e exp]] env]
+      | `Xmls -> [%expr Xtmpl.env_add_xml ~prefix: [%e e_prefix] [%e e_str] [%e exp] env]
       | `Other (typ, f)->
           let to_xml = parse_ocaml_expression loc f in
           [%expr let v_ = ([%e to_xml]) [%e exp] in
-            Xtmpl.env_add_att ~prefix: [%e e_prefix] [%e e_str] v_ env]
+            Xtmpl.env_add_xml ~prefix: [%e e_prefix] [%e e_str] v_ env]
     in
     let default_def v =
       match p.typ, v with
