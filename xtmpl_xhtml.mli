@@ -127,7 +127,10 @@ val del : elt_fun
 
 (** {2 Embedding resources} *)
 
+val embed : elt_fun
+val object_ : elt_fun
 val img : elt_fun
+val audio : elt_fun
 val video : elt_fun
 val source : elt_fun
 

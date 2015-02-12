@@ -141,8 +141,12 @@ let wbr = elt "wbr" []
 let ins = elt "ins"
 let del = elt "del"
 
+let embed = elt "embed"
+let object_ = elt "object"
 let img = elt "img"
+let audio = elt "audio"
 let video = elt "video"
+let source = elt "source"
 
 let table = elt "table"
 let caption = elt "caption"
