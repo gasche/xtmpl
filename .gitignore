@@ -1,5 +1,6 @@
 *.cm*
 *.o
+*.a
 *.annot
 .chamo*
 doc

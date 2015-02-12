@@ -38,29 +38,46 @@ RM=rm -f
 CP=cp -f
 MKDIR=mkdir -p
 
+LIB=xtmpl.cmxa
+LIB_CMXS=$(LIB:.cmxa:.cmxs)
+LIB_A=$(LIB:.cmxa:.a)
+LIB_BYTE=$(LIB:.cmxa=.cma)
+LIB_CMI=$(LIB:.cmxa:.cmi)
+
+LIB_CMXFILES=xtmpl.cmx xtmpl_xhtml.cmx
+LIB_CMOFILES=$(LIB_CMXFILES:.cmx=.cmo)
+LIB_CMIFILES=$(LIB_CMXFILES:.cmx=.cmi)
+LIB_OFILES=$(LIB_CMXFILES:.cmx=.o)
+
 all: byte opt
-byte: xtmpl.cmo ppx_xtmpl.byte
-opt: xtmpl.cmx xtmpl.cmxs ppx_xtmpl
+byte: $(LIB_BYTE) ppx_xtmpl.byte
+opt: $(LIB) $(LIB_CMXS) ppx_xtmpl
 
-xtmpl.cmx: xtmpl.cmi xtmpl.ml
-	$(OCAMLFIND) ocamlopt -c -package $(PACKAGES) $(COMPFLAGS) xtmpl.ml
+$(LIB): $(LIB_CMIFILES) $(LIB_CMXFILES)
+	$(OCAMLFIND) ocamlopt -o $@ -a -package $(PACKAGES) $(LIB_CMXFILES)
 
-xtmpl.cmxs: xtmpl.cmx
-	$(OCAMLFIND) ocamlopt -shared -o $@ -package $(PACKAGES) $(COMPFLAGS) xtmpl.cmx
+$(LIB_CMXS): $(LIB_CMIFILES) $(LIB_CMXFILES)
+	$(OCAMLFIND) ocamlopt -shared -o $@ -package $(PACKAGES) $(LIB_CMXFILES)
 
-xtmpl.cmo: xtmpl.cmi xtmpl.ml
-	$(OCAMLFIND) ocamlc -c -package $(PACKAGES) $(COMPFLAGS) xtmpl.ml
+$(LIB_BYTE): $(LIB_CMIFILES) $(LIB_CMOFILES)
+	$(OCAMLFIND) ocamlc -o $@ -a -package $(PACKAGES) $(LIB_CMOFILES)
 
-xtmpl.cmi: xtmpl.mli
+%.cmx: %.ml %.cmi
+	$(OCAMLFIND) ocamlopt -c -package $(PACKAGES) $(COMPFLAGS) $<
+
+%.cmo: %.ml %.cmi
 	$(OCAMLFIND) ocamlc -c -package $(PACKAGES) $(COMPFLAGS) $<
 
-ppx_xtmpl: ppx_xtmpl.ml
-	$(OCAMLFIND) ocamlopt -o $@ -package ppx_tools.metaquot,str,$(PACKAGES) \
-	$(COMPFLAGS) -linkpkg xtmpl.cmx $<
+%.cmi: %.mli
+	$(OCAMLFIND) ocamlc -c -package $(PACKAGES) $(COMPFLAGS) $<
 
-ppx_xtmpl.byte: ppx_xtmpl.ml
+ppx_xtmpl: $(LIB) ppx_xtmpl.ml
+	$(OCAMLFIND) ocamlopt -o $@ -package ppx_tools.metaquot,str,$(PACKAGES) \
+	$(COMPFLAGS) -linkpkg $(LIB) ppx_xtmpl.ml
+
+ppx_xtmpl.byte: $(LIB_BYTE) ppx_xtmpl.ml
 	$(OCAMLFIND) ocamlc -o $@ -package ppx_tools.metaquot,str,$(PACKAGES) \
-	$(COMPFLAGS) -linkpkg xtmpl.cmo $<
+	$(COMPFLAGS) -linkpkg $(LIB_BYTE) ppx_xtmpl.ml
 
 .PHONY: test_ppx_xtmpl
 
@@ -76,7 +93,8 @@ test_ppx_xtmpl: ppx_xtmpl test_ppx_xtmpl.ml
 .PHONY: doc
 doc:
 	$(MKDIR) doc
-	$(OCAMLFIND) ocamldoc -package $(PACKAGES) xtmpl.mli -t Xtmpl -d doc -html
+	$(OCAMLFIND) ocamldoc -package $(PACKAGES) xtmpl.mli xtmpl_xhtml.mli \
+	-rectypes -t Xtmpl -d doc -html
 
 webdoc: doc
 	$(MKDIR) ../xtmpl-gh-pages/refdoc
