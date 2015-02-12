@@ -110,13 +110,13 @@ let file_of_string ~file s =
 
 module Str_map = Map.Make (struct type t = string * string let compare = compare end);;
 
-let tag_main = "main_";;
-let tag_env = "env_";;
-let att_defer = "defer_";;
-let att_escamp = "escamp_";;
-let att_protect = "protect_";;
+let tag_main = "main_"
+let tag_env = "env_"
+let att_defer = "defer_"
+let att_escamp = "escamp_"
+let att_protect = "protect_"
 
-let re_escape = Str.regexp "&\\(\\([a-z]+\\)\\|\\(#[0-9]+\\)\\);";;
+let re_escape = Str.regexp "&\\(\\([a-z]+\\)\\|\\(#[0-9]+\\)\\);"
 let escape_ampersand s =
   let len = String.length s in
   let b = Buffer.create len in
@@ -128,10 +128,9 @@ let escape_ampersand s =
     | c -> Buffer.add_char b c
   done;
   Buffer.contents b
-;;
 
-let re_amp = Str.regexp_string "&amp;";;
-let unescape_ampersand s = Str.global_replace re_amp "&" s;;
+let re_amp = Str.regexp_string "&amp;"
+let unescape_ampersand s = Str.global_replace re_amp "&" s
 
 
 exception No_change
@@ -143,7 +142,7 @@ module Name_ord = struct
       0 -> String.compare p1 p2
     | n -> n
   end
-;;
+
 module Name_map = Map.Make (Name_ord)
 module Name_set = Set.Make (Name_ord)
 
@@ -184,17 +183,14 @@ let gen_atts_to_escape =
           Name_set.empty
           l
 
-;;
-
-let atts_to_escape = gen_atts_to_escape (fun x -> x);;
+let atts_to_escape = gen_atts_to_escape (fun x -> x)
 let xml_atts_to_escape = gen_atts_to_escape
   (function [D s] -> s
-   | _ -> failwith ("Invalid value for attribute "^att_escamp));;
+   | _ -> failwith ("Invalid value for attribute "^att_escamp))
 
-let get_arg args name =
-  try Some (Name_map.find name args)
+let get_att atts name =
+  try Some (Name_map.find name atts)
   with Not_found -> None
-;;
 
 (* This function only unescape some common named entities
   and characters with code between 0 and 255. *)
@@ -227,7 +223,6 @@ let unescape_entities =
         | _ -> matched
   in
   fun s -> Str.global_substitute re f s
-;;
 
 let rec string_of_xml ?xml_atts tree =
   try
@@ -264,14 +259,13 @@ and string_of_xml_atts ?(xml_atts=true) atts =
             (name, s) :: acc
       in
       List.rev (Name_map.fold f atts [])
-;;
 
-let get_arg_cdata args name =
-  match get_arg args name with
+let get_att_cdata atts name =
+  match get_att atts name with
   | Some [D s] -> Some s
   | Some xmls -> Some (string_of_xmls xmls)
   | _ -> None
-;;
+
 
 let string_of_stack l =
   let b = Buffer.create 256 in
@@ -290,22 +284,20 @@ let string_of_stack l =
   in
   List.iter f (List.rev l);
   Buffer.contents b
-;;
 
-let env_add ?(prefix="") name = Str_map.add (prefix, name) ;;
+let env_add_cb ?(prefix="") name = Str_map.add (prefix, name)
+
 let env_get k env =
   try Some (Str_map.find k env)
   with Not_found -> None
-;;
+
 let env_empty () =
   let (f_main : 'a callback) = fun data env atts subs -> (data, subs) in
-  env_add tag_main f_main Str_map.empty
-;;
+  env_add_cb tag_main f_main Str_map.empty
 
 let limit =
   try Some (int_of_string (Sys.getenv "XTMPL_FIXPOINT_LIMIT"))
   with _ -> None
-;;
 
 let rec fix_point_snd ?(n=0) f (data, x) =
   match limit with
@@ -316,7 +308,6 @@ let rec fix_point_snd ?(n=0) f (data, x) =
       (*let file = Printf.sprintf "/tmp/fixpoint%d.txt" n in
       file_of_string ~file (string_of_xmls y);*)
       if y = x then (data, x) else fix_point_snd ~n: (n+1) f (data, y)
-;;
 
 let string_of_env env =
   let f (prefix, name) _ acc =
@@ -328,7 +319,6 @@ let string_of_env env =
     s :: acc
   in
   String.concat ", " (Str_map.fold f env [])
-;;
 
 let rec xml_of_source s_source source =
  try
@@ -375,7 +365,6 @@ and xml_of_string ?(add_main=true) s =
       s
   in
   xml_of_source (s^"\n") (`String (0, s))
-;;
 
 let xml_of_file file =
   let ic = open_in file in
@@ -389,16 +378,12 @@ let xml_of_file file =
     e ->
       close_in ic;
       raise e
-;;
 
-let env_add_att ?prefix a v env =
-  env_add ?prefix a (fun data _ _ _ -> data, v) env
-;;
-
-
+let env_add_xml ?prefix a v env =
+  env_add_cb ?prefix a (fun data _ _ _ -> data, v) env
 
 let protect_in_env env atts =
-  match get_arg atts ("", att_protect) with
+  match get_att atts ("", att_protect) with
     None -> env
   | Some [D s] ->
       let f env s =
@@ -411,12 +396,10 @@ let protect_in_env env atts =
       in
       List.fold_left f env (split_string s [',' ; ';'])
   | _ -> failwith ("Invalid value for attribute "^att_protect)
-;;
 
 let max_rewrite_depth =
   try int_of_string (Sys.getenv "XTMPL_REWRITE_DEPTH_LIMIT")
   with _ -> 100
-;;
 
 let push stack tag atts subs =
   let stack = (tag, atts, subs) :: stack in
@@ -424,7 +407,6 @@ let push stack tag atts subs =
     raise (Loop stack)
   else
     stack
-;;
 
 let rec eval_env stack data env atts subs =
 (*  prerr_endline
@@ -434,7 +416,7 @@ let rec eval_env stack data env atts subs =
   let env = Name_map.fold
     (fun (prefix,s) v acc ->
        (*       prerr_endline (Printf.sprintf "env: %s=%s" s v);*)
-       env_add_att ~prefix s v acc)
+       env_add_xml ~prefix s v acc)
       atts env
   in
   eval_xmls stack data env subs
@@ -498,7 +480,7 @@ and eval_xml stack data env = function
                )
               );*)
             let (defer,atts) =
-              match get_arg_cdata atts ("",att_defer) with
+              match get_att_cdata atts ("",att_defer) with
                 None -> (0, atts)
               | Some s ->
                   try
@@ -543,7 +525,6 @@ and (eval_string : rewrite_stack -> 'a -> 'a env -> string -> 'a * string) =
     let xml = xml_of_string s in
     let (data, xmls) = eval_xml stack data env xml in
     (data, string_of_xmls xmls)
-;;
 
 let merge_cdata_list =
   let rec f acc = function
@@ -555,32 +536,27 @@ let merge_cdata_list =
       f ((E (t, atts, subs)) :: acc) q
   in
   f []
-;;
+
 let merge_cdata t =
   match t with
   | D _ -> t
   | E (tag, atts, subs) -> E (tag, atts, merge_cdata_list subs)
-;;
-
 
 let apply_to_xmls data env xmls =
   (*prerr_endline (string_of_env env);*)
   let f (data, xmls) = eval_xmls [] data env xmls in
   fix_point_snd f (data, xmls)
-;;
 
 let apply_to_xml data env xml = apply_to_xmls data env [xml] ;;
 
 let (apply_to_string : 'a -> 'a env -> string -> 'a * tree list) = fun data env s ->
   let xml = xml_of_string s in
   apply_to_xml data env xml
-;;
 
 let apply_to_file data env file =
   let s = string_of_file file in
   let xml = xml_of_string s in
   apply_to_xml data env xml
-;;
 
 let apply_into_file data ?head env ~infile ~outfile =
   let (data, xmls) = apply_to_file data env infile in
@@ -588,7 +564,6 @@ let apply_into_file data ?head env ~infile ~outfile =
   let s = match head with None -> s | Some h -> h^s in
   file_of_string ~file: outfile s;
   data
-;;
 
 let apply_string_into_file data ?head env ~outfile s =
   let (data, xmls) = apply_to_string data env s in
@@ -596,10 +571,8 @@ let apply_string_into_file data ?head env ~outfile s =
   let s = match head with None -> s | Some h -> h^s in
   file_of_string ~file: outfile s;
   data
-;;
 
-
-let string_of_args args =
+let string_of_atts atts =
   String.concat " "
     (Name_map.fold
      (fun (pref,s) v acc ->
@@ -608,30 +581,33 @@ let string_of_args args =
         in
         s :: acc
      )
-       args []
+       atts []
     )
-;;
 
 let env_of_list ?(env=env_empty()) l =
-  List.fold_right (fun ((prefix,name), f) env -> env_add ~prefix name f env) l env
+  List.fold_right (fun ((prefix,name), f) env -> env_add_cb ~prefix name f env) l env
 ;;
 
-let opt_arg args ?(def=[]) name =
-  match get_arg args name with None -> def | Some s -> s
-;;
+let opt_att atts ?(def=[]) name =
+  match get_att atts name with None -> def | Some s -> s
 
-
-let opt_arg_cdata args ?(def="") name =
-  match get_arg_cdata args name with None -> def | Some s -> s
-;;
+let opt_att_cdata atts ?(def="") name =
+  match get_att_cdata atts name with None -> def | Some s -> s
 
 let atts_of_list =
   let f acc (name,v) = Name_map.add name v acc in
   fun ?(atts=atts_empty) l -> List.fold_left f atts l
-;;
 
 let atts_one ?(atts=atts_empty) name v = Name_map.add name v atts;;
 let atts_replace = Name_map.add;;
 let atts_remove = Name_map.remove;;
 
+(* deprecated stuff *)
 
+let get_arg = get_att
+let get_arg_cdata = get_att_cdata
+let opt_arg = opt_att
+let opt_arg_cdata = opt_att_cdata
+let string_of_args = string_of_atts
+let env_add = env_add_cb
+let env_add_att = env_add_xml

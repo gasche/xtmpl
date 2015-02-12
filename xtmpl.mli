@@ -32,9 +32,7 @@
     {!section:engine} section below.
 *)
 
-(** This exception can be raised by callbacks to indicate that the
-  node to be rewritten remains unchanged. *)
-exception No_change
+(** {2 XML trees} *)
 
 (** A name is a pair [(prefix, s)], where prefix can be the empty string.
   When the prefix is not empty, it corresponds to the notation [prefix:foo]
@@ -49,40 +47,12 @@ module Name_map : Map.S with type key = name
 (** Sets of names. *)
 module Name_set : Set.S with type elt = name
 
-type 'a env
-and 'a callback = 'a -> 'a env -> attributes -> tree list -> 'a * tree list
-  (** A ['a callback] takes data of type ['a], a ['a env], attributes and XML nodes.
-    It returns a potentially new data of type ['a] and XML nodes. The attributes are
-    the attributes of the node being rewritten, and the XML trees in parameter are the
-    XML children of this node. The environment must be a ['a env] so that
-    if can be used in the callback to perform rewriting, returning a
-    new data of type ['a]. *)
-
-and tree =
+type tree =
     E of name * attributes * tree list
   | D of string
 and attributes = tree list Name_map.t
   (** Attributes of a XML node. Note that the content value of an attribute is
       a list of XML trees, not just a string. *)
-
-(** Recursively merge sibling [D] nodes into one [D] node. *)
-val merge_cdata : tree -> tree
-
-(** Same as {!merge_cdata} but taking a {!tree} list. *)
-val merge_cdata_list : tree list -> tree list
-
-(** To catch eventual infinite loops in rewriting, we keep a
-  stack of the rules called. *)
-type rewrite_stack = (name * attributes * tree list) list
-
-(** The [Loop] exception is raised when the rewrite stack
-  is higher than a default value of 100. This value can be changed
-  by setting the [XTMPL_REWRITE_DEPTH_LIMIT] environment variable.
-  Default value is [100]. *)
-exception Loop of  rewrite_stack
-
-(** String representation of the given rewrite stack. *)
-val string_of_stack : rewrite_stack -> string
 
 (** {2 Attributes}
 
@@ -108,48 +78,66 @@ val atts_remove : name -> attributes -> attributes
 (** [atts_replace name xmls attributes] adds a new bindings from [name] to
   [xmls] in [attributes]. If [name] was previously bound, the previous
   binding is removed.
-  [atts_replace ~atts name xmls] is equivalent to [atts_replace name xmls atts].
-*)
+  [atts_replace ~atts name xmls] is equivalent to [atts_replace name xmls atts].*)
 val atts_replace : name -> tree list -> attributes -> attributes
 
-(** [get_arg attributes name] returns the xml tree list bound to [name] in
-  [attributes]. Return [None] if no binding was found for [name]. *)
-val get_arg : attributes -> name -> tree list option
+(** [get_att attributes name] returns the xml tree list bound to [name] in
+  [attributes]. Return [None] if no binding was found for [name].
+  @since 0.11
+*)
+val get_att : attributes -> name -> tree list option
 
-(** Same as {!get_arg} but return a string [s] only if [name] is bound to
+(** Same as {!get_att} but return a string [s] only if [name] is bound to
   a single CDATA XML node ([[D s]]).
   In particular, if [name] is bound to a list of XML tree, or to
-  a single tree which is not a CDATA, the function returns [None]. *)
-val get_arg_cdata : attributes -> name -> string option
+  a single tree which is not a CDATA, the function returns [None].
+  @since 0.11
+*)
+val get_att_cdata : attributes -> name -> string option
 
-(** [opt_arg attributes ?def name] returns the tree list associated to [name]
+(** [opt_att attributes ?def name] returns the tree list associated to [name]
   in the [attributes] or a default value. This default value can be
   specified with the [def] parameter. If no default value is specified, then
   the empty list is used.
+  @since 0.11
 *)
-val opt_arg : attributes -> ?def:tree list -> name -> tree list
+val opt_att : attributes -> ?def:tree list -> name -> tree list
 
-(** Same as {!opt_arg} but looking for CDATA bounded values, as in
-  {!get_arg_cdata}.*)
-val opt_arg_cdata : attributes -> ?def:string -> name -> string
-
+(** Same as {!opt_att} but looking for CDATA bounded values, as in
+  {!get_att_cdata}.
+  @since 0.11
+*)
+val opt_att_cdata : attributes -> ?def:string -> name -> string
 
 (** Return a string representation of attributes, in the form
     [a="foo" b="bar" ...].
-    Note that the argument names are output verbatim, but the
-    argument values are escaped with the [%S] format.
+    Note that the attribute names are output verbatim, but the
+    attribute values are escaped with the [%S] format.
 *)
-val string_of_args : attributes -> string
+val string_of_atts : attributes -> string
 
 (** {2 Environment}
 
     An {!type:env} is a {!type:name}-to-{!type:callback} associative map. In addition
-    to basic manipulation functions, the functions {!val:env_add_att} and
+    to basic manipulation functions, the functions {!val:env_add_xml} and
     {!val:env_of_list} provide convenient shortcuts for common operations.
 
     The environments are immutable, all mutating operations return new
     environments.
 *)
+
+type 'a env
+and 'a callback = 'a -> 'a env -> attributes -> tree list -> 'a * tree list
+  (** A ['a callback] takes data of type ['a], a ['a env], attributes and XML nodes.
+    It returns a potentially new data of type ['a] and XML nodes. The attributes are
+    the attributes of the node being rewritten, and the XML trees in parameter are the
+    XML children of this node. The environment must be a ['a env] so that
+    if can be used in the callback to perform rewriting, returning a
+    new data of type ['a]. *)
+
+(** This exception can be raised by callbacks to indicate that the
+  node to be rewritten remains unchanged. *)
+exception No_change
 
 (** An environment that contains only one binding, associating
   {!val:tag_main} to a function such as [(fun data _env _atts subs -> (data, subs))],
@@ -159,17 +147,30 @@ val env_empty : unit -> 'a env
 
 (** Add a binding to an environment.
 
-    [env_add "double" (fun acc _ _ xml -> (acc, xml @ xml))] binds the key
+    [env_add_cb "double" (fun acc _ _ xml -> (acc, xml @ xml))] binds the key
     [("", "double")] to a callback that doubles an XML subtree.
 
-    [env_add ~prefix: "foo" "double" (fun acc _ _ xml -> (acc, xml @ xml))] does the same but
+    [env_add_cb ~prefix: "foo" "double" (fun acc _ _ xml -> (acc, xml @ xml))] does the same but
     for the key  [("foo", "double")].
 
     If the same key was already bound, the previous binding is replaced.
 
     @param prefix is [""] by default.
 *)
-val env_add : ?prefix: string -> string -> 'a callback -> 'a env -> 'a env
+val env_add_cb : ?prefix: string -> string -> 'a callback -> 'a env -> 'a env
+
+(** Bind a callback that returns some XML.
+
+    The most frequent operation performed by a callback is to return
+    constant XML subtrees. This convenience function lets you provide
+    the XML subtrees.
+
+    [env_add_xml "logo" [ E (("","img"), atts_one ("","src") [D "logo.png"], []) ] env]
+    binds the key [("","logo")] to a callback that returns an XHTML image tag.
+
+    @param prefix can be used to specify a prefix for the rule name. Default is [""].
+*)
+val env_add_xml : ?prefix:string -> string -> tree list -> 'a env -> 'a env
 
 (** Get a binding from an environment.
 
@@ -180,26 +181,13 @@ val env_get : name -> 'a env -> 'a callback option
 (** String representation of all the keys in the environment. *)
 val string_of_env : 'a env -> string
 
-(** Bind a callback that returns some XML.
-
-    The most frequent operation performed by a callback is to return
-    constant XML subtrees. This convenience function lets you provide
-    the XML subtrees.
-
-    [env_add_att "logo" [ E (("","img"), atts_one ("","src") [D "logo.png"], []) ] env]
-    binds the key [("","logo")] to a callback that returns an XHTML image tag.
-
-    @param prefix can be used to specify a prefix for the rule name. Default is [""].
-*)
-val env_add_att : ?prefix:string -> string -> tree list -> 'a env -> 'a env
-
 (** Add several bindings at once.
 
     This convenience function saves you the effort of calling
-    {!val:env_add} several times yourself.
+    {!val:env_add_cb} several times yourself.
 
     [env_of_list ~env:env [ (ns1, k1), f1 ; (ns2, k2), f2 ]] is equivalent to
-    [env_add ~prefix: ns1 k1 f1 (env_add ~prefix: ns2 k2 f2 env)]. This means that one key
+    [env_add_cb ~prefix: ns1 k1 f1 (env_add_cb ~prefix: ns2 k2 f2 env)]. This means that one key
     is present twice in the list, the first association in the list
     will hide the second one in the resulting environment.
 
@@ -208,7 +196,7 @@ val env_add_att : ?prefix:string -> string -> tree list -> 'a env -> 'a env
 *)
 val env_of_list : ?env: 'a env -> (name * 'a callback) list -> 'a env
 
-(** {2 XML Manipulation} *)
+(** {2 Special tags and attributes} *)
 
 (** A dummy tag, currently ["main_"]. It is used when parsing a
    string as an XML tree, to ensure that we will parse a tree and
@@ -257,6 +245,13 @@ val att_escamp : string
 *)
 val att_protect : string
 
+(** {2 XML Manipulation} *)
+
+(** Recursively merge sibling [D] nodes into one [D] node. *)
+val merge_cdata : tree -> tree
+
+(** Same as {!merge_cdata} but taking a {!tree} list. *)
+val merge_cdata_list : tree list -> tree list
 (** Output an XML string.
 
     The returned string does not include the initial [<?xml ... ?>].
@@ -328,7 +323,7 @@ val xml_of_file : string -> tree
      and a new list of elements that is used instead of the old element.
 
     {i Example}: assuming that the environnement was build using
-    [env_add "x2" (fun data _ _ xml -> (data, xml @ xml)) env],
+    [env_add_cb "x2" (fun data _ _ xml -> (data, xml @ xml)) env],
     then [<x2>A</x2>] is rewritten as [AA].
 }
 {- The engine then recursively descends into those replaced
@@ -345,7 +340,7 @@ val xml_of_file : string -> tree
 
     [env_] effectively changes the environment
     used when processing its children by adding the bindings defined by
-    its arguments (using {!val:env_add_att}, hence the name).
+    its attributes (using {!val:env_add_xml}).
 
     {i Example}: [<env_ a="&lt;b&gt;A&lt;/b&gt;"><a/></env_>] is
     replaced by [<a/>], which in turn is replaced by
@@ -366,6 +361,19 @@ val xml_of_file : string -> tree
 }
 }
 *)
+
+(** To catch eventual infinite loops in rewriting, we keep a
+  stack of the rules called. *)
+type rewrite_stack = (name * attributes * tree list) list
+
+(** The [Loop] exception is raised when the rewrite stack
+  is higher than a default value of 100. This value can be changed
+  by setting the [XTMPL_REWRITE_DEPTH_LIMIT] environment variable.
+  Default value is [100]. *)
+exception Loop of  rewrite_stack
+
+(** String representation of the given rewrite stack. *)
+val string_of_stack : rewrite_stack -> string
 
 (** Applies as many iterations as necessary to a piece of XML (represented
     as an unparsed string) to reach a fix-point.
@@ -393,4 +401,33 @@ val apply_into_file : 'a -> ?head:string -> 'a env -> infile: string -> outfile:
 *)
 val apply_string_into_file : 'a -> ?head:string -> 'a env -> outfile: string -> string -> 'a
 
+(** {2 Deprecated functions} *)
+
+(** @deprecated Use {!get_att}. *)
+val get_arg : attributes -> name -> tree list option
+  [@@ocaml.deprecated "Use Xtmpl.get_att instead."]
+
+(** @deprecated Use {!get_att_cdata}. *)
+val get_arg_cdata : attributes -> name -> string option
+  [@@ocaml.deprecated "Use Xtmpl.get_att_cdata instead."]
+
+(** @deprecated Use {!opt_att}. *)
+val opt_arg : attributes -> ?def:tree list -> name -> tree list
+  [@@ocaml.deprecated "Use Xtmpl.opt_att instead."]
+
+(** @deprecated Use {!opt_att_cdata}. *)
+val opt_arg_cdata : attributes -> ?def:string -> name -> string
+  [@@ocaml.deprecated "Use Xtmpl.opt_att_data instead."]
+
+(** @deprecated Use {!string_of_atts}. *)
+val string_of_args : attributes -> string
+  [@@ocaml.deprecated "Use Xtmpl.string_of_atts instead."]
+
+(** @deprecated Use {!env_add_cb} instead. *)
+val env_add : ?prefix: string -> string -> 'a callback -> 'a env -> 'a env
+  [@@ocaml.deprecated "Use Xtmpl.env_add_cb instead."]
+
+(** @deprecated Use {!env_add_xml} instead. *)
+val env_add_att : ?prefix:string -> string -> tree list -> 'a env -> 'a env
+  [@@ocaml.deprecated "Use Xtmpl.env_add_xml instead."]
 
