@@ -128,7 +128,8 @@ val del : elt_fun
 (** {2 Embedding resources} *)
 
 val img : elt_fun
-val video :elt_fun
+val video : elt_fun
+val source : elt_fun
 
 (** {2 Tables} *)
 
