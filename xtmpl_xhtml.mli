@@ -133,6 +133,7 @@ val img : elt_fun
 val audio : elt_fun
 val video : elt_fun
 val source : elt_fun
+val script : elt_fun
 
 (** {2 Tables} *)
 
