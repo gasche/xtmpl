@@ -131,4 +131,12 @@ headers:
 noheaders:
 	headache -r -c .headache_config $(HEADFILES)
 
+# depend :
+##########
 
+.PHONY: depend
+
+.depend depend:
+	$(OCAMLFIND) ocamldep xtmpl*.ml xtmpl*.mli > .depend
+
+include .depend

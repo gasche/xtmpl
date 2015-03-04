@@ -158,6 +158,9 @@ exception Loop of  rewrite_stack
 
 let atts_empty = Name_map.empty
 
+let node tag ?(atts=atts_empty) subs = E (tag, atts, subs)
+let cdata str = D str
+
 let gen_atts_to_escape =
   let key = ("", att_escamp) in
   fun to_s atts ->
