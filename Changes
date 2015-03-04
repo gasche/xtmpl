@@ -3,6 +3,9 @@ Release 0.11:
   files, with the parameter described in the template.
   Usage: let doc = [%xtmpl "file.xml"]
          let doc = [%xtmpl.string {| <div>...</div> |} ]
+- some functions renamed (deprecating original ones functions)
+- add Xtmpl.node, Xtmpl.cdata
+- new Xtmpl_xhtml module, with convenient functions to create Xhtml trees
 
 Release 0.10:
   - use safe-string mode
