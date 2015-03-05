@@ -6,6 +6,7 @@ Release 0.11:
 - some functions renamed (deprecating original ones functions)
 - add Xtmpl.node, Xtmpl.cdata
 - new Xtmpl_xhtml module, with convenient functions to create Xhtml trees
+- new package Xtmpl.js, with a Xtmpl_js module
 
 Release 0.10:
   - use safe-string mode

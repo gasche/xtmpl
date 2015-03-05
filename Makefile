@@ -88,10 +88,13 @@ ppx_xtmpl.byte: $(LIB_BYTE) ppx_xtmpl.ml
 	$(OCAMLFIND) ocamlc -o $@ -package ppx_tools.metaquot,str,$(PACKAGES) \
 	$(COMPFLAGS) -linkpkg $(LIB_BYTE) ppx_xtmpl.ml
 
-xtmpl_js.cmo xtmpl_js.cmi: xtmpl_js.ml
+xtmpl_js.cmo: xtmpl_js.ml
 	$(OCAMLFIND) ocamlc -c -package $(JS_PACKAGES) \
 	-package js_of_ocaml.syntax -syntax camlp4o \
 	$(COMPFLAGS) $<
+
+xtmpl_js.cmi: xtmpl_js.mli
+	$(OCAMLFIND) ocamlc -c -package $(JS_PACKAGES) $(COMPFLAGS) $<
 
 .PHONY: test_ppx_xtmpl
 
@@ -106,13 +109,12 @@ test_ppx_xtmpl: ppx_xtmpl test_ppx_xtmpl.ml
 ##########
 .PHONY: doc
 dump.odoc:
-	$(OCAMLFIND) ocamldoc -package $(PACKAGES) -dump $@ -rectypes \
-	xtmpl.mli xtmpl_xhtml.mli
+	$(OCAMLFIND) ocamldoc -package $(JS_PACKAGES) -dump $@ -rectypes \
+	xtmpl.mli xtmpl_xhtml.mli xtmpl_js.mli
 
 doc: dump.odoc
 	$(MKDIR) doc
-	$(OCAMLFIND) ocamldoc -package $(PACKAGES) -load $^ \
-	-rectypes -t Xtmpl -d doc -html
+	$(OCAMLFIND) ocamldoc -load $^ -rectypes -t Xtmpl -d doc -html
 
 docstog: dump.odoc
 	$(MKDIR) web/refdoc
