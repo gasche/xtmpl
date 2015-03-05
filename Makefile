@@ -52,7 +52,7 @@ LIB_OFILES=$(LIB_CMXFILES:.cmx=.o)
 
 LIB_JS=xtmpl_js.cma
 LIB_JS_CMI=$(LIB_JS:.cma=.cmi)
-LIB_JS_CMOFILES=xtmpl.cmo xtmpl_js.cmo
+LIB_JS_CMOFILES=xtmpl_js.cmo
 LIB_JS_CMIFILES=$(LIB_JS_CMOFILES:.cmo=.cmi)
 
 all: byte opt
@@ -68,7 +68,7 @@ $(LIB_CMXS): $(LIB_CMIFILES) $(LIB_CMXFILES)
 $(LIB_BYTE): $(LIB_CMIFILES) $(LIB_CMOFILES)
 	$(OCAMLFIND) ocamlc -o $@ -a -package $(PACKAGES) $(LIB_CMOFILES)
 
-$(LIB_JS): $(LIB_JS_CMIFILES) $(LIB_JS_CMOFILES)
+$(LIB_JS): $(LIB_BYTE) $(LIB_JS_CMIFILES) $(LIB_JS_CMOFILES)
 	$(OCAMLFIND) ocamlc -o $@ -a -package $(JS_PACKAGES) $(LIB_JS_CMOFILES)
 
 %.cmx: %.ml %.cmi
@@ -125,6 +125,7 @@ install: xtmpl.cmo xtmpl.cmx
 	$(OCAMLFIND) install xtmpl META LICENSE \
 		$(LIB) $(LIB_CMXS) $(LIB_OFILES) $(LIB_CMXFILES) $(LIB_A) \
 		$(LIB_BYTE) $(LIB_CMIFILES) \
+		$(LIB_JS) $(LIB_JS_CMIFILES) \
 		ppx_xtmpl ppx_xtmpl.byte
 
 uninstall:

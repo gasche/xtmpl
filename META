@@ -8,3 +8,9 @@ archive(native,plugin) = "xtmpl.cmxs"
 ppx(-byte)="./ppx_xtmpl"
 ppx(byte)="./ppx_xtmpl.byte"
 
+package "js" (
+  version = "0.11"
+  description = "Js code of Xtmpl templating library"
+  requires = "xtmpl"
+  archive(byte) = "xtmpl_js.cma"
+)
