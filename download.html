@@ -1,0 +1,183 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>Xtmpl : Download/Install</title><meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<link href="https://zoggy.github.io/xtmpl/style.css" rel="stylesheet" type="text/css"/>
+<rssfeed></rssfeed>
+</head><body>
+<div id="page">
+<div class="navbar navbar-fixed-top">
+<div class="navbar-inner">
+<div class="container">
+
+  <div class="nav-collapse">
+  <ul class="nav">
+    <li class="&lt;navbar-home/&gt;"><a href="https://zoggy.github.io/xtmpl/">Xtmpl</a></li>
+    <li class="active"><a href="https://zoggy.github.io/xtmpl/download.html">Download/Install</a></li>
+    <li class="&lt;navbar-doc/&gt;"><a href="https://zoggy.github.io/xtmpl/doc.html">Documentation</a></li>
+    <li class="&lt;navbar-blog/&gt;"><a href="https://zoggy.github.io/xtmpl/blog.html">Blog</a></li>
+    <li class="&lt;navbar-about/&gt;"><a href="https://zoggy.github.io/xtmpl/about.html">?</a></li>
+  </ul>
+  </div>
+  <div class="nav pull-right">
+
+  </div>
+</div>
+</div>
+</div>
+
+<div id="header">
+
+<div class="page-title">Download/Install</div>
+</div>
+<span></span>
+
+
+
+<ul class="toc"><li class="toc-section"><a href="https://zoggy.github.io/xtmpl/download.html#download">Download</a></li><li class="toc-section"><a href="https://zoggy.github.io/xtmpl/download.html#install">Install</a></li></ul>
+<div class="section"><div class="section-title" id="download">Download</div>
+<p>
+Xtmpl is <a href="https://github.com/zoggy/xtmpl">hosted on Github</a>.
+</p>
+<div class="subsection"><div class="subsection-title" id="aa43-170c-c948-91e5">Releases</div>
+<ul>
+<li><strong><a href="xtmpl-0.11.tar.gz">0.11</a></strong>
+[2015-03-05]:
+  <ul id="changes0.11">
+    <li>add <a href="https://zoggy.github.io/xtmpl/doc.html#ppx">ppx_xtmpl</a>:
+     this preprocessor creates functions from template files or strings,
+     with the parameters described in the template. Usage:
+     <pre class="code-ocaml"><span class="hl kwa">let</span><span class="hl std"> </span><span class="">doc</span><span class="hl std"> = [%</span><span class="">xtmpl</span><span class="hl std"> </span><span class="hl str">&quot;file.xml&quot;</span><span class="hl std">]
+</span><span class="hl kwa">let</span><span class="hl std"> </span><span class="">doc</span><span class="hl std"> = [%</span><span class="">xtmpl</span><span class="hl std">.</span><span class="hl kwd">string</span><span class="hl std"> {| &lt;</span><span class="">div</span><span class="hl std">&gt;...&lt;/</span><span class="">div</span><span class="hl std">&gt; |} ]
+</span></pre></li>
+<li>some functions renamed (deprecating original ones functions),</li>
+<li>add <a href="https://zoggy.github.io/xtmpl/refdoc/Xtmpl.html#VALnode">Xtmpl.node</a> and
+  <a href="https://zoggy.github.io/xtmpl/refdoc/Xtmpl.html#VALcdata">Xtmpl.cdata</a>,
+</li>
+<li>new <a href="https://zoggy.github.io/xtmpl/refdoc/Xtmpl_xhtml.html">Xtmpl_xhtml</a> module, with convenient
+  functions to create Xhtml trees,</li>
+<li>new <a href="https://zoggy.github.io/xtmpl/refdoc/Xtmpl_js.html">Xtmpl_js</a> module in a
+  new package <code>xtmpl.js</code>.
+</li>
+</ul>
+</li>
+
+<li><strong><a href="xtmpl-0.10.tar.gz">0.10</a></strong>
+[2014-09-25]:
+<ul>
+<li>Use safe-string mode (require OCaml &gt;= 4.02),</li>
+<li>new parameter <code>~xml_atts</code> for
+    <code>Xtmpl.string_of_{xml,xmls,xml_atts}</code>
+    to indicate whether or not to keep valid XML in attributes when
+    printing an XML tree. Default is true, to be backward-compatible.
+    When it is true, Xtmpl tries to unescape some entities. Only
+    lt, gt, amp, quot and apos named entities are unescaped.
+    When an entity is given by its character code, only the ones
+    with code between 0 and 255 are unescaped.
+</li>
+</ul>
+</li>
+
+<li><strong><a href="xtmpl-0.9.tar.gz">0.9</a></strong>
+[2014-03-20]:
+<ul>
+<li>Add <code>Xtmpl.merge_cdata</code> and <code>Xtmpl.merge_cdata_list</code>.</li>
+</ul>
+</li>
+
+<li><strong><a href="xtmpl-0.8.tar.gz">0.8</a></strong>
+[2014-01-15]:
+<ul>
+<li>An attribute value is now a list Xml trees, to improve performance
+    (before, attribute values were continously parsed as XML and printed back
+    as string),</li>
+<li>New <code>protect_</code> attribute, to remove from environment the rules
+    in this attribute. For example:
+    <code>&lt;foo protect_=&quot;title,id&quot; ...&gt;...&lt;/foo&gt;</code>
+    will prevent applying <code>&lt;title&gt;</code> and
+    <code>&lt;id&gt;</code> rules in the node's children,
+</li>
+<li>The rewrite is now done as a fold, taking a data in parameter and
+    returning it or another value of same type.
+</li>
+</ul>
+</li>
+
+<li><strong><a href="xtmpl-0.7.tar.gz">0.7</a></strong>
+[2013-10-07]:
+<ul>
+<li>Re-introduce (un)escaping of ampersands, only in attributes
+ specified in attribute escamp_.
+ For example:
+   <div class="code">&lt;a escamp_=&quot;href&quot; href=&quot;http://foo.net/x?t=1&amp;amp;sort=0&quot;&gt;...&lt;/a&gt;</div>
+ Without <code class="code">escamp_=&quot;href&quot;</code>, ampersand is not escaped,
+ producing an invalid XML code during rewrite process.
+</li>
+</ul>
+</li>
+
+<li><strong><a href="xtmpl-0.6.tar.gz">0.6</a></strong>
+[2013-03-19]:
+<ul>
+<li>do not (un)escape ampersand in attributes,</li>
+<li>fix META version,</li>
+<li>generate and install .cmxs file.</li>
+</ul>
+</li>
+<li><strong><a href="xtmpl-0.5.tar.gz">0.5</a></strong>
+[2012-12-18]:
+  <ul>
+    <li>mod: do not use string representation to check for changes in
+    fixpoint computation</li>
+    <li>API change: Xtmpl.E of tag * atts * subs</li>
+    <li>API change: No more Xtmpl.T constructor</li>
+    <li>API change: make API more homogeneous</li>
+    <li>API change: handle prefix in nodes and attributes</li>
+  </ul>
+</li>
+
+<li><strong><a href="xtmpl-0.4.tar.gz">0.4</a></strong>
+[2012-11-22]: Add <code>string_of_xmls</code>.
+</li>
+
+<li><strong><a href="xtmpl-0.3.tar.gz">0.3</a></strong>
+[2012-08-30]: Minor <a href="https://github.com/zoggy/xtmpl/blob/master/Changes">changes</a> and fixes.</li>
+
+<li><strong><a href="xtmpl-0.2.tar.gz">0.2</a></strong>
+[2012-08-28]: Minor <a href="https://github.com/zoggy/xtmpl/blob/master/Changes">changes</a>.</li>
+
+<li><strong><a href="xtmpl-0.1.tar.gz">0.1</a></strong> [2012-06-20]: Initial release.</li>
+</ul>
+
+</div>
+</div>
+<div class="section"><div class="section-title" id="install">Install</div>
+<p>
+Xtmpl requires <a href="http://erratique.ch/software/xmlm">Xmlm &gt;= 1.1.0</a>
+to be installed.
+</p>
+<p>To compile and install:
+</p>
+<ul>
+<li><span class="shell">tar xvfz xtmpl-XXX.tar.gz</span></li>
+<li><span class="shell">cd xtmpl-XXX</span></li>
+<li><span class="shell">make all install</span></li>
+</ul>
+<p>
+This will install the <tt>xtmpl</tt> package with findlib.
+</p>
+</div>
+
+
+
+
+
+</div>
+
+<footer id="bottombar">
+</footer>
+<script src="https://zoggy.github.io/xtmpl/jquery.js" type="text/javascript">_</script>
+<script src="https://zoggy.github.io/xtmpl/bootstrap-collapse.js" type="text/javascript">_</script>
+
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>Xtmpl : Xtmpl reference documentation : Xtmpl_xhtml</title><meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<link href="https://zoggy.github.io/xtmpl/style.css" rel="stylesheet" type="text/css"/>
+<rssfeed></rssfeed>
+</head><body>
+<div id="page">
+<div class="navbar navbar-fixed-top">
+<div class="navbar-inner">
+<div class="container">
+
+  <div class="nav-collapse">
+  <ul class="nav">
+    <li class="&lt;navbar-home/&gt;"><a href="https://zoggy.github.io/xtmpl/">Xtmpl</a></li>
+    <li class="&lt;navbar-download/&gt;"><a href="https://zoggy.github.io/xtmpl/download.html">Download/Install</a></li>
+    <li class="active"><a href="https://zoggy.github.io/xtmpl/doc.html">Documentation</a></li>
+    <li class="&lt;navbar-blog/&gt;"><a href="https://zoggy.github.io/xtmpl/blog.html">Blog</a></li>
+    <li class="&lt;navbar-about/&gt;"><a href="https://zoggy.github.io/xtmpl/about.html">?</a></li>
+  </ul>
+  </div>
+  <div class="nav pull-right">
+
+  </div>
+</div>
+</div>
+</div>
+
+<div id="header">
+
+
+</div>
+<span></span>
+
+<div class="ocamldoc-page">
+<div class="navbar"><a class="pre" href="Xtmpl.html" title="Xtmpl">Previous</a>
+ <a class="up" href="index.html" title="Index">Up</a>
+ <a class="post" href="Xtmpl_js.html" title="Xtmpl_js">Next</a>
+</div>
+<h1>Module <a href="type_Xtmpl_xhtml.html">Xtmpl_xhtml</a></h1>
+
+<pre><span class="keyword">module</span> Xtmpl_xhtml: <code class="code">sig</code> <a href="Xtmpl_xhtml.html">..</a> <code class="code">end</code></pre><div class="info module top">
+Creating XHTML nodes.<br/>
+</div>
+<hr width="100%"/>
+
+<pre><span id="TYPEelt_fun"><span class="keyword">type</span> elt_fun</span> = <code class="type">?xid:<a href="Xtmpl.html#TYPEtree">Xtmpl.tree</a> list -&gt;<br/>       ?id:string -&gt;<br/>       ?xclass:<a href="Xtmpl.html#TYPEtree">Xtmpl.tree</a> list -&gt;<br/>       ?class_:string -&gt;<br/>       ?classes:string list -&gt;<br/>       ?xhref:<a href="Xtmpl.html#TYPEtree">Xtmpl.tree</a> list -&gt;<br/>       ?href:string -&gt;<br/>       ?xtitle:<a href="Xtmpl.html#TYPEtree">Xtmpl.tree</a> list -&gt;<br/>       ?title:string -&gt;<br/>       ?xtype:<a href="Xtmpl.html#TYPEtree">Xtmpl.tree</a> list -&gt;<br/>       ?type_:string -&gt;<br/>       ?xname:<a href="Xtmpl.html#TYPEtree">Xtmpl.tree</a> list -&gt;<br/>       ?name:string -&gt; ?atts:<a href="Xtmpl.html#TYPEattributes">Xtmpl.attributes</a> -&gt; <a href="Xtmpl.html#TYPEtree">Xtmpl.tree</a> list -&gt; <a href="Xtmpl.html#TYPEtree">Xtmpl.tree</a></code> </pre>
+
+
+<pre><span id="TYPEelt_fun_"><span class="keyword">type</span> elt_fun_</span> = <code class="type">?prefix:string -&gt; string -&gt; <a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code> </pre>
+
+
+<pre><span id="VALelt"><span class="keyword">val</span> elt</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun_">elt_fun_</a></code></pre>
+<pre><span id="VALhtml"><span class="keyword">val</span> html</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre><br/>
+<div class="section-title" id="2_Header">Header</div><br/>
+
+<pre><span id="VALhead"><span class="keyword">val</span> head</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALmeta"><span class="keyword">val</span> meta</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALtitle"><span class="keyword">val</span> title</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALbase"><span class="keyword">val</span> base</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALlink"><span class="keyword">val</span> link</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALstyle"><span class="keyword">val</span> style</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre><br/>
+<div class="section-title" id="2_Bodyandsectionning">Body and sectionning</div><br/>
+
+<pre><span id="VALbody"><span class="keyword">val</span> body</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALarticle"><span class="keyword">val</span> article</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALsection"><span class="keyword">val</span> section</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALnav"><span class="keyword">val</span> nav</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALaside"><span class="keyword">val</span> aside</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALh1"><span class="keyword">val</span> h1</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALh2"><span class="keyword">val</span> h2</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALh3"><span class="keyword">val</span> h3</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALh4"><span class="keyword">val</span> h4</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALh5"><span class="keyword">val</span> h5</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALh6"><span class="keyword">val</span> h6</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALheader"><span class="keyword">val</span> header</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALfooter"><span class="keyword">val</span> footer</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALaddress"><span class="keyword">val</span> address</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre><br/>
+<div class="section-title" id="2_Blocks">Blocks</div><br/>
+
+<pre><span id="VALp"><span class="keyword">val</span> p</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALhr"><span class="keyword">val</span> hr</span> : <code class="type"><a href="Xtmpl.html#TYPEtree">Xtmpl.tree</a></code></pre>
+<pre><span id="VALpre"><span class="keyword">val</span> pre</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALblockquote"><span class="keyword">val</span> blockquote</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALol"><span class="keyword">val</span> ol</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALul"><span class="keyword">val</span> ul</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALli"><span class="keyword">val</span> li</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALdl"><span class="keyword">val</span> dl</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALdt"><span class="keyword">val</span> dt</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALdd"><span class="keyword">val</span> dd</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALfigure"><span class="keyword">val</span> figure</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALfigcaption"><span class="keyword">val</span> figcaption</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALdiv"><span class="keyword">val</span> div</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALmain"><span class="keyword">val</span> main</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre><br/>
+<div class="section-title" id="2_Textelements">Text elements</div><br/>
+
+<pre><span id="VALa"><span class="keyword">val</span> a</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALem"><span class="keyword">val</span> em</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALstrong"><span class="keyword">val</span> strong</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALsmall"><span class="keyword">val</span> small</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALs"><span class="keyword">val</span> s</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALcite"><span class="keyword">val</span> cite</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALq"><span class="keyword">val</span> q</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALdfn"><span class="keyword">val</span> dfn</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALabbr"><span class="keyword">val</span> abbr</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALdata"><span class="keyword">val</span> data</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALtime"><span class="keyword">val</span> time</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALcode"><span class="keyword">val</span> code</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALvar"><span class="keyword">val</span> var</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALsamp"><span class="keyword">val</span> samp</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALkbd"><span class="keyword">val</span> kbd</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALsub"><span class="keyword">val</span> sub</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALsup"><span class="keyword">val</span> sup</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALi"><span class="keyword">val</span> i</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALb"><span class="keyword">val</span> b</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALu"><span class="keyword">val</span> u</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALmark"><span class="keyword">val</span> mark</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALruby"><span class="keyword">val</span> ruby</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALrb"><span class="keyword">val</span> rb</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALrt"><span class="keyword">val</span> rt</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALrtc"><span class="keyword">val</span> rtc</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALrp"><span class="keyword">val</span> rp</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALbdi"><span class="keyword">val</span> bdi</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALbdo"><span class="keyword">val</span> bdo</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALspan"><span class="keyword">val</span> span</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALbr"><span class="keyword">val</span> br</span> : <code class="type"><a href="Xtmpl.html#TYPEtree">Xtmpl.tree</a></code></pre>
+<pre><span id="VALwbr"><span class="keyword">val</span> wbr</span> : <code class="type"><a href="Xtmpl.html#TYPEtree">Xtmpl.tree</a></code></pre><br/>
+<div class="section-title" id="2_Edits">Edits</div><br/>
+
+<pre><span id="VALins"><span class="keyword">val</span> ins</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALdel"><span class="keyword">val</span> del</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre><br/>
+<div class="section-title" id="2_Embeddingresources">Embedding resources</div><br/>
+
+<pre><span id="VALembed"><span class="keyword">val</span> embed</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALobject_"><span class="keyword">val</span> object_</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALimg"><span class="keyword">val</span> img</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALaudio"><span class="keyword">val</span> audio</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALvideo"><span class="keyword">val</span> video</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALsource"><span class="keyword">val</span> source</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALscript"><span class="keyword">val</span> script</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre><br/>
+<div class="section-title" id="2_Tables">Tables</div><br/>
+
+<pre><span id="VALtable"><span class="keyword">val</span> table</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALcaption"><span class="keyword">val</span> caption</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALcolgroup"><span class="keyword">val</span> colgroup</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALcol"><span class="keyword">val</span> col</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALtbody"><span class="keyword">val</span> tbody</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALthead"><span class="keyword">val</span> thead</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALtfoot"><span class="keyword">val</span> tfoot</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALtr"><span class="keyword">val</span> tr</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALtd"><span class="keyword">val</span> td</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALth"><span class="keyword">val</span> th</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre><br/>
+<div class="section-title" id="2_Forms">Forms</div><br/>
+
+<pre><span id="VALform"><span class="keyword">val</span> form</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALlabel"><span class="keyword">val</span> label</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALinput"><span class="keyword">val</span> input</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALbutton"><span class="keyword">val</span> button</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALselect"><span class="keyword">val</span> select</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALdatalist"><span class="keyword">val</span> datalist</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALoptgroup"><span class="keyword">val</span> optgroup</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALoption"><span class="keyword">val</span> option</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALtextarea"><span class="keyword">val</span> textarea</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALkeygen"><span class="keyword">val</span> keygen</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALoutput"><span class="keyword">val</span> output</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALprogress"><span class="keyword">val</span> progress</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALmeter"><span class="keyword">val</span> meter</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALfieldset"><span class="keyword">val</span> fieldset</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
+<pre><span id="VALlegend"><span class="keyword">val</span> legend</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre></div>
+
+
+</div>
+
+<footer id="bottombar">
+</footer>
+<script src="https://zoggy.github.io/xtmpl/jquery.js" type="text/javascript">_</script>
+<script src="https://zoggy.github.io/xtmpl/bootstrap-collapse.js" type="text/javascript">_</script>
+
+</body>
+</html>

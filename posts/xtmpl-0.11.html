@@ -1,0 +1,98 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>Xtmpl : Xtmpl 0.11</title><meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<link href="https://zoggy.github.io/xtmpl/style.css" rel="stylesheet" type="text/css"/>
+<rssfeed></rssfeed>
+</head><body>
+<div id="page">
+<div class="navbar navbar-fixed-top">
+<div class="navbar-inner">
+<div class="container">
+
+  <div class="nav-collapse">
+  <ul class="nav">
+    <li class="&lt;navbar-home/&gt;"><a href="https://zoggy.github.io/xtmpl/">Xtmpl</a></li>
+    <li class="&lt;navbar-download/&gt;"><a href="https://zoggy.github.io/xtmpl/download.html">Download/Install</a></li>
+    <li class="&lt;navbar-doc/&gt;"><a href="https://zoggy.github.io/xtmpl/doc.html">Documentation</a></li>
+    <li class="active"><a href="https://zoggy.github.io/xtmpl/blog.html">Blog</a></li>
+    <li class="&lt;navbar-about/&gt;"><a href="https://zoggy.github.io/xtmpl/about.html">?</a></li>
+  </ul>
+  </div>
+  <div class="nav pull-right">
+
+  </div>
+</div>
+</div>
+</div>
+
+<div id="header">
+
+<div class="page-title">Xtmpl 0.11</div>
+</div>
+<span></span>
+<div class="date">March 5, 2015</div>
+
+<p>
+Release 0.11 of Xtmpl is available from
+the <a href="https://zoggy.github.io/xtmpl/download.html">download page</a>.
+Changes:
+</p>
+
+<ul id="changes0.11">
+    <li>add <a href="https://zoggy.github.io/xtmpl/doc.html#ppx">ppx_xtmpl</a>:
+     this preprocessor creates functions from template files or strings,
+     with the parameters described in the template. Usage:
+     <pre class="code-ocaml"><span class="hl kwa">let</span><span class="hl std"> </span><span class="">doc</span><span class="hl std"> = [%</span><span class="">xtmpl</span><span class="hl std"> </span><span class="hl str">&quot;file.xml&quot;</span><span class="hl std">]
+</span><span class="hl kwa">let</span><span class="hl std"> </span><span class="">doc</span><span class="hl std"> = [%</span><span class="">xtmpl</span><span class="hl std">.</span><span class="hl kwd">string</span><span class="hl std"> {| &lt;</span><span class="">div</span><span class="hl std">&gt;...&lt;/</span><span class="">div</span><span class="hl std">&gt; |} ]
+</span></pre></li>
+<li>some functions renamed (deprecating original ones functions),</li>
+<li>add <a href="https://zoggy.github.io/xtmpl/refdoc/Xtmpl.html#VALnode">Xtmpl.node</a> and
+  <a href="https://zoggy.github.io/xtmpl/refdoc/Xtmpl.html#VALcdata">Xtmpl.cdata</a>,
+</li>
+<li>new <a href="https://zoggy.github.io/xtmpl/refdoc/Xtmpl_xhtml.html">Xtmpl_xhtml</a> module, with convenient
+  functions to create Xhtml trees,</li>
+<li>new <a href="https://zoggy.github.io/xtmpl/refdoc/Xtmpl_js.html">Xtmpl_js</a> module in a
+  new package <code>xtmpl.js</code>.
+</li>
+</ul>
+
+
+<div class="comments">
+<div>
+<div class="doc-keywords">
+  <div class="bloc-keywords">
+  Topics: <div class="keywords"><a href="https://zoggy.github.io/xtmpl/topic_release.html"><span itemprop="keywords">release</span></a></div>
+  </div>
+  <div class="bloc-keywords">
+  Keywords: <div class="keywords"><a href="https://zoggy.github.io/xtmpl/kw_ppx.html"><span itemprop="keywords">ppx</span></a>,<a href="https://zoggy.github.io/xtmpl/kw_interface.html"><span itemprop="keywords">interface</span></a></div>
+  </div>
+</div>
+</div>
+<div class="section" itemprop="articleSection">
+      <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'ocamlrdf'; // required: replace example with your forum shortname
+        var disqus_url = 'https://zoggy.github.io/xtmpl/posts/xtmpl-0.11.html' ;
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a class="dsq-brlink" href="http://disqus.com">comments powered by <span class="logo-disqus">Disqus</span></a>
+    
+</div>
+</div>
+</div>
+
+<footer id="bottombar">
+</footer>
+<script src="https://zoggy.github.io/xtmpl/jquery.js" type="text/javascript">_</script>
+<script src="https://zoggy.github.io/xtmpl/bootstrap-collapse.js" type="text/javascript">_</script>
+
+</body>
+</html>
