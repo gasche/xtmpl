@@ -185,7 +185,7 @@ let ml_id_of_param p =
       | "", s -> to_id s
       | p,s -> to_id p ^ "_" ^ to_id s
 
-let fun_of_param loc name p body =
+let fun_of_param loc body (name, p) =
   let id = ml_id_of_param p in
   let label =
     match p.default with
@@ -197,7 +197,9 @@ let fun_of_param loc name p body =
 
 let funs_of_params loc params body =
   let exp = [%expr fun () -> [%e body]] in
-  let exp = Xtmpl.Name_map.fold (fun_of_param loc) params exp in
+  (* list parameters in reverse order to generate them in name order *)
+  let params = Xtmpl.Name_map.fold (fun name p acc -> (name, p) :: acc) params [] in
+  let exp = List.fold_left (fun_of_param loc) exp params in
   [%expr fun ?(env=Xtmpl.env_empty()) -> [%e exp]]
 
 let env_or_defaults loc params exp =
