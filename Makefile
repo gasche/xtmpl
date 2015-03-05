@@ -28,6 +28,7 @@ VERSION=0.11
 
 OCAMLFIND=ocamlfind
 PACKAGES=xmlm
+JS_PACKAGES=$(PACKAGES),js_of_ocaml
 COMPFLAGS=-annot -rectypes -safe-string -g
 OCAMLPP=
 OCAMLLIB:=`$(OCAMLC) -where`
@@ -49,8 +50,13 @@ LIB_CMOFILES=$(LIB_CMXFILES:.cmx=.cmo)
 LIB_CMIFILES=$(LIB_CMXFILES:.cmx=.cmi)
 LIB_OFILES=$(LIB_CMXFILES:.cmx=.o)
 
+LIB_JS=xtmpl_js.cma
+LIB_JS_CMI=$(LIB_JS:.cma=.cmi)
+LIB_JS_CMOFILES=xtmpl.cmo xtmpl_js.cmo
+LIB_JS_CMIFILES=$(LIB_JS_CMOFILES:.cmo=.cmi)
+
 all: byte opt
-byte: $(LIB_BYTE) ppx_xtmpl.byte
+byte: $(LIB_BYTE) $(LIB_JS) ppx_xtmpl.byte
 opt: $(LIB) $(LIB_CMXS) ppx_xtmpl
 
 $(LIB): $(LIB_CMIFILES) $(LIB_CMXFILES)
@@ -61,6 +67,9 @@ $(LIB_CMXS): $(LIB_CMIFILES) $(LIB_CMXFILES)
 
 $(LIB_BYTE): $(LIB_CMIFILES) $(LIB_CMOFILES)
 	$(OCAMLFIND) ocamlc -o $@ -a -package $(PACKAGES) $(LIB_CMOFILES)
+
+$(LIB_JS): $(LIB_JS_CMIFILES) $(LIB_JS_CMOFILES)
+	$(OCAMLFIND) ocamlc -o $@ -a -package $(JS_PACKAGES) $(LIB_JS_CMOFILES)
 
 %.cmx: %.ml %.cmi
 	$(OCAMLFIND) ocamlopt -c -package $(PACKAGES) $(COMPFLAGS) $<
@@ -78,6 +87,11 @@ ppx_xtmpl: $(LIB) ppx_xtmpl.ml
 ppx_xtmpl.byte: $(LIB_BYTE) ppx_xtmpl.ml
 	$(OCAMLFIND) ocamlc -o $@ -package ppx_tools.metaquot,str,$(PACKAGES) \
 	$(COMPFLAGS) -linkpkg $(LIB_BYTE) ppx_xtmpl.ml
+
+xtmpl_js.cmo xtmpl_js.cmi: xtmpl_js.ml
+	$(OCAMLFIND) ocamlc -c -package $(JS_PACKAGES) \
+	-package js_of_ocaml.syntax -syntax camlp4o \
+	$(COMPFLAGS) $<
 
 .PHONY: test_ppx_xtmpl
 
@@ -141,6 +155,8 @@ noheaders:
 .PHONY: depend
 
 .depend depend:
-	$(OCAMLFIND) ocamldep xtmpl*.ml xtmpl*.mli > .depend
+	$(OCAMLFIND) ocamldep `ls xtmpl*.ml xtmpl*.mli | grep -v _js.ml` > .depend
+
+xtmpl_js.cmi xtmpl_js.cmo: xtmpl.cmi
 
 include .depend

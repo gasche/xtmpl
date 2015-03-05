@@ -54,6 +54,10 @@ and attributes = tree list Name_map.t
   (** Attributes of a XML node. Note that the content value of an attribute is
       a list of XML trees, not just a string. *)
 
+(** {[ string_of_name ("",s) = s
+       string_of_name (p, s) = p ^ ":" ^ s ]} *)
+val string_of_name : name -> string
+
 (** {2 Constructors} *)
 
 val node : name -> ?atts: attributes -> tree list -> tree

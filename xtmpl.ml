@@ -157,6 +157,9 @@ type rewrite_stack = (name * attributes * tree list) list
 exception Loop of  rewrite_stack
 
 let atts_empty = Name_map.empty
+let string_of_name = function
+  ("",s) -> s
+| (p, s) -> p ^ ":" ^ s
 
 let node tag ?(atts=atts_empty) subs = E (tag, atts, subs)
 let cdata str = D str

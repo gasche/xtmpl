@@ -1,6 +1,6 @@
 xtmpl.cmo : xtmpl.cmi
 xtmpl.cmx : xtmpl.cmi
+xtmpl.cmi :
 xtmpl_xhtml.cmo : xtmpl.cmi xtmpl_xhtml.cmi
 xtmpl_xhtml.cmx : xtmpl.cmx xtmpl_xhtml.cmi
-xtmpl.cmi :
 xtmpl_xhtml.cmi : xtmpl.cmi
