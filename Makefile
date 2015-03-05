@@ -91,16 +91,20 @@ test_ppx_xtmpl: ppx_xtmpl test_ppx_xtmpl.ml
 
 ##########
 .PHONY: doc
-doc:
+dump.odoc:
+	$(OCAMLFIND) ocamldoc -package $(PACKAGES) -dump $@ -rectypes \
+	xtmpl.mli xtmpl_xhtml.mli
+
+doc: dump.odoc
 	$(MKDIR) doc
-	$(OCAMLFIND) ocamldoc -package $(PACKAGES) xtmpl.mli xtmpl_xhtml.mli \
+	$(OCAMLFIND) ocamldoc -package $(PACKAGES) -load $^ \
 	-rectypes -t Xtmpl -d doc -html
 
-webdoc: doc
-	$(MKDIR) ../xtmpl-gh-pages/refdoc
-	$(CP) doc/* ../xtmpl-gh-pages/refdoc/
-	$(CP) web/index.html web/style.css ../xtmpl-gh-pages/
-
+docstog: dump.odoc
+	$(MKDIR) web/refdoc
+	ocamldoc.opt \
+	-t "Xtmpl reference documentation" \
+	-load $^ -d web/refdoc -g odoc_stog.cmxs
 
 ##########
 install: xtmpl.cmo xtmpl.cmx

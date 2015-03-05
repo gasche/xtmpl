@@ -27,7 +27,7 @@ MKSTOG=mk-stog
 MKSTOG_OCAML_SESSION=mk-stog-ocaml-session
 STOG=./mystog
 STOG_OCAML_SESSION=./mystog-ocaml-session
-DEST_DIR=`pwd`/../../xtmpl-pages
+DEST_DIR=`pwd`/../../xtmpl-gh-pages
 BASE_URL_OPTION=
 STOG_OPTIONS=--stog-ocaml-session "$(STOG_OCAML_SESSION)  -I ../src" -d $(DEST_DIR) $(BASE_URL_OPTION)
 LESSC=lessc
@@ -45,7 +45,7 @@ site: style.css
 
 ocamldoc:
 	rm -f refdoc/*html ref-doc/style.css
-	(cd ../src && make docstog)
+	(cd .. && make docstog)
 
 test:
 	$(MAKE) BASE_URL_OPTION="--local" site
