@@ -1,6 +1,6 @@
 Release 0.11:
-- add ppx_xtmpl: this preprocessor creates function from template
-  files, with the parameter described in the template.
+- add ppx_xtmpl: this preprocessor creates functions from template
+  files or strings, with the parameters described in the template.
   Usage: let doc = [%xtmpl "file.xml"]
          let doc = [%xtmpl.string {| <div>...</div> |} ]
 - some functions renamed (deprecating original ones functions)

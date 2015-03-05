@@ -9,7 +9,26 @@ Xtmpl is <a href="https://github.com/zoggy/xtmpl">hosted on Github</a>.
 </p>
 <subsection title="Releases">
 <ul>
-<li><a href="xtmpl-0.10.tar.gz">0.10</a>
+<li><strong><a href="xtmpl-0.11.tar.gz">0.11</a></strong>
+[2015-03-05]:
+  <ul id="changes0.11">
+    <li>add <doc href="doc#ppx">ppx_xtmpl</doc>:
+     this preprocessor creates functions from template files or strings,
+     with the parameters described in the template. Usage:
+     <ocaml>
+let doc = [%xtmpl "file.xml"]
+let doc = [%xtmpl.string {| <div>...</div> |} ]
+</ocaml></li>
+<li>some functions renamed (deprecating original ones functions),</li>
+<li>add <doc href="refdoc/Xtmpl.html#VALnode">Xtmpl.node</doc> and
+  <doc href="refdoc/Xtmpl.html#VALcdata">Xtmpl.cdata</doc>,
+</li>
+<li>new <doc href="refdoc/Xtmpl_xhtml">Xtmpl_xhtml</doc> module, with convenient
+  functions to create Xhtml trees.</li>
+</ul>
+</li>
+
+<li><strong><a href="xtmpl-0.10.tar.gz">0.10</a></strong>
 [2014-09-25]:
 <ul>
 <li>Use safe-string mode (require OCaml &gt;= 4.02),</li>
@@ -25,15 +44,14 @@ Xtmpl is <a href="https://github.com/zoggy/xtmpl">hosted on Github</a>.
 </ul>
 </li>
 
-
-<li><a href="xtmpl-0.9.tar.gz">0.9</a>
+<li><strong><a href="xtmpl-0.9.tar.gz">0.9</a></strong>
 [2014-03-20]:
 <ul>
 <li>Add <code>Xtmpl.merge_cdata</code> and <code>Xtmpl.merge_cdata_list</code>.</li>
 </ul>
 </li>
 
-<li><a href="xtmpl-0.8.tar.gz">0.8</a>
+<li><strong><a href="xtmpl-0.8.tar.gz">0.8</a></strong>
 [2014-01-15]:
 <ul>
 <li>An attribute value is now a list Xml trees, to improve performance
@@ -51,7 +69,7 @@ Xtmpl is <a href="https://github.com/zoggy/xtmpl">hosted on Github</a>.
 </ul>
 </li>
 
-<li><a href="xtmpl-0.7.tar.gz">0.7</a>
+<li><strong><a href="xtmpl-0.7.tar.gz">0.7</a></strong>
 [2013-10-07]:
 <ul>
 <li>Re-introduce (un)escaping of ampersands, only in attributes
@@ -64,7 +82,7 @@ Xtmpl is <a href="https://github.com/zoggy/xtmpl">hosted on Github</a>.
 </ul>
 </li>
 
-<li><a href="xtmpl-0.6.tar.gz">0.6</a>
+<li><strong><a href="xtmpl-0.6.tar.gz">0.6</a></strong>
 [2013-03-19]:
 <ul>
 <li>do not (un)escape ampersand in attributes,</li>
@@ -72,7 +90,7 @@ Xtmpl is <a href="https://github.com/zoggy/xtmpl">hosted on Github</a>.
 <li>generate and install .cmxs file.</li>
 </ul>
 </li>
-<li><a href="xtmpl-0.5.tar.gz">0.5</a>
+<li><strong><a href="xtmpl-0.5.tar.gz">0.5</a></strong>
 [2012-12-18]:
   <ul>
     <li>mod: do not use string representation to check for changes in
@@ -84,17 +102,17 @@ Xtmpl is <a href="https://github.com/zoggy/xtmpl">hosted on Github</a>.
   </ul>
 </li>
 
-<li><a href="xtmpl-0.4.tar.gz">0.4</a>
+<li><strong><a href="xtmpl-0.4.tar.gz">0.4</a></strong>
 [2012-11-22]: Add <code>string_of_xmls</code>.
 </li>
 
-<li><a href="xtmpl-0.3.tar.gz">0.3</a>
+<li><strong><a href="xtmpl-0.3.tar.gz">0.3</a></strong>
 [2012-08-30]: Minor <a href="https://github.com/zoggy/xtmpl/blob/master/Changes">changes</a> and fixes.</li>
 
-<li><a href="xtmpl-0.2.tar.gz">0.2</a>
+<li><strong><a href="xtmpl-0.2.tar.gz">0.2</a></strong>
 [2012-08-28]: Minor <a href="https://github.com/zoggy/xtmpl/blob/master/Changes">changes</a>.</li>
 
-<li><a href="xtmpl-0.1.tar.gz">0.1</a> [2012-06-20]: Initial release.</li>
+<li><strong><a href="xtmpl-0.1.tar.gz">0.1</a></strong> [2012-06-20]: Initial release.</li>
 </ul>
 
 </subsection>
