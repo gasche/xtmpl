@@ -123,7 +123,7 @@ archive:
 
 #####
 clean:
-	$(RM) *.cm* *.o *.annot *.a ppx_xtmpl ppx_xtmpl.byte
+	$(RM) *.cm* *.o *.annot *.a ppx_xtmpl ppx_xtmpl.byte dump.odoc
 
 # headers :
 ###########
