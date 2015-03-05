@@ -1,0 +1,72 @@
+<page title="Documentation"
+navbar-doc="active"
+>
+
+<section id="lib" title="Library">
+<p>
+Reference documentation of the Xtmpl library is <a href="refdoc/index.html">here</a>.
+</p>
+</section>
+<section id="ppx" title="Syntax extension">
+<p>
+The ppx preprocessor allows the use of the following extension nodes:
+</p>
+<ocaml>
+let doc = [%xtmpl "file.xml"]
+let doc = [%xtmpl.string {| &lt;div&gt;...&lt;/div&gt; |} ]
+</ocaml>
+<p>In the first case, the file "file.xml" is read at compilation time,
+and its content is embedded in the code. A function is generated,
+taking the parameters defined in the file and returning the
+template where some nodes have been replaced by parameters.
+</p>
+<p>The second extension node, <ml>[%xtmpl.string ...]</ml>,
+does the same but the XML code is given as a string instead of
+a file.</p>
+<p>
+In the given XML code, some nodes are described as parameters of
+the function to generate. These parameters are nodes with a
+<xml>param_="true"</xml> attribute.
+</p>
+<p>By default, a parameter will be of type <ml>string</ml>, but the type
+can be changed with the <xml>type_="..."</xml> attribute.
+If <xml>type_="xmls"</xml> or <xml>type_="xml"</xml>, then
+the parameter will be of type <ml>Xtmpl.tree list</ml>. If <xml>type_</xml>
+has another value, say <ml>t</ml>, then an attribute <xml>to_xml_</xml>
+must be provided, containing code that will map a value of type <ml>t</ml>
+to <ml>Xtmpl.tree list</ml>.
+</p>
+<p>
+A parameter is mandatory by default, but can be set as optional
+with <xml>optional_="true"</xml>. In this case, the default value
+of the parameter is given in the subnodes of the parameter node.
+</p>
+<p>
+By default, the parameter name will be the name of the XML node. Another
+name can be given, using the <xml>name_="..."</xml> attribute.
+</p>
+<p>Here is an example of template stored in <code>page.tmpl</code>:</p>
+<hxml defer_="1"><include raw="true" file="./page.tmpl"/></hxml>
+<p>
+The following OCaml code in <code>example.ml</code>
+</p>
+<ocaml defer_="1"><include raw="true" file="./example.ml"/></ocaml>
+<p>can be compiled with </p>
+<command-line>ocamlfind ocamlc -c -package xtmpl -rectypes example.ml</command-line>
+<p>
+And the interface of the <code>page</code> function is
+</p>
+<ocaml>
+val page :
+  ?env:unit Xtmpl.env ->
+  contents:Xtmpl.tree list ->
+  ?debug:Xtmpl.tree list ->
+  title:string -> ?value:int -> unit -> Xtmpl.tree list
+</ocaml>
+<p>
+The <ml>env</ml> parameter can be used to specify additional rewrite rules.
+Indeed, the Xtmpl rewrite engine is used to replace the paramter nodes in
+the template by the the parameter values.
+</p>
+</section>
+</page>

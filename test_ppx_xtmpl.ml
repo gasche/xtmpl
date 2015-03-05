@@ -29,7 +29,7 @@ type t = [%xtmpl.string.type {|<h2><foo param_="true" optional_="true"/></h2>|} 
 let page = [%xtmpl "page.tmpl"]
 let h2 = [%xtmpl.string {|<h2><foo param_="true"/></h2>|} ]
 
-let p = page ~page_title: "The page title"
+let p = page ~title: "The page title"
   ~contents: (h2 ~foo: "Hello world !" ())
   ~value: 3
   ()

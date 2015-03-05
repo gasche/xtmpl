@@ -1,0 +1,41 @@
+<html>
+<head>
+<title><site-title/> : <doc-title/></title><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<link rel="stylesheet" type="text/css" href="&lt;site-url/&gt;/style.css"></link>
+<rssfeed/>
+</head><body>
+<div id="page">
+<include file="menubar.tmpl"/>
+<div id="header">
+<!--<if doc-type="post">><div class="doc-navbar"><if previous=""><span/><div class="navleft"><previous/></div></if><if next=""><span/><div class="navright"><next/></div></if></div></if>-->
+<if doc-type="ocamldoc"><main_/><div class="page-title"><doc-title/></div></if>
+</div>
+<if withsidebar="true"><include file="sidebar.tmpl"/><span/></if>
+<if doc-type="post"><div class="date"><doc-date/></div></if>
+<doc-body/>
+
+<if doc-type="post"><div class="comments">
+<div>
+<div class="doc-keywords">
+  <div class="bloc-keywords">
+  Topics: <div class="keywords"><doc-topics sep=", "/></div>
+  </div>
+  <div class="bloc-keywords">
+  Keywords: <div class="keywords"><doc-keywords sep=", "/></div>
+  </div>
+</div>
+</div>
+<div itemprop="articleSection" class="section">
+  <comments/>
+</div>
+</div>
+</if>
+</div>
+
+<footer id="bottombar">
+</footer>
+<script type="text/javascript" src="&lt;site-url/&gt;/jquery.js">_</script>
+<script type="text/javascript" src="&lt;site-url/&gt;/bootstrap-collapse.js">_</script>
+
+</body>
+</html>

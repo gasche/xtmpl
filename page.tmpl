@@ -1,16 +1,16 @@
 <html>
 <header>
-<title><page-title param_="true"/></title>
+<title><title_ param_="true" name_="title"/></title>
 </header>
 <body>
 <h1><page-title/></h1>
 <contents param_="true" type_="xml"/>
-<debug param_="true" type_="xml" optional_="true">
-hello le debug
-</debug>
+<debug param_="true" type_="xml" optional_="true">Hello debug</debug>
 <p>
-<value param_="true" type_="int" optional_="true"
-  to_xml_="fun x -&gt; [Xtmpl.D (string_of_int x)]">1+1</value>
+<value
+  param_="true" type_="int" optional_="true"
+  to_xml_="fun x -&gt; [Xtmpl.D (string_of_int x)]">1+1
+</value>
 </p>
 </body>
 </html>

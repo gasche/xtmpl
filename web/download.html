@@ -1,0 +1,120 @@
+<page title="Download/Install"
+navbar-download="active"
+>
+<prepare-toc depth="2">
+<toc/>
+<section id="download" title="Download">
+<p>
+Xtmpl is <a href="https://github.com/zoggy/xtmpl">hosted on Github</a>.
+</p>
+<subsection title="Releases">
+<ul>
+<li><a href="xtmpl-0.10.tar.gz">0.10</a>
+[2014-09-25]:
+<ul>
+<li>Use safe-string mode (require OCaml &gt;= 4.02),</li>
+<li>new parameter <code>~xml_atts</code> for
+    <code>Xtmpl.string_of_{xml,xmls,xml_atts}</code>
+    to indicate whether or not to keep valid XML in attributes when
+    printing an XML tree. Default is true, to be backward-compatible.
+    When it is true, Xtmpl tries to unescape some entities. Only
+    lt, gt, amp, quot and apos named entities are unescaped.
+    When an entity is given by its character code, only the ones
+    with code between 0 and 255 are unescaped.
+</li>
+</ul>
+</li>
+
+
+<li><a href="xtmpl-0.9.tar.gz">0.9</a>
+[2014-03-20]:
+<ul>
+<li>Add <code>Xtmpl.merge_cdata</code> and <code>Xtmpl.merge_cdata_list</code>.</li>
+</ul>
+</li>
+
+<li><a href="xtmpl-0.8.tar.gz">0.8</a>
+[2014-01-15]:
+<ul>
+<li>An attribute value is now a list Xml trees, to improve performance
+    (before, attribute values were continously parsed as XML and printed back
+    as string),</li>
+<li>New <code>protect_</code> attribute, to remove from environment the rules
+    in this attribute. For example:
+    <code>&lt;foo protect_="title,id" ...&gt;...&lt;/foo&gt;</code>
+    will prevent applying <code>&lt;title&gt;</code> and
+    <code>&lt;id&gt;</code> rules in the node's children,
+</li>
+<li>The rewrite is now done as a fold, taking a data in parameter and
+    returning it or another value of same type.
+</li>
+</ul>
+</li>
+
+<li><a href="xtmpl-0.7.tar.gz">0.7</a>
+[2013-10-07]:
+<ul>
+<li>Re-introduce (un)escaping of ampersands, only in attributes
+ specified in attribute escamp_.
+ For example:
+   <div class="code">&lt;a escamp_="href" href="http://foo.net/x?t=1&amp;amp;sort=0"&gt;...&lt;/a&gt;</div>
+ Without <code class="code">escamp_="href"</code>, ampersand is not escaped,
+ producing an invalid XML code during rewrite process.
+</li>
+</ul>
+</li>
+
+<li><a href="xtmpl-0.6.tar.gz">0.6</a>
+[2013-03-19]:
+<ul>
+<li>do not (un)escape ampersand in attributes,</li>
+<li>fix META version,</li>
+<li>generate and install .cmxs file.</li>
+</ul>
+</li>
+<li><a href="xtmpl-0.5.tar.gz">0.5</a>
+[2012-12-18]:
+  <ul>
+    <li>mod: do not use string representation to check for changes in
+    fixpoint computation</li>
+    <li>API change: Xtmpl.E of tag * atts * subs</li>
+    <li>API change: No more Xtmpl.T constructor</li>
+    <li>API change: make API more homogeneous</li>
+    <li>API change: handle prefix in nodes and attributes</li>
+  </ul>
+</li>
+
+<li><a href="xtmpl-0.4.tar.gz">0.4</a>
+[2012-11-22]: Add <code>string_of_xmls</code>.
+</li>
+
+<li><a href="xtmpl-0.3.tar.gz">0.3</a>
+[2012-08-30]: Minor <a href="https://github.com/zoggy/xtmpl/blob/master/Changes">changes</a> and fixes.</li>
+
+<li><a href="xtmpl-0.2.tar.gz">0.2</a>
+[2012-08-28]: Minor <a href="https://github.com/zoggy/xtmpl/blob/master/Changes">changes</a>.</li>
+
+<li><a href="xtmpl-0.1.tar.gz">0.1</a> [2012-06-20]: Initial release.</li>
+</ul>
+
+</subsection>
+</section>
+<section id="install" title="Install">
+<p>
+Xtmpl requires <a href="http://erratique.ch/software/xmlm">Xmlm >= 1.1.0</a>
+to be installed.
+</p>
+<p>To compile and install:
+</p>
+<ul>
+<li><span class="shell">tar xvfz xtmpl-XXX.tar.gz</span></li>
+<li><span class="shell">cd xtmpl-XXX</span></li>
+<li><span class="shell">make all install</span></li>
+</ul>
+<p>
+This will install the <tt>xtmpl</tt> package with findlib.
+</p>
+</section>
+</prepare-toc>
+
+</page>
