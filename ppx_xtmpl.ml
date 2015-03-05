@@ -305,7 +305,7 @@ let map_xtmpl exp =
   map_tmpl loc tmpl
 
 let typ_of_params loc params =
-  let f name p acc =
+  let f acc (name, p) =
     let opt = p.default <> None in
     let label = Printf.sprintf "%s%s"
       (if opt then "?" else "")
@@ -326,7 +326,9 @@ let typ_of_params loc params =
     in
     Typ.arrow label typ acc
   in
-  let typ = Xtmpl.Name_map.fold f params [%type: unit -> Xtmpl.tree list] in
+ (* list parameters in reverse order to generate them in name order *)
+  let params = Xtmpl.Name_map.fold (fun name p acc -> (name, p) :: acc) params [] in
+  let typ = List.fold_left f [%type: unit -> Xtmpl.tree list] params in
   [%type: ?env: unit Xtmpl.env -> [%t typ] ]
 
 let map_xtmpl_string_type exp =
