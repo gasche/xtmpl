@@ -1,3 +1,7 @@
+Next release:
+- fix Xtmpl_js.Dom_of_xtmpl to unescape xml in attributes, using
+  Regexp module of Js_of_ocaml
+
 Release 0.11:
 - add ppx_xtmpl: this preprocessor creates functions from template
   files or strings, with the parameters described in the template.

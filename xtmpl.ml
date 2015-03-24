@@ -132,7 +132,6 @@ let escape_ampersand s =
 let re_amp = Str.regexp_string "&amp;"
 let unescape_ampersand s = Str.global_replace re_amp "&" s
 
-
 exception No_change
 
 module Name_ord = struct
@@ -230,6 +229,8 @@ let unescape_entities =
   in
   fun s -> Str.global_substitute re f s
 
+(* !!! When fixing these string_of_ functions, fix also the javascript
+   !!! versions in xtmpl_js.ml *)
 let rec string_of_xml ?xml_atts tree =
   try
     let b = Buffer.create 256 in

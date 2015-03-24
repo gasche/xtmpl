@@ -410,6 +410,26 @@ val apply_into_file : 'a -> ?head:string -> 'a env -> infile: string -> outfile:
 *)
 val apply_string_into_file : 'a -> ?head:string -> 'a env -> outfile: string -> string -> 'a
 
+(** {2 Utilities} *)
+
+(*i==v=[String.split_string]=1.2====*)
+(** Separate the given string according to the given list of characters.
+@author Maxence Guesdon
+@version 1.2
+@param keep_empty is [false] by default. If set to [true],
+   the empty strings between separators are kept.
+@cgname String.split_string*)
+val split_string : ?keep_empty:bool -> string -> char list -> string list
+(*/i==v=[String.split_string]=1.2====*)
+
+(*i==v=[String.strip_string]=1.0====*)
+(** [strip_string s] removes all leading and trailing spaces from the given string.
+@author Maxence Guesdon
+@version 1.0
+@cgname String.strip_string*)
+val strip_string : string -> string
+(*/i==v=[String.strip_string]=1.0====*)
+
 (** {2 Deprecated functions} *)
 
 (** @deprecated Use {!get_att}. *)
