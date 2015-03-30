@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <rss version="2.0">
        <channel>
-         <title>Xtmpl : release</title>
+         <title>Xtmpl : js</title>
          <link>https://zoggy.github.io/xtmpl</link>
          <description>Xml template library for OCaml</description>
          <managingEditor>maxence 'DOT' guesdon 'AT' inria 'DOT' fr</managingEditor>
@@ -22,18 +22,6 @@ Changes:
 &lt;a href=&quot;https://zoggy.github.io/xtmpl/posts/xtmpl-0.12.html&quot;&gt;&lt;img alt=&quot;next&quot; src=&quot;https://zoggy.github.io/xtmpl/next.png&quot;/&gt;&lt;/a&gt;</description>
       <pubDate>30 Mar 2015 00:00:00 +0000</pubDate>
       <guid isPermaLink="true">https://zoggy.github.io/xtmpl/posts/xtmpl-0.12.html</guid>
-    </item><item>
-      <title>Xtmpl 0.11</title>
-      <link>https://zoggy.github.io/xtmpl/posts/xtmpl-0.11.html</link>
-      <description>
-&lt;p&gt;
-Release 0.11 of Xtmpl is available from
-the &lt;a href=&quot;https://zoggy.github.io/xtmpl/download.html&quot;&gt;download page&lt;/a&gt;.
-Changes:
-&lt;/p&gt;
-&lt;a href=&quot;https://zoggy.github.io/xtmpl/posts/xtmpl-0.11.html&quot;&gt;&lt;img alt=&quot;next&quot; src=&quot;https://zoggy.github.io/xtmpl/next.png&quot;/&gt;&lt;/a&gt;</description>
-      <pubDate>05 Mar 2015 00:00:00 +0000</pubDate>
-      <guid isPermaLink="true">https://zoggy.github.io/xtmpl/posts/xtmpl-0.11.html</guid>
     </item>
        </channel>
      </rss>

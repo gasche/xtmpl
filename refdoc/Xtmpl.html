@@ -499,6 +499,22 @@ As <a href="Xtmpl.html#VALapply_to_file"><code class="code">Xtmpl.apply_to_file<
 As <a href="Xtmpl.html#VALapply_into_file"><code class="code">Xtmpl.apply_into_file</code></a>, but read the XML from a string instead of a file.<br/>
 </div>
 <br/>
+<div class="section-title" id="2_Utilities">Utilities</div><br/>
+
+<pre><span id="VALsplit_string"><span class="keyword">val</span> split_string</span> : <code class="type">?keep_empty:bool -&gt; string -&gt; char list -&gt; string list</code></pre><div class="info">
+Separate the given string according to the given list of characters.<br/>
+<b>Author(s):</b> Maxence Guesdon<br/>
+<b>Version:</b> 1.2<br/>
+</div>
+<div class="param_info"><code class="code">keep_empty</code> : is <code class="code">false</code> by default. If set to <code class="code">true</code>,
+   the empty strings between separators are kept.</div>
+
+<pre><span id="VALstrip_string"><span class="keyword">val</span> strip_string</span> : <code class="type">string -&gt; string</code></pre><div class="info">
+<code class="code">strip_string s</code> removes all leading and trailing spaces from the given string.<br/>
+<b>Author(s):</b> Maxence Guesdon<br/>
+<b>Version:</b> 1.0<br/>
+</div>
+<br/>
 <div class="section-title" id="2_Deprecatedfunctions">Deprecated functions</div><br/>
 
 <pre><span id="VALget_arg"><span class="keyword">val</span> get_arg</span> : <code class="type"><a href="Xtmpl.html#TYPEattributes">attributes</a> -&gt; <a href="Xtmpl.html#TYPEname">name</a> -&gt; <a href="Xtmpl.html#TYPEtree">tree</a> list option</code></pre><div class="info">

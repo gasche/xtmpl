@@ -164,6 +164,8 @@
     ?head:string <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="constructor">Xtmpl</span>.env <span class="keywordsign">-&gt;</span> infile:string <span class="keywordsign">-&gt;</span> outfile:string <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a<br/>
   <span class="keyword">val</span> apply_string_into_file :<br/>
     <span class="keywordsign">'</span>a <span class="keywordsign">-&gt;</span> ?head:string <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="constructor">Xtmpl</span>.env <span class="keywordsign">-&gt;</span> outfile:string <span class="keywordsign">-&gt;</span> string <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a<br/>
+  <span class="keyword">val</span> split_string : ?keep_empty:bool <span class="keywordsign">-&gt;</span> string <span class="keywordsign">-&gt;</span> char list <span class="keywordsign">-&gt;</span> string list<br/>
+  <span class="keyword">val</span> strip_string : string <span class="keywordsign">-&gt;</span> string<br/>
   <span class="keyword">val</span> get_arg : <span class="constructor">Xtmpl</span>.attributes <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl</span>.name <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl</span>.tree list option<br/>
   <span class="keyword">val</span> get_arg_cdata : <span class="constructor">Xtmpl</span>.attributes <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl</span>.name <span class="keywordsign">-&gt;</span> string option<br/>
   <span class="keyword">val</span> opt_arg :<br/>
