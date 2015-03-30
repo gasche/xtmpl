@@ -1,4 +1,4 @@
-Next release:
+Release 0.12:
 - fix Xtmpl_js.Dom_of_xtmpl to unescape xml in attributes, using
   Regexp module of Js_of_ocaml
 

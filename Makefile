@@ -24,7 +24,7 @@
 ####################################################################################
 
 # DO NOT FORGET TO UPDATE META FILE
-VERSION=0.11
+VERSION=0.12
 
 OCAMLFIND=ocamlfind
 PACKAGES=xmlm
