@@ -308,7 +308,43 @@ and parse_attribute_value pos lb =
       error (loc_of_pos pos 1)
         "Unexpected end of stream while parsing attribute value"
 
-let xml = {|<!--hello comment !-->bla bl <strong>bla</strong> |}
+(** FIXME: escape what must be escaped *)
+let print_att buf name value =
+  Printf.bprintf buf "%s=\"%s\"" (string_of_name name) value
+
+let rec print_tree buf = function
+| C { comment } ->
+    Printf.bprintf buf "<!--%s-->" comment
+| D { text ; quoted = true } ->
+    Printf.bprintf buf "<![CDATA[%s]]>" text
+| D { text ; quoted = false } ->
+    Printf.bprintf buf "%s" text
+| E { name ; atts ; subs } ->
+    Printf.bprintf buf "<%s" (string_of_name name);
+    Name_map.iter
+      (fun name (value,_) ->
+         Buffer.add_string buf " ";
+         print_att buf name value
+      )
+      atts;
+    match subs with
+      [] -> Buffer.add_string buf "/>"
+    | _ ->
+        Buffer.add_string buf ">";
+        List.iter (print_tree buf) subs;
+        Printf.bprintf buf "</%s>" (string_of_name name)
+
+let string_of_xml t =
+  let buf = Buffer.create 512 in
+  print_tree buf t ;
+  Buffer.contents buf
+
+let string_of_xmls l =
+  let buf = Buffer.create 512 in
+  List.iter (print_tree buf) l;
+  Buffer.contents buf
+
+let xml = {|<!--hello comment !-->bla bl <strong title="coucou&lt;">bla</strong> foo bar|}
 let tree =
   try
     let pos_start =
@@ -319,7 +355,7 @@ let tree =
         pos_start
         (U.from_string xml)
     in
-    ignore(xmls)
+    print_endline (string_of_xmls xmls)
   with
   Error e ->
       prerr_endline (string_of_error e)
