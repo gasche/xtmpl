@@ -27,6 +27,8 @@
 
 open Xtmpl
 
+type tree = rewrite_tree
+type attributes = xml_attributes
 type elt_fun =
   ?xid: tree list -> ?id: string ->
   ?xclass: tree list -> ?class_: string -> ?classes: string list ->
@@ -72,7 +74,7 @@ val address : elt_fun
 (** {2 Blocks} *)
 
 val p : elt_fun
-val hr : Xtmpl.tree
+val hr : tree
 val pre : elt_fun
 val blockquote : elt_fun
 val ol : elt_fun
@@ -117,8 +119,8 @@ val rp : elt_fun
 val bdi : elt_fun
 val bdo : elt_fun
 val span : elt_fun
-val br : Xtmpl.tree
-val wbr : Xtmpl.tree
+val br : tree
+val wbr : tree
 
 (** {2 Edits} *)
 

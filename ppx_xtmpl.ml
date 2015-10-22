@@ -87,7 +87,7 @@ let read_template loc file =
 
 type parameter =
   { name : Xtmpl.name ;
-    default : Xtmpl.tree list option ;
+    default : Xtmpl.rewrite_tree list option ;
     typ : [ `CData | `Xmls | `Other of string * string ] ;
     mlname : string option ;
   }

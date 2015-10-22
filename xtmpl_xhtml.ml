@@ -26,6 +26,8 @@
 (** *)
 open Xtmpl
 
+type tree = rewrite_tree
+type attributes = xml_attributes
 type elt_fun =
   ?xid: tree list -> ?id: string ->
   ?xclass: tree list -> ?class_: string -> ?classes: string list ->

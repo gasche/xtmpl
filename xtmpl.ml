@@ -26,172 +26,44 @@
 (** *)
 
 type name = string * string
+module B = Xtmpl_base
 
-(*c==v=[File.string_of_file]=1.1====*)
-let string_of_file name =
-  let chanin = open_in_bin name in
-  let len = 1024 in
-  let s = Bytes.create len in
-  let buf = Buffer.create len in
-  let rec iter () =
-    try
-      let n = input chanin s 0 len in
-      if n = 0 then
-        ()
-      else
-        (
-         Buffer.add_subbytes buf s 0 n;
-         iter ()
-        )
-    with
-      End_of_file -> ()
-  in
-  iter ();
-  close_in chanin;
-  Buffer.contents buf
-(*/c==v=[File.string_of_file]=1.1====*)
-
-(*c==v=[String.split_string]=1.2====*)
-let split_string ?(keep_empty=false) s chars =
-  let len = String.length s in
-  let rec iter acc pos =
-    if pos >= len then
-      match acc with
-        "" -> if keep_empty then [""] else []
-      | _ -> [acc]
-    else
-      if List.mem s.[pos] chars then
-        match acc with
-          "" ->
-            if keep_empty then
-              "" :: iter "" (pos + 1)
-            else
-              iter "" (pos + 1)
-        | _ -> acc :: (iter "" (pos + 1))
-      else
-        iter (Printf.sprintf "%s%c" acc s.[pos]) (pos + 1)
-  in
-  iter "" 0
-(*/c==v=[String.split_string]=1.2====*)
-
-(*c==v=[String.strip_string]=1.0====*)
-let strip_string s =
-  let len = String.length s in
-  let rec iter_first n =
-    if n >= len then
-      None
-    else
-      match s.[n] with
-        ' ' | '\t' | '\n' | '\r' -> iter_first (n+1)
-      | _ -> Some n
-  in
-  match iter_first 0 with
-    None -> ""
-  | Some first ->
-      let rec iter_last n =
-        if n <= first then
-          None
-        else
-          match s.[n] with
-            ' ' | '\t' | '\n' | '\r' -> iter_last (n-1)
-          |	_ -> Some n
-      in
-      match iter_last (len-1) with
-        None -> String.sub s first 1
-      |	Some last -> String.sub s first ((last-first)+1)
-(*/c==v=[String.strip_string]=1.0====*)
-
-(*c==v=[File.file_of_string]=1.1====*)
-let file_of_string ~file s =
-  let oc = open_out file in
-  output_string oc s;
-  close_out oc
-(*/c==v=[File.file_of_string]=1.1====*)
-
-module Str_map = Map.Make (struct type t = string * string let compare = compare end);;
+let split_string = B.split_string
+let strip_string = B.strip_string
 
 let tag_main = "main_"
 let tag_env = "env_"
 let att_defer = "defer_"
-let att_escamp = "escamp_"
+let att_escamp = B.att_escamp
 let att_protect = "protect_"
 
-let re_escape = Str.regexp "&\\(\\([a-z]+\\)\\|\\(#[0-9]+\\)\\);"
-let escape_ampersand s =
-  let len = String.length s in
-  let b = Buffer.create len in
-  for i = 0 to len - 1 do
-    match s.[i] with
-      '&' when Str.string_match re_escape s i ->
-        Buffer.add_char b '&'
-    | '&' -> Buffer.add_string b "&amp;"
-    | c -> Buffer.add_char b c
-  done;
-  Buffer.contents b
-
-let re_amp = Str.regexp_string "&amp;"
-let unescape_ampersand s = Str.global_replace re_amp "&" s
 
 exception No_change
 
-module Name_ord = struct
-  type t = name
-  let compare (p1,s1) (p2,s2) =
-    match String.compare s1 s2 with
-      0 -> String.compare p1 p2
-    | n -> n
-  end
+module Name_ord = B.Name_ord
+module Name_map = B.Name_map
+module Name_set = B.Name_set
 
-module Name_map = Map.Make (Name_ord)
-module Name_set = Set.Make (Name_ord)
-
-type 'a env = ('a callback) Str_map.t
-and 'a callback = 'a -> 'a env -> attributes -> tree list -> 'a * tree list
-and tree =
-    E of name * attributes * tree list
+type 'a attributes = 'a Name_map.t
+type 'a tree = 'a B.tree =
+    E of name * 'a attributes * 'a tree list
   | D of string
-and attributes = tree list Name_map.t
+type rewrite_tree = (('a tree list) as 'a) tree
+type xml_attributes = rewrite_tree list attributes
+type str_attributes = string attributes
 
-type rewrite_stack = (name * attributes * tree list) list
+type 'a env = ('a callback) Name_map.t
+and 'a callback = 'a -> 'a env -> xml_attributes -> rewrite_tree list ->
+  'a * rewrite_tree list
+
+type rewrite_stack = (name * xml_attributes * rewrite_tree list) list
 exception Loop of  rewrite_stack
 
-let atts_empty = Name_map.empty
-let string_of_name = function
-  ("",s) -> s
-| (p, s) -> p ^ ":" ^ s
+let atts_empty = B.atts_empty
+let string_of_name = B.string_of_name
+let node = B.node
+let cdata = B.cdata
 
-let node tag ?(atts=atts_empty) subs = E (tag, atts, subs)
-let cdata str = D str
-
-let gen_atts_to_escape =
-  let key = ("", att_escamp) in
-  fun to_s atts ->
-    let spec =
-      try Some (Name_map.find key atts)
-      with Not_found -> None
-    in
-    match spec with
-      None -> Name_set.empty
-    | Some x ->
-        let s = to_s x in
-        let l = split_string s [',' ; ';'] in
-        List.fold_left
-          (fun set s ->
-             let s = strip_string s in
-             let name =
-               match split_string s [':'] with
-                 [] | [_] -> ("",s)
-               | p :: q -> (p, String.concat ":" q)
-             in
-             Name_set.add name set
-          )
-          Name_set.empty
-          l
-
-let atts_to_escape = gen_atts_to_escape (fun x -> x)
-let xml_atts_to_escape = gen_atts_to_escape
-  (function [D s] -> s
-   | _ -> failwith ("Invalid value for attribute "^att_escamp))
 
 let get_att atts name =
   try Some (Name_map.find name atts)
@@ -229,9 +101,12 @@ let unescape_entities =
   in
   fun s -> Str.global_substitute re f s
 
+
 (* !!! When fixing these string_of_ functions, fix also the javascript
    !!! versions in xtmpl_js.ml *)
 let rec string_of_xml ?xml_atts tree =
+  assert false
+  (*
   try
     let b = Buffer.create 256 in
     let ns_prefix s = Some s in
@@ -250,23 +125,24 @@ let rec string_of_xml ?xml_atts tree =
         line col (Xmlm.error_message error)
       in
       failwith msg
-
+*)
 and string_of_xmls ?xml_atts l = String.concat "" (List.map (string_of_xml ?xml_atts) l)
 and string_of_xml_atts ?(xml_atts=true) atts =
-      let atts_to_escape = xml_atts_to_escape atts in
+  assert false
+  (*    let atts_to_escape = B.xml_atts_to_escape atts in
       let f name xmls acc =
         match name with
-          ("", s) when s = att_escamp -> acc
+          ("", s) when s = B.att_escamp -> acc
         | ("", s) when s = att_protect -> acc
         | _ ->
             let s = string_of_xmls xmls in
             let escamp = Name_set.mem name atts_to_escape in
-            let s = if escamp then unescape_ampersand s else s in
+            let s = if escamp then B.unescape_ampersand s else s in
             let s = if xml_atts then s else unescape_entities s in
             (name, s) :: acc
       in
       List.rev (Name_map.fold f atts [])
-
+*)
 let get_att_cdata atts name =
   match get_att atts name with
   | Some [D s] -> Some s
@@ -292,15 +168,15 @@ let string_of_stack l =
   List.iter f (List.rev l);
   Buffer.contents b
 
-let env_add_cb ?(prefix="") name = Str_map.add (prefix, name)
+let env_add_cb ?(prefix="") name = Name_map.add (prefix, name)
 
 let env_get k env =
-  try Some (Str_map.find k env)
+  try Some (Name_map.find k env)
   with Not_found -> None
 
 let env_empty () =
   let (f_main : 'a callback) = fun data env atts subs -> (data, subs) in
-  env_add_cb tag_main f_main Str_map.empty
+  env_add_cb tag_main f_main Name_map.empty
 
 let limit =
   try Some (int_of_string (Sys.getenv "XTMPL_FIXPOINT_LIMIT"))
@@ -325,7 +201,7 @@ let string_of_env env =
     in
     s :: acc
   in
-  String.concat ", " (Str_map.fold f env [])
+  String.concat ", " (Name_map.fold f env [])
 
 let rec xml_of_source s_source source =
  try
@@ -353,11 +229,11 @@ and xmls_of_atts atts =
         (fun map (name, s) -> Name_map.add name s map)
         Name_map.empty atts
       in
-      let atts_to_escape = atts_to_escape atts in
+      let atts_to_escape = B.atts_to_escape atts in
       Name_map.mapi
         (fun name s ->
            let escamp = Name_set.mem name atts_to_escape in
-           let s = if escamp then escape_ampersand s else s in
+           let s = if escamp then B.escape_ampersand s else s in
            match xml_of_string s with
              E (_,_,xmls) -> (* remove main_ tag*) xmls
            | _ -> assert false
@@ -394,14 +270,14 @@ let protect_in_env env atts =
     None -> env
   | Some [D s] ->
       let f env s =
-        match split_string s [':'] with
+        match B.split_string s [':'] with
           [] -> env
-        | [s] | ["" ; s] -> Str_map.remove ("",s) env
+        | [s] | ["" ; s] -> Name_map.remove ("",s) env
         | s1 :: q ->
             let s2 = String.concat ":" q in
-            Str_map.remove (s1, s2) env
+            Name_map.remove (s1, s2) env
       in
-      List.fold_left f env (split_string s [',' ; ';'])
+      List.fold_left f env (B.split_string s [',' ; ';'])
   | _ -> failwith ("Invalid value for attribute "^att_protect)
 
 let max_rewrite_depth =
@@ -542,7 +418,7 @@ let merge_cdata_list =
       let subs = f [] subs in
       f ((E (t, atts, subs)) :: acc) q
   in
-  f []
+  fun l -> f [] l
 
 let merge_cdata t =
   match t with
@@ -556,12 +432,12 @@ let apply_to_xmls data env xmls =
 
 let apply_to_xml data env xml = apply_to_xmls data env [xml] ;;
 
-let (apply_to_string : 'a -> 'a env -> string -> 'a * tree list) = fun data env s ->
+let (apply_to_string : 'a -> 'a env -> string -> 'a * rewrite_tree list) = fun data env s ->
   let xml = xml_of_string s in
   apply_to_xml data env xml
 
 let apply_to_file data env file =
-  let s = string_of_file file in
+  let s = B.string_of_file file in
   let xml = xml_of_string s in
   apply_to_xml data env xml
 
@@ -569,14 +445,14 @@ let apply_into_file data ?head env ~infile ~outfile =
   let (data, xmls) = apply_to_file data env infile in
   let s = string_of_xmls xmls in
   let s = match head with None -> s | Some h -> h^s in
-  file_of_string ~file: outfile s;
+  B.file_of_string ~file: outfile s;
   data
 
 let apply_string_into_file data ?head env ~outfile s =
   let (data, xmls) = apply_to_string data env s in
   let s = string_of_xmls xmls in
   let s = match head with None -> s | Some h -> h^s in
-  file_of_string ~file: outfile s;
+  B.file_of_string ~file: outfile s;
   data
 
 let string_of_atts atts =

@@ -47,12 +47,17 @@ module Name_map : Map.S with type key = name
 (** Sets of names. *)
 module Name_set : Set.S with type elt = name
 
-type tree =
-    E of name * attributes * tree list
+type 'a attributes = 'a Name_map.t
+type 'a tree =
+    E of name * 'a attributes * 'a tree list
   | D of string
-and attributes = tree list Name_map.t
-  (** Attributes of a XML node. Note that the content value of an attribute is
+type rewrite_tree = (('a tree list) as 'a) tree
+type xml_attributes = rewrite_tree list attributes
+  (** Attributes of a XML node in a rewrite tree.
+      Note that the content value of an attribute is
       a list of XML trees, not just a string. *)
+
+type str_attributes = string attributes
 
 (** {[ string_of_name ("",s) = s
        string_of_name (p, s) = p ^ ":" ^ s ]} *)
@@ -60,41 +65,41 @@ val string_of_name : name -> string
 
 (** {2 Constructors} *)
 
-val node : name -> ?atts: attributes -> tree list -> tree
-val cdata : string -> tree
+val node : name -> ?atts: 'a attributes -> 'a tree list -> 'a tree
+val cdata : string -> 'a tree
 
 (** {2 Attributes}
 
 Here are some convenient functions to work with attributes: building, querying. *)
 
 (** Empty {!attributes} structure. *)
-val atts_empty : attributes
+val atts_empty : 'a attributes
 
 (** [atts_of_list list] returns an {!attributes} structure from the given
   list of pairs [(name, xml tree list) ; (name, xml tree list) ; ...].
   The last  pair of the list is added first (using [List.fold_right]).
   @param atts can be used to specify an existing {!attributes} structure to
   add bindings to, instead of starting from an empty one. *)
-val atts_of_list : ?atts: attributes -> (name * tree list) list -> attributes
+val atts_of_list : ?atts: 'a attributes -> (name * 'a) list -> 'a attributes
 
 (** [atts_one ?atts name xmls] is like {!atts_of_list} but for one attribute. *)
-val atts_one : ?atts: attributes -> name -> tree list -> attributes
+val atts_one : ?atts: 'a attributes -> name -> 'a -> 'a attributes
 
 (** [atts_remove name attributes] removes the binding to [name] from the
   [attributes].*)
-val atts_remove : name -> attributes -> attributes
+val atts_remove : name -> 'a attributes -> 'a attributes
 
 (** [atts_replace name xmls attributes] adds a new bindings from [name] to
   [xmls] in [attributes]. If [name] was previously bound, the previous
   binding is removed.
   [atts_replace ~atts name xmls] is equivalent to [atts_replace name xmls atts].*)
-val atts_replace : name -> tree list -> attributes -> attributes
+val atts_replace : name -> 'a -> 'a attributes -> 'a attributes
 
 (** [get_att attributes name] returns the xml tree list bound to [name] in
   [attributes]. Return [None] if no binding was found for [name].
   @since 0.11
 *)
-val get_att : attributes -> name -> tree list option
+val get_att : 'a attributes -> name -> 'a option
 
 (** Same as {!get_att} but return a string [s] only if [name] is bound to
   a single CDATA XML node ([[D s]]).
@@ -102,7 +107,7 @@ val get_att : attributes -> name -> tree list option
   a single tree which is not a CDATA, the function returns [None].
   @since 0.11
 *)
-val get_att_cdata : attributes -> name -> string option
+val get_att_cdata : xml_attributes -> name -> string option
 
 (** [opt_att attributes ?def name] returns the tree list associated to [name]
   in the [attributes] or a default value. This default value can be
@@ -110,20 +115,23 @@ val get_att_cdata : attributes -> name -> string option
   the empty list is used.
   @since 0.11
 *)
-val opt_att : attributes -> ?def:tree list -> name -> tree list
+val opt_att : xml_attributes -> ?def:rewrite_tree list -> name -> rewrite_tree list
 
 (** Same as {!opt_att} but looking for CDATA bounded values, as in
   {!get_att_cdata}.
   @since 0.11
 *)
-val opt_att_cdata : attributes -> ?def:string -> name -> string
+val opt_att_cdata : xml_attributes -> ?def:string -> name -> string
 
 (** Return a string representation of attributes, in the form
     [a="foo" b="bar" ...].
     Note that the attribute names are output verbatim, but the
     attribute values are escaped with the [%S] format.
 *)
-val string_of_atts : attributes -> string
+val string_of_atts : xml_attributes -> string
+
+(*val string_of_str_atts : str_attributes -> string*)
+
 
 (** {2 Environment}
 
@@ -136,7 +144,9 @@ val string_of_atts : attributes -> string
 *)
 
 type 'a env
-and 'a callback = 'a -> 'a env -> attributes -> tree list -> 'a * tree list
+and 'a callback =
+  'a -> 'a env -> xml_attributes -> rewrite_tree list -> 
+    'a * rewrite_tree list
   (** A ['a callback] takes data of type ['a], a ['a env], attributes and XML nodes.
     It returns a potentially new data of type ['a] and XML nodes. The attributes are
     the attributes of the node being rewritten, and the XML trees in parameter are the
@@ -179,7 +189,7 @@ val env_add_cb : ?prefix: string -> string -> 'a callback -> 'a env -> 'a env
 
     @param prefix can be used to specify a prefix for the rule name. Default is [""].
 *)
-val env_add_xml : ?prefix:string -> string -> tree list -> 'a env -> 'a env
+val env_add_xml : ?prefix:string -> string -> rewrite_tree list -> 'a env -> 'a env
 
 (** Get a binding from an environment.
 
@@ -257,10 +267,10 @@ val att_protect : string
 (** {2 XML Manipulation} *)
 
 (** Recursively merge sibling [D] nodes into one [D] node. *)
-val merge_cdata : tree -> tree
+val merge_cdata : 'a tree -> 'a tree
 
 (** Same as {!merge_cdata} but taking a {!tree} list. *)
-val merge_cdata_list : tree list -> tree list
+val merge_cdata_list : 'a tree list -> 'a tree list
 (** Output an XML string.
 
     The returned string does not include the initial [<?xml ... ?>].
@@ -269,14 +279,14 @@ val merge_cdata_list : tree list -> tree list
     of not. Default is [true] but it should be set to [false] when outputting
     final documents like HTML pages.
 *)
-val string_of_xml : ?xml_atts: bool -> tree -> string
+val string_of_xml : ?xml_atts: bool -> 'a tree -> string
 
 (** Use {!string_of_xml} to concatenate a list of xml trees into one string,
   with no separator.*)
-val string_of_xmls : ?xml_atts: bool -> tree list -> string
+val string_of_xmls : ?xml_atts: bool -> 'a tree list -> string
 
 (** Return a list of strings to represent the given attributes. *)
-val string_of_xml_atts : ?xml_atts: bool -> attributes -> (name * string) list
+val string_of_xml_atts : ?xml_atts: bool -> 'a attributes -> (name * string) list
 
 (** Parses a string as XML.
 
@@ -284,14 +294,14 @@ val string_of_xml_atts : ?xml_atts: bool -> attributes -> (name * string) list
     (see {!val:tag_main}).
     @raise Failure when a parsing error occurs, including the source string.
 *)
-val xml_of_string : ?add_main:bool -> string -> tree
+val xml_of_string : ?add_main:bool -> string -> rewrite_tree
 
 (** Convert "string attributes" to an {!attributes} structure. The value
   associated to each name must be valid XML. See also {!att_escamp}. *)
-val xmls_of_atts : (name * string) list -> attributes
+val xmls_of_atts : (name * string) list -> xml_attributes
 
 (** Same as {!xml_of_string} but read from a file. *)
-val xml_of_file : string -> tree
+val xml_of_file : string -> rewrite_tree
 
 (** {2:engine Templating engine}
 
@@ -373,7 +383,7 @@ val xml_of_file : string -> tree
 
 (** To catch eventual infinite loops in rewriting, we keep a
   stack of the rules called. *)
-type rewrite_stack = (name * attributes * tree list) list
+type rewrite_stack = (name * xml_attributes * rewrite_tree list) list
 
 (** The [Loop] exception is raised when the rewrite stack
   is higher than a default value of 100. This value can be changed
@@ -389,13 +399,13 @@ val string_of_stack : rewrite_stack -> string
 
     See above for how an iteration is applied.
 *)
-val apply_to_string : 'a -> 'a env -> string -> 'a * tree list
+val apply_to_string : 'a -> 'a env -> string -> 'a * rewrite_tree list
 
 (** As {!val:apply_to_string}, but reads the XML from a file. *)
-val apply_to_file : 'a -> 'a env -> string -> 'a * tree list
+val apply_to_file : 'a -> 'a env -> string -> 'a * rewrite_tree list
 
 (** As {!val:apply_to_string}, but applies to a list of XML trees.*)
-val apply_to_xmls : 'a -> 'a env -> tree list -> 'a * tree list
+val apply_to_xmls : 'a -> 'a env -> rewrite_tree list -> 'a * rewrite_tree list
 
 (** As {!val:apply_to_file}, but writes the result back to a file.
 
@@ -433,23 +443,23 @@ val strip_string : string -> string
 (** {2 Deprecated functions} *)
 
 (** @deprecated Use {!get_att}. *)
-val get_arg : attributes -> name -> tree list option
+val get_arg : 'a attributes -> name -> 'a option
   [@@ocaml.deprecated "Use Xtmpl.get_att instead."]
 
 (** @deprecated Use {!get_att_cdata}. *)
-val get_arg_cdata : attributes -> name -> string option
+val get_arg_cdata : xml_attributes -> name -> string option
   [@@ocaml.deprecated "Use Xtmpl.get_att_cdata instead."]
 
 (** @deprecated Use {!opt_att}. *)
-val opt_arg : attributes -> ?def:tree list -> name -> tree list
+val opt_arg : xml_attributes -> ?def:rewrite_tree list -> name -> rewrite_tree list
   [@@ocaml.deprecated "Use Xtmpl.opt_att instead."]
 
 (** @deprecated Use {!opt_att_cdata}. *)
-val opt_arg_cdata : attributes -> ?def:string -> name -> string
+val opt_arg_cdata : xml_attributes -> ?def:string -> name -> string
   [@@ocaml.deprecated "Use Xtmpl.opt_att_data instead."]
 
 (** @deprecated Use {!string_of_atts}. *)
-val string_of_args : attributes -> string
+val string_of_args : xml_attributes -> string
   [@@ocaml.deprecated "Use Xtmpl.string_of_atts instead."]
 
 (** @deprecated Use {!env_add_cb} instead. *)
@@ -457,6 +467,6 @@ val env_add : ?prefix: string -> string -> 'a callback -> 'a env -> 'a env
   [@@ocaml.deprecated "Use Xtmpl.env_add_cb instead."]
 
 (** @deprecated Use {!env_add_xml} instead. *)
-val env_add_att : ?prefix:string -> string -> tree list -> 'a env -> 'a env
+val env_add_att : ?prefix:string -> string -> rewrite_tree list -> 'a env -> 'a env
   [@@ocaml.deprecated "Use Xtmpl.env_add_xml instead."]
 
