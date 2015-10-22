@@ -124,16 +124,6 @@ let escape_ampersand s =
 let re_amp = Str.regexp_string "&amp;"
 let unescape_ampersand s = Str.global_replace re_amp "&" s
 
-module Name_ord = struct
-  type t = name
-  let compare (p1,s1) (p2,s2) =
-    match String.compare s1 s2 with
-      0 -> String.compare p1 p2
-    | n -> n
-  end
-
-module Name_map = Map.Make (Name_ord)
-module Name_set = Set.Make (Name_ord)
 
 type 'a attributes = 'a Name_map.t
 type 'a tree =
