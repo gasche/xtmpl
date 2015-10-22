@@ -50,6 +50,22 @@ let string_of_loc loc =
 let string_of_error (loc, str) =
   Printf.sprintf "%s: %s" (string_of_loc loc) str
 
+let string_of_name = function
+  ("",s) -> s
+| (p, s) -> p ^ ":" ^ s
+
+let name_of_string str =
+  try
+    let p = String.index str ':' in
+    let len = String.length str in
+    let prefix = String.sub str 0 p in
+    let suffix =
+      if p + 1 < len then String.sub str p (len - (p + 1)) else ""
+    in
+    (prefix, suffix)
+  with
+    Not_found -> ("", str)
+
 let loc_of_pos pos len =
   { line = pos.pline;
     char = pos.pchar - pos.pbol ;
@@ -93,28 +109,50 @@ module Name_ord = struct
 module Name_map = Map.Make (Name_ord)
 module Name_set = Set.Make (Name_ord)
 
-type cdata = { loc: loc option; text: string }
-type attributes = string Name_map.t
+type cdata = { loc: loc option; text: string ; quoted: bool}
+type comment = { loc: loc option; comment: string }
+type attributes = (string * loc option) Name_map.t
 type node = { loc: loc option; name: name ; atts: attributes ; subs: tree list }
 and tree =
 | E of node
 | D of cdata
-| C of cdata
+| C of comment
 
 let atts_empty = Name_map.empty
 let node ?loc name ?(atts=atts_empty) subs = E { loc; name; atts; subs}
-let cdata ?loc text = D { loc ; text }
-let comment ?loc text = C { loc ; text }
+let cdata ?loc ?(quoted=false) text = D { loc ; text ; quoted }
+let comment ?loc comment = C { loc ; comment }
 
 type stack = (pos * name * attributes) Stack.t
 
+let e_nameStartChar = [%sedlex.regexp? ":" | 'A'..'Z' | "_" | 'a'..'z' | 0xC0..0xD6 | 0xD8..0xF6 | 0xF8..0x02FF | 0x0370..0x037D | 0x037F..0x1FFF | 0x200C..0x200D | 0x2070..0x218F | 0x2C00..0x2FEF | 0x3001..0xD7FF | 0xF900..0xFDCF | 0xFDF0..0xFFFD | 0x010000..0x0EFFFF]
+let e_nameChar = [%sedlex.regexp? e_nameStartChar | "-" | "." | '0'..'9' | 0xB7 | 0x0300..0x036F | 0x203F..0x2040]
+
+let e_name = [%sedlex.regexp? e_nameStartChar , Star(e_nameChar)]
+let e_space = [%sedlex.regexp? 	Plus(0x20 | 0x9 | 0xD | 0xA)]
+
+let e_char_no_minus = [%sedlex.regexp?  0x9 | 0xA | 0xD | 0x20..0x2C | 0x2E..0xD7FF | 0xE000..0xFFFD | 0x10000..0x10FFFF]
+let e_char = [%sedlex.regexp? e_char_no_minus | '-']
+
+let e_charRef = [%sedlex.regexp?
+    ("&#", Plus('0'..'0'), ';') | ("&#x", Plus('0'..'9'|'a'..'f'|'A'..'F'), ';')]
+let e_entityRef = [%sedlex.regexp? '&',e_name,';']
+let e_reference = [%sedlex.regexp? e_entityRef | e_charRef]
+let e_attValueChar = [%sedlex.regexp? 0x00..0x25| 0x27..0x3B | 0x3D..0x0EFFFF]
+
+let e_attValue = [%sedlex.regexp?
+    '"', Star(e_attValueChar | e_reference), '"'
+  | "'", Star(e_attValueChar | e_reference), "'"
+  ]
 
 let rec parse_comment pos buf lb =
   match%sedlex lb with
     "-->" -> Buffer.contents buf
-  | any ->
+  | e_char_no_minus | '-', e_char_no_minus ->
       Buffer.add_string buf (U.lexeme lb);
       parse_comment pos buf lb
+  | any ->
+      error (loc_of_pos pos 1) ("Invalid comment character: "^(U.lexeme lb))
   | _ ->
       let pos = update_pos pos (Buffer.contents buf) in
       error (loc_of_pos pos 1) "Unexpected end of stream while parsing comment"
@@ -122,14 +160,39 @@ let rec parse_comment pos buf lb =
 let rec parse_cdata pos buf lb =
   match%sedlex lb with
     "]]>" -> Buffer.contents buf
-  | any ->
+  | e_char ->
       Buffer.add_string buf (U.lexeme lb);
       parse_cdata pos buf lb
+  | any ->
+      error (loc_of_pos pos 1) ("Invalid cdata character: "^(U.lexeme lb))
   | _ ->
       let pos = update_pos pos (Buffer.contents buf) in
       error (loc_of_pos pos 1) "Unexpected end of stream while parsing cdata"
 
-let rec parse_tree_list acc pos lb =
+let add_elt stack elt =
+  match stack with
+  | [] -> assert false
+  | (x,l) :: q -> (x, elt :: l) :: q
+
+let push stack pos_start name attributes =
+  ((name, pos_start, attributes), []) :: stack
+
+let pop stack pos_end name =
+  match stack with
+  | [] -> assert false
+  | ((n,pos_start,atts), subs) :: q ->
+      if n = name then
+        (
+         let loc = loc_of_pos2 pos_start pos_end in
+         let elt = node ~loc ~atts name (List.rev subs) in
+         add_elt q elt
+        )
+      else
+        error (loc_of_pos pos_end 1)
+          (Printf.sprintf "Found </%s> instead of </%s>"
+           (string_of_name name) (string_of_name n))
+
+let rec parse_text stack pos lb =
   match%sedlex lb with
     "<!--" ->
       let pos = update_pos_from_lb pos lb in
@@ -138,39 +201,125 @@ let rec parse_tree_list acc pos lb =
       (* update pos2 with the "-->" lexeme just read *)
       let pos2 = update_pos_from_lb pos2 lb in
       let loc = loc_of_pos2 pos pos2 in
-      let acc = (comment ~loc text) :: acc in
-      parse_tree_list acc pos2 lb
+      let stack = add_elt stack (comment ~loc text) in
+      parse_text stack pos2 lb
 
-  | "<[CDATA[" ->
+  | "<![CDATA[" ->
       let pos = update_pos_from_lb pos lb in
       let text = parse_cdata pos (Buffer.create 256) lb in
       let pos2 = update_pos pos text in
       (* update pos2 with the "]]>" lexeme just read *)
       let pos2 = update_pos_from_lb pos2 lb in
       let loc = loc_of_pos2 pos pos2 in
-      let acc = (cdata ~loc text) :: acc in
-      parse_tree_list acc pos2 lb
+      let stack = add_elt stack (cdata ~loc text) in
+      parse_text stack pos2 lb
 
-  | '<' ->
+  | '<',e_name ->
+      let name =
+        let s = U.lexeme lb in
+        let len = String.length s in
+        name_of_string (String.sub s 1 (len - 1))
+      in
       let pos2 = update_pos_from_lb pos lb in
-      let (node, pos2) = parse_node pos2 lb in
-      let acc = node :: acc in
-      parse_tree_list acc pos2 lb
+      let (atts, pos2, closed) = parse_attributes atts_empty pos2 lb in
+      let stack =
+        if closed then
+          (
+           let loc = loc_of_pos2 pos pos2 in
+           let elt = node ~loc ~atts name [] in
+           add_elt stack elt
+          )
+        else
+          push stack pos name atts
+      in
+      parse_text stack pos2 lb
+  | "</",e_name,'>' ->
+      let lexeme = U.lexeme lb in
+      let len = String.length lexeme in
+      let name = name_of_string (String.sub lexeme 2 (len - 3)) in
+      let pos2 = update_pos_from_lb pos lb in
+      let stack = pop stack pos2 name in
+      parse_text stack pos2 lb
+  | "]]>" ->
+      error (loc_of_pos pos 3)
+        ("Invalid sequence in character data: "^(U.lexeme lb))
+  | Plus(e_attValueChar) ->
+      let lexeme = U.lexeme lb in
+      let pos2 = update_pos_from_lb pos lb in
+      let loc = loc_of_pos2 pos pos2 in
+      let stack = add_elt stack (cdata ~loc lexeme) in
+      parse_text stack pos2 lb
+  | '<', any ->
+      let pos2 = update_pos_from_lb pos lb in
+      error (loc_of_pos2 pos pos2)
+        (Printf.sprintf "Unexpected characters: %s" (U.lexeme lb))
   | any ->
-      error (loc_of_pos pos 1) ("Unhandled character stream: "^(U.lexeme lb))
+      error (loc_of_pos pos 1) "Unexpected characters from this point"
   | _ ->
-      error (loc_of_pos pos 1) "Unexpected end of stream"
+      match stack with
+        [] -> assert false
+      | ((name,_,_),_) :: _ :: _ ->
+          error (loc_of_pos pos 1)
+            (Printf.sprintf "Element not terminated: %s"
+             (string_of_name name))
+      | [_,subs] ->
+          List.rev subs
 
-and parse_node pos lb =
+and parse_attributes map pos lb =
   match%sedlex lb with
-  | _ -> error (loc_of_pos pos 1) "parsing nodes is not implemented yet!"
-  
-let xml = {|<!--hello comment !-->bla bl bla |}
+  | e_space -> parse_attributes map (update_pos_from_lb pos lb) lb
+  | e_name ->
+       let name = name_of_string (U.lexeme lb) in
+       let pos = update_pos_from_lb pos lb in
+       let (att_value, pos2) = parse_attribute_eq pos lb in
+       let map = Name_map.add name att_value map in
+       parse_attributes map pos2 lb
+  | '>' -> (map, update_pos_from_lb pos lb, false)
+  | "/>" -> (map, update_pos_from_lb pos lb, true)
+  | any ->
+      error (loc_of_pos pos 1)
+        ("Unexpected character in attribute list: "^(U.lexeme lb))
+  | _ -> error (loc_of_pos pos 1) "Unexpected end of stream while parsing attributes"
+
+and parse_attribute_eq pos lb =
+  match%sedlex lb with
+  | e_space -> parse_attribute_eq (update_pos_from_lb pos lb) lb
+  | '=', Star(e_space) -> parse_attribute_value pos lb
+  | any ->
+      error (loc_of_pos pos 1)
+        ("Unexpected character: "^(U.lexeme lb)^"; '=' was expected")
+  | _ ->
+      error (loc_of_pos pos 1)
+        "Unexpected end of stream while parsing attribute"
+
+and parse_attribute_value pos lb =
+  match%sedlex lb with
+  | e_attValue ->
+    let lexeme = U.lexeme lb in
+    let pos2 = update_pos_from_lb pos lb in
+    let len = String.length lexeme in
+    let v = String.sub lexeme 1 (len - 2) in
+    let loc = loc_of_pos2 pos pos2 in
+    ((v, Some loc), pos2)
+  | any ->
+      error (loc_of_pos pos 1)
+        ("Unexpected character: "^(U.lexeme lb))
+  | _ ->
+      error (loc_of_pos pos 1)
+        "Unexpected end of stream while parsing attribute value"
+
+let xml = {|<!--hello comment !-->bla bl <strong>bla</strong> |}
 let tree =
   try
-    parse_tree_list []
+    let pos_start =
       { pline = 1; pchar = 1 ; pbol = 0 ; pfile = None }
-      (U.from_string xml)
+    in
+    let xmls =
+      parse_text [(("",""), pos_start, atts_empty), []]
+        pos_start
+        (U.from_string xml)
+    in
+    ignore(xmls)
   with
   Error e ->
       prerr_endline (string_of_error e)

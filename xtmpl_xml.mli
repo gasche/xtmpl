@@ -32,10 +32,11 @@ module Name_ord : Map.OrderedType with type t = name
 module Name_map : Map.S with type key = name
 module Name_set : Set.S with type elt = name
 
-type cdata = { loc: loc option; text: string }
-type attributes = string Name_map.t
+type cdata = { loc: loc option; text: string; quoted: bool }
+type comment = { loc: loc option; comment: string }
+type attributes = (string * loc option) Name_map.t
 type node = { loc: loc option; name: name ; atts: attributes ; subs: tree list }
 and tree =
 | E of node
 | D of cdata
-| C of cdata
+| C of comment
