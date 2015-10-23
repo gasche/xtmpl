@@ -37,6 +37,7 @@ type comment = { loc: loc option; comment: string }
 type proc_inst = { loc: loc option; app: name; args: string}
 type attributes = (string * loc option) Name_map.t
 type xml_decl = { loc: loc option; atts: attributes }
+type doctype = { loc: loc option; name: name; args: string}
 type node = { loc: loc option; name: name ; atts: attributes ; subs: tree list }
 and tree =
 | E of node
@@ -44,3 +45,4 @@ and tree =
 | C of comment
 | PI of proc_inst
 | X of xml_decl
+| DT of doctype

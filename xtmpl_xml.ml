@@ -114,6 +114,7 @@ type comment = { loc: loc option; comment: string }
 type proc_inst = { loc: loc option; app: name; args: string}
 type attributes = (string * loc option) Name_map.t
 type xml_decl = { loc: loc option; atts: attributes }
+type doctype = { loc: loc option; name: name; args: string}
 type node = { loc: loc option; name: name ; atts: attributes ; subs: tree list }
 and tree =
 | E of node
@@ -121,6 +122,7 @@ and tree =
 | C of comment
 | PI of proc_inst
 | X of xml_decl
+| DT of doctype
 
 let atts_empty = Name_map.empty
 let node ?loc name ?(atts=atts_empty) subs = E { loc; name; atts; subs}
@@ -128,6 +130,7 @@ let cdata ?loc ?(quoted=false) text = D { loc ; text ; quoted }
 let comment ?loc comment = C { loc ; comment }
 let proc_inst ?loc app args = PI { loc ; app ; args }
 let xml_decl ?loc atts = X { loc ; atts }
+let doctype ?loc name args = DT { loc ; name ; args }
 
 type stack = (pos * name * attributes) Stack.t
 
@@ -267,11 +270,28 @@ let rec parse_proc_inst pos buf lb =
       Buffer.add_string buf (U.lexeme lb);
       parse_proc_inst pos buf lb
   | any ->
-      error (loc_of_pos pos 1) ("Invalid processing instruction character: "^(U.lexeme lb))
+      error (loc_of_pos pos 1) ("Invalid character in processing instruction: "^(U.lexeme lb))
   | _ ->
       let pos = update_pos pos (Buffer.contents buf) in
       error (loc_of_pos pos 1)
         "Unexpected end of stream while parsing processing instruction"
+
+let rec parse_doctype pos buf lb =
+  match%sedlex lb with
+    ">" ->
+      let args = unescape (Buffer.contents buf) in
+      let pos = update_pos pos (U.lexeme lb) in
+      let args = Xtmpl_misc.strip_string args in
+      (args, pos)
+  | e_char ->
+      Buffer.add_string buf (U.lexeme lb);
+      parse_doctype pos buf lb
+  | any ->
+      error (loc_of_pos pos 1) ("Invalid character in doctype decl: "^(U.lexeme lb))
+  | _ ->
+      let pos = update_pos pos (Buffer.contents buf) in
+      error (loc_of_pos pos 1)
+        "Unexpected end of stream while parsing doctype decl"
 
 let add_elt stack elt =
   match stack with
@@ -317,6 +337,20 @@ let rec parse_text stack pos lb =
       let loc = loc_of_pos2 pos pos2 in
       let stack = add_elt stack (cdata ~loc text) in
       parse_text stack pos2 lb
+  | "<!DOCTYPE",Plus(e_space) ->
+      let pos2 = update_pos_from_lb pos lb in
+      begin
+        let name = match%sedlex lb with
+          | e_name -> name_of_string (U.lexeme lb)
+          | _ ->
+            error (loc_of_pos pos 1)
+                ("Invalid character in doctype decl: "^(U.lexeme lb))
+        in
+        let (args, pos2) = parse_doctype pos2 (Buffer.create 256) lb in
+        let loc = loc_of_pos2 pos pos2 in
+        let stack = add_elt stack (doctype ~loc name args) in
+        parse_text stack pos2 lb
+      end
   | "<?",e_name ->
       let pos2 = update_pos_from_lb pos lb in
       let app =
@@ -472,7 +506,9 @@ let rec print_tree buf = function
       )
       atts;
     Buffer.add_string buf "?>"
-
+| DT { name ; args } ->
+    Printf.bprintf buf "<!DOCTYPE %s %s>"
+      (string_of_name name) (escape args)
 | E { name ; atts ; subs } ->
     Printf.bprintf buf "<%s" (string_of_name name);
     Name_map.iter
@@ -499,6 +535,7 @@ let string_of_xmls l =
   Buffer.contents buf
 
 let xml = {|<?xml version='1' ?>
+  <!DOCTYPE toto sdkfsdl>
   <!--hello comment !-->
    <?myapp tralalalal?>
    bla bl <strong title="coucou&lt;">bla</strong> foo bar|}
