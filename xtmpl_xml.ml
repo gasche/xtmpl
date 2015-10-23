@@ -147,11 +147,16 @@ let e_charRef = [%sedlex.regexp?
     ("&#", Plus('0'..'9'), ';') | ("&#x", Plus('0'..'9'|'a'..'f'|'A'..'F'), ';')]
 let e_entityRef = [%sedlex.regexp? '&',e_name,';']
 let e_reference = [%sedlex.regexp? e_entityRef | e_charRef]
-let e_attValueChar = [%sedlex.regexp? 0x00..0x25| 0x27..0x3B | 0x3D..0x0EFFFF]
+let e_attValueChar =
+  [%sedlex.regexp? 0x00..0x25| 0x27..0x3B | 0x3D..0x0EFFFF]
+let e_attValueChar_noquot =
+  [%sedlex.regexp? 0x00..0x21 | 0x23..0x25| 0x27..0x3B | 0x3D..0x0EFFFF]
+let e_attValueChar_noapos =
+  [%sedlex.regexp? 0x00..0x25| 0x28..0x3B | 0x3D..0x0EFFFF]
 
 let e_attValue = [%sedlex.regexp?
-    '"', Star(e_attValueChar | e_reference), '"'
-  | "'", Star(e_attValueChar | e_reference), "'"
+    '"', Star(e_attValueChar_noquot | e_reference), '"'
+  | "'", Star(e_attValueChar_noapos | e_reference), "'"
   ]
 
 let map_string lexer str =
@@ -233,7 +238,7 @@ let escape =
     | any -> add buf (U.lexeme lb); iter quotes buf lb
     | _ -> ()
   in
-  fun ?(quotes=true) -> map_string (iter quotes)
+  fun ?(quotes=false) -> map_string (iter quotes)
 
 let rec parse_comment pos buf lb =
   match%sedlex lb with
@@ -335,7 +340,7 @@ let rec parse_text stack pos lb =
       (* update pos2 with the "]]>" lexeme just read *)
       let pos2 = update_pos_from_lb pos2 lb in
       let loc = loc_of_pos2 pos pos2 in
-      let stack = add_elt stack (cdata ~loc text) in
+      let stack = add_elt stack (cdata ~loc ~quoted: true text) in
       parse_text stack pos2 lb
   | "<!DOCTYPE",Plus(e_space) ->
       let pos2 = update_pos_from_lb pos lb in
@@ -402,7 +407,7 @@ let rec parse_text stack pos lb =
   | "]]>" ->
       error (loc_of_pos pos 3)
         ("Invalid sequence in character data: "^(U.lexeme lb))
-  | Plus(e_attValueChar) ->
+  | Plus(e_attValueChar | e_reference) ->
       let str = unescape (U.lexeme lb) in
       let pos2 = update_pos_from_lb pos lb in
       let loc = loc_of_pos2 pos pos2 in
@@ -539,6 +544,7 @@ let xml = {|<?xml version='1' ?>
   <!--hello comment !-->
    <?myapp tralalalal?>
    bla bl <strong title="coucou&lt;">bla</strong> foo bar|}
+let xml = Xtmpl_misc.string_of_file Sys.argv.(1)
 let tree =
   try
     let pos_start =
