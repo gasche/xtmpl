@@ -1,8 +1,5 @@
 type name = string * string
-val string_of_file : string -> string
-val split_string : ?keep_empty:bool -> string -> char list -> string list
-val strip_string : string -> string
-val file_of_string : file:string -> string -> unit
+
 val re_escape : Str.regexp
 val escape_ampersand : string -> string
 val re_amp : Str.regexp

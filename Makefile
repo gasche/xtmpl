@@ -45,7 +45,12 @@ LIB_A=$(LIB:.cmxa=.a)
 LIB_BYTE=$(LIB:.cmxa=.cma)
 LIB_CMI=$(LIB:.cmxa=.cmi)
 
-LIB_CMXFILES=xtmpl_xml.cmx xtmpl_base.cmx xtmpl.cmx xtmpl_xhtml.cmx
+LIB_CMXFILES= \
+	xtmpl_misc.cmx \
+	xtmpl_xml.cmx \
+	xtmpl_base.cmx \
+	xtmpl.cmx \
+	xtmpl_xhtml.cmx
 LIB_CMOFILES=$(LIB_CMXFILES:.cmx=.cmo)
 LIB_CMIFILES=$(LIB_CMXFILES:.cmx=.cmi)
 LIB_OFILES=$(LIB_CMXFILES:.cmx=.o)

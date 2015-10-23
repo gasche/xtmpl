@@ -34,9 +34,13 @@ module Name_set : Set.S with type elt = name
 
 type cdata = { loc: loc option; text: string; quoted: bool }
 type comment = { loc: loc option; comment: string }
+type proc_inst = { loc: loc option; app: name; args: string}
 type attributes = (string * loc option) Name_map.t
+type xml_decl = { loc: loc option; atts: attributes }
 type node = { loc: loc option; name: name ; atts: attributes ; subs: tree list }
 and tree =
 | E of node
 | D of cdata
 | C of comment
+| PI of proc_inst
+| X of xml_decl

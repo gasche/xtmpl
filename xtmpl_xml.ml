@@ -111,17 +111,23 @@ module Name_set = Set.Make (Name_ord)
 
 type cdata = { loc: loc option; text: string ; quoted: bool}
 type comment = { loc: loc option; comment: string }
+type proc_inst = { loc: loc option; app: name; args: string}
 type attributes = (string * loc option) Name_map.t
+type xml_decl = { loc: loc option; atts: attributes }
 type node = { loc: loc option; name: name ; atts: attributes ; subs: tree list }
 and tree =
 | E of node
 | D of cdata
 | C of comment
+| PI of proc_inst
+| X of xml_decl
 
 let atts_empty = Name_map.empty
 let node ?loc name ?(atts=atts_empty) subs = E { loc; name; atts; subs}
 let cdata ?loc ?(quoted=false) text = D { loc ; text ; quoted }
 let comment ?loc comment = C { loc ; comment }
+let proc_inst ?loc app args = PI { loc ; app ; args }
+let xml_decl ?loc atts = X { loc ; atts }
 
 type stack = (pos * name * attributes) Stack.t
 
@@ -135,7 +141,7 @@ let e_char_no_minus = [%sedlex.regexp?  0x9 | 0xA | 0xD | 0x20..0x2C | 0x2E..0xD
 let e_char = [%sedlex.regexp? e_char_no_minus | '-']
 
 let e_charRef = [%sedlex.regexp?
-    ("&#", Plus('0'..'0'), ';') | ("&#x", Plus('0'..'9'|'a'..'f'|'A'..'F'), ';')]
+    ("&#", Plus('0'..'9'), ';') | ("&#x", Plus('0'..'9'|'a'..'f'|'A'..'F'), ';')]
 let e_entityRef = [%sedlex.regexp? '&',e_name,';']
 let e_reference = [%sedlex.regexp? e_entityRef | e_charRef]
 let e_attValueChar = [%sedlex.regexp? 0x00..0x25| 0x27..0x3B | 0x3D..0x0EFFFF]
@@ -145,9 +151,90 @@ let e_attValue = [%sedlex.regexp?
   | "'", Star(e_attValueChar | e_reference), "'"
   ]
 
+let map_string lexer str =
+  let buf = Buffer.create (String.length str) in
+  lexer buf (U.from_string str);
+  Buffer.contents buf
+
+let unescape =
+  let add = Buffer.add_string in
+  let rec iter entities buf lb =
+    match%sedlex lb with
+    | "&lt;" ->
+        if entities then add buf "<" else add buf (U.lexeme lb);
+        iter entities buf lb
+    | "&gt;" ->
+        if entities then add buf ">" else add buf (U.lexeme lb);
+        iter entities buf lb
+    | "&amp;" ->
+        if entities then add buf "&" else add buf (U.lexeme lb);
+        iter entities buf lb
+    | "&quot;" ->
+        if entities then add buf "\"" else add buf (U.lexeme lb);
+        iter entities buf lb
+    | "&apos;" ->
+        if entities then add buf "'" else add buf (U.lexeme lb);
+        iter entities buf lb
+
+    | "&#", Plus('0'..'9'), ';' ->
+        let lexeme = U.lexeme lb in
+        let s =
+          try
+            let n =
+              let len = String.length lexeme in
+              let s = String.sub lexeme 2 (len - 3) in
+              int_of_string s
+            in
+            Uutf.cp_to_string n
+          with _ -> lexeme
+        in
+        add buf s ;
+        iter entities buf lb
+    | "&#x", Plus('0'..'9'|'a'..'f'|'A'..'F'), ';' ->
+        let lexeme = U.lexeme lb in
+        let s =
+          try
+            let n =
+              let len = String.length lexeme in
+              let s = "0"^(String.sub lexeme 2 (len - 3)) in
+              int_of_string s
+            in
+            Uutf.cp_to_string n
+          with
+            _ -> lexeme
+        in
+        add buf s;
+        iter entities buf lb
+    | any -> add buf (U.lexeme lb); iter entities buf lb
+    | _ -> ()
+  in
+  fun ?(entities=true) -> map_string (iter entities)
+
+let escape =
+  let add = Buffer.add_string in
+  let rec iter quotes buf lb =
+    match%sedlex lb with
+    | "<" -> add buf "&lt;"; iter quotes buf lb
+    | ">" -> add buf "&gt;"; iter quotes buf lb
+    | "&" -> add buf "&amp;"; iter quotes buf lb
+    | "\"" ->
+        if quotes
+        then add buf "&quot;"
+        else add buf (U.lexeme lb);
+        iter quotes buf lb
+    | "'" ->
+        if quotes
+        then add buf "&apos;"
+        else add buf (U.lexeme lb);
+        iter quotes buf lb
+    | any -> add buf (U.lexeme lb); iter quotes buf lb
+    | _ -> ()
+  in
+  fun ?(quotes=true) -> map_string (iter quotes)
+
 let rec parse_comment pos buf lb =
   match%sedlex lb with
-    "-->" -> Buffer.contents buf
+    "-->" -> unescape (Buffer.contents buf)
   | e_char_no_minus | '-', e_char_no_minus ->
       Buffer.add_string buf (U.lexeme lb);
       parse_comment pos buf lb
@@ -159,7 +246,7 @@ let rec parse_comment pos buf lb =
 
 let rec parse_cdata pos buf lb =
   match%sedlex lb with
-    "]]>" -> Buffer.contents buf
+    "]]>" -> unescape ~entities: false (Buffer.contents buf)
   | e_char ->
       Buffer.add_string buf (U.lexeme lb);
       parse_cdata pos buf lb
@@ -168,6 +255,23 @@ let rec parse_cdata pos buf lb =
   | _ ->
       let pos = update_pos pos (Buffer.contents buf) in
       error (loc_of_pos pos 1) "Unexpected end of stream while parsing cdata"
+
+let rec parse_proc_inst pos buf lb =
+  match%sedlex lb with
+    "?>" ->
+      let args = unescape (Buffer.contents buf) in
+      let pos = update_pos pos (U.lexeme lb) in
+      let args = Xtmpl_misc.strip_string args in
+      (args, pos)
+  | e_char ->
+      Buffer.add_string buf (U.lexeme lb);
+      parse_proc_inst pos buf lb
+  | any ->
+      error (loc_of_pos pos 1) ("Invalid processing instruction character: "^(U.lexeme lb))
+  | _ ->
+      let pos = update_pos pos (Buffer.contents buf) in
+      error (loc_of_pos pos 1)
+        "Unexpected end of stream while parsing processing instruction"
 
 let add_elt stack elt =
   match stack with
@@ -213,7 +317,28 @@ let rec parse_text stack pos lb =
       let loc = loc_of_pos2 pos pos2 in
       let stack = add_elt stack (cdata ~loc text) in
       parse_text stack pos2 lb
-
+  | "<?",e_name ->
+      let pos2 = update_pos_from_lb pos lb in
+      let app =
+        let s = U.lexeme lb in
+        let len = String.length s in
+        name_of_string (String.sub s 2 (len - 2))
+      in
+      begin
+        match app with
+          ("", s) when String.lowercase s = "xml" ->
+            let (atts, pos2, _) = parse_attributes
+              ~xml_decl: true atts_empty pos2 lb
+            in
+            let loc = loc_of_pos2 pos pos2 in
+            let stack = add_elt stack (xml_decl ~loc atts) in
+            parse_text stack pos2 lb
+        | _ ->
+            let (args, pos2) = parse_proc_inst pos2 (Buffer.create 256) lb in
+            let loc = loc_of_pos2 pos pos2 in
+            let stack = add_elt stack (proc_inst ~loc app args) in
+            parse_text stack pos2 lb
+      end
   | '<',e_name ->
       let name =
         let s = U.lexeme lb in
@@ -244,10 +369,10 @@ let rec parse_text stack pos lb =
       error (loc_of_pos pos 3)
         ("Invalid sequence in character data: "^(U.lexeme lb))
   | Plus(e_attValueChar) ->
-      let lexeme = U.lexeme lb in
+      let str = unescape (U.lexeme lb) in
       let pos2 = update_pos_from_lb pos lb in
       let loc = loc_of_pos2 pos pos2 in
-      let stack = add_elt stack (cdata ~loc lexeme) in
+      let stack = add_elt stack (cdata ~loc str) in
       parse_text stack pos2 lb
   | '<', any ->
       let pos2 = update_pos_from_lb pos lb in
@@ -265,17 +390,33 @@ let rec parse_text stack pos lb =
       | [_,subs] ->
           List.rev subs
 
-and parse_attributes map pos lb =
+and parse_attributes ?(xml_decl=false) map pos lb =
   match%sedlex lb with
-  | e_space -> parse_attributes map (update_pos_from_lb pos lb) lb
+  | e_space -> parse_attributes ~xml_decl map (update_pos_from_lb pos lb) lb
   | e_name ->
        let name = name_of_string (U.lexeme lb) in
        let pos = update_pos_from_lb pos lb in
        let (att_value, pos2) = parse_attribute_eq pos lb in
        let map = Name_map.add name att_value map in
-       parse_attributes map pos2 lb
-  | '>' -> (map, update_pos_from_lb pos lb, false)
-  | "/>" -> (map, update_pos_from_lb pos lb, true)
+       parse_attributes ~xml_decl map pos2 lb
+  | "?>" ->
+      if xml_decl then
+        (map, update_pos_from_lb pos lb, true)
+      else
+        error (loc_of_pos pos 2)
+          ("Unexpected characters: "^(U.lexeme lb))
+  | '>' ->
+      if xml_decl then
+        error (loc_of_pos pos 1)
+          ("Unexpected character: "^(U.lexeme lb))
+      else
+        (map, update_pos_from_lb pos lb, false)
+  | "/>" ->
+      if xml_decl then
+        error (loc_of_pos pos 2)
+          ("Unexpected characters: "^(U.lexeme lb))
+      else
+        (map, update_pos_from_lb pos lb, true)
   | any ->
       error (loc_of_pos pos 1)
         ("Unexpected character in attribute list: "^(U.lexeme lb))
@@ -298,7 +439,7 @@ and parse_attribute_value pos lb =
     let lexeme = U.lexeme lb in
     let pos2 = update_pos_from_lb pos lb in
     let len = String.length lexeme in
-    let v = String.sub lexeme 1 (len - 2) in
+    let v = unescape (String.sub lexeme 1 (len - 2)) in
     let loc = loc_of_pos2 pos pos2 in
     ((v, Some loc), pos2)
   | any ->
@@ -308,17 +449,30 @@ and parse_attribute_value pos lb =
       error (loc_of_pos pos 1)
         "Unexpected end of stream while parsing attribute value"
 
-(** FIXME: escape what must be escaped *)
 let print_att buf name value =
-  Printf.bprintf buf "%s=\"%s\"" (string_of_name name) value
+  Printf.bprintf buf "%s=\"%s\"" (string_of_name name)
+    (escape ~quotes: true value)
 
 let rec print_tree buf = function
 | C { comment } ->
-    Printf.bprintf buf "<!--%s-->" comment
+    Printf.bprintf buf "<!--%s-->" (escape comment)
 | D { text ; quoted = true } ->
     Printf.bprintf buf "<![CDATA[%s]]>" text
 | D { text ; quoted = false } ->
-    Printf.bprintf buf "%s" text
+    Printf.bprintf buf "%s" (escape text)
+| PI { app ; args } ->
+    Printf.bprintf buf "<?%s %s?>"
+      (string_of_name app) (escape args)
+| X { atts } ->
+    Printf.bprintf buf "<?xml" ;
+    Name_map.iter
+      (fun name (value,_) ->
+         Buffer.add_string buf " ";
+         print_att buf name value
+      )
+      atts;
+    Buffer.add_string buf "?>"
+
 | E { name ; atts ; subs } ->
     Printf.bprintf buf "<%s" (string_of_name name);
     Name_map.iter
@@ -344,7 +498,10 @@ let string_of_xmls l =
   List.iter (print_tree buf) l;
   Buffer.contents buf
 
-let xml = {|<!--hello comment !-->bla bl <strong title="coucou&lt;">bla</strong> foo bar|}
+let xml = {|<?xml version='1' ?>
+  <!--hello comment !-->
+   <?myapp tralalalal?>
+   bla bl <strong title="coucou&lt;">bla</strong> foo bar|}
 let tree =
   try
     let pos_start =
