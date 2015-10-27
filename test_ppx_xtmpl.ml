@@ -33,4 +33,4 @@ let p = page ~title: "The page title"
   ~contents: (h2 ~foo: "Hello world !" ())
   ~value: 3
   ()
-let () = print_endline (Xtmpl.string_of_xmls p)
+let () = print_endline (Xtmpl_rewrite.to_string p)

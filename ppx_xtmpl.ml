@@ -157,7 +157,7 @@ let gather_params loc xmls =
 
 let parse_ocaml_expression loc str =
   let lexbuf = Lexing.from_string str in
-  try Parser.parse_expression Lexer.token_with_comments lexbuf
+  try Parse.expression lexbuf
   with e ->
     error loc
         (Printf.sprintf "Error while parsing the following OCaml expression:\n%s\n%s"
@@ -165,7 +165,7 @@ let parse_ocaml_expression loc str =
 
 let parse_ocaml_type loc str =
   let lexbuf = Lexing.from_string str in
-  try Parser.parse_core_type Lexer.token_with_comments lexbuf
+  try Parse.core_type lexbuf
   with e ->
     error loc
         (Printf.sprintf "Error while parsing the following OCaml type:\n%s\n%s"
@@ -201,7 +201,7 @@ let funs_of_params loc params body =
   (* list parameters in reverse order to generate them in name order *)
   let params = Xml.Name_map.fold (fun name p acc -> (name, p) :: acc) params [] in
   let exp = List.fold_left (fun_of_param loc) exp params in
-  [%expr fun ?(env=Xtmpl.env_empty()) -> [%e exp]]
+  [%expr fun ?(env=Xtmpl_rewrite.env_empty()) -> [%e exp]]
 
 let env_or_defaults loc params exp =
  let f name p exp =
@@ -217,12 +217,15 @@ let env_or_defaults loc params exp =
     in
     let add_to_env exp =
       match p.typ with
-      | `CData -> [%expr Xtmpl.env_add_xml ~prefix: [%e e_prefix] [%e e_str] [Xtmpl.D [%e exp]] env]
-      | `Xmls -> [%expr Xtmpl.env_add_xml ~prefix: [%e e_prefix] [%e e_str] [%e exp] env]
+      | `CData ->
+          [%expr Xtmpl_rewrite.env_add_xml
+            ~prefix: [%e e_prefix] [%e e_str] [Xtmpl_rewrite.cdata [%e exp] ] env
+          ]
+      | `Xmls -> [%expr Xtmpl_rewrite.env_add_xml ~prefix: [%e e_prefix] [%e e_str] [%e exp] env]
       | `Other (typ, f)->
           let to_xml = parse_ocaml_expression loc f in
           [%expr let v_ = ([%e to_xml]) [%e exp] in
-            Xtmpl.env_add_xml ~prefix: [%e e_prefix] [%e e_str] v_ env]
+            Xtmpl_rewrite.env_add_xml ~prefix: [%e e_prefix] [%e e_str] v_ env]
     in
     let default_def v =
       match p.typ, v with
@@ -249,7 +252,7 @@ let env_or_defaults loc params exp =
             match [%e e_id] with
               Some v -> [%e add_to_env (Exp.ident (lid loc "v"))]
             | None ->
-                match Xtmpl.env_get [%e e_name] env with
+                match Xtmpl_rewrite.env_get [%e e_name] env with
                   Some _ -> env
                 | None -> [%e add_to_env (default_def default_xmls)]
           in
@@ -268,7 +271,7 @@ let defaults_of_params loc params exp =
         let id = "__default_"^(ml_id_of_param p) in
         Exp.let_ Nonrecursive
           [Vb.mk (Pat.var (Location.mkloc id loc))
-            [%expr [Xtmpl.xml_of_string [%e const_tmpl]]]
+            [%expr Xtmpl_rewrite.from_string [%e const_tmpl]]
           ]
           exp
     | _ -> exp
@@ -279,12 +282,12 @@ let map_tmpl loc tmpl =
   let (params, tmpl) = gather_params loc tmpl in
   let const_tmpl = Exp.constant ~loc
     (Const_string (X.to_string tmpl, None)) in
-  let call = [%expr let (_, res) = Xtmpl.apply_to_xmls () env [tmpl_] in res] in
-  (*let envs = Xtmpl.Name_map.fold (env_of_param loc) params call in*)
+  let call = [%expr let (_, res) = Xtmpl_rewrite.apply_to_xmls () env tmpl_ in res] in
+  (*let envs = Xtmpl_rewrite.Name_map.fold (env_of_param loc) params call in*)
   let envs = env_or_defaults loc params call in
   let funs = funs_of_params loc params envs in
   let defaults = defaults_of_params loc params funs in
-  let exp_tmpl = [%expr let tmpl_ = Xtmpl.xml_of_string [%e const_tmpl] in [%e defaults]] in
+  let exp_tmpl = [%expr let tmpl_ = Xtmpl_rewrite.from_string [%e const_tmpl] in [%e defaults]] in
   exp_tmpl
 
 let template_of_inline_string loc node exp =
@@ -313,7 +316,7 @@ let typ_of_params loc params =
     let typ =
       let str = match p.typ with
         | `CData -> "string"
-        | `Xmls -> "Xtmpl.tree list"
+        | `Xmls -> "Xtmpl_rewrite.tree list"
         | `Other (typ, _) -> typ
       in
       let typ = parse_ocaml_type loc str in
@@ -327,8 +330,8 @@ let typ_of_params loc params =
   in
  (* list parameters in reverse order to generate them in name order *)
   let params = Xml.Name_map.fold (fun name p acc -> (name, p) :: acc) params [] in
-  let typ = List.fold_left f [%type: unit -> Xtmpl.tree list] params in
-  [%type: ?env: unit Xtmpl.env -> [%t typ] ]
+  let typ = List.fold_left f [%type: unit -> Xtmpl_rewrite.tree list] params in
+  [%type: ?env: unit Xtmpl_rewrite.env -> [%t typ] ]
 
 let map_xtmpl_string_type exp =
   let loc = exp.pexp_loc in

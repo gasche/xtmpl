@@ -105,8 +105,8 @@ xtmpl_js.cmi: xtmpl_js.mli
 test: test_ppx_xtmpl
 
 test_ppx_xtmpl: ppx_xtmpl test_ppx_xtmpl.ml
-	$(OCAMLFIND) ocamlopt -o $@ -dsource -rectypes -package xmlm,str -linkpkg \
-	-ppx ./ppx_xtmpl xtmpl.cmx test_ppx_xtmpl.ml
+	$(OCAMLFIND) ocamlopt -o $@ -dsource -rectypes -package uutf,sedlex,str -linkpkg \
+	-ppx ./ppx_xtmpl xtmpl.cmxa test_ppx_xtmpl.ml
 	@echo "======"
 	./$@
 

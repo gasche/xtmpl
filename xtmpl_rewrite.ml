@@ -120,7 +120,7 @@ let xml_atts_to_escape = gen_atts_to_escape
   (function [D s] -> s.Xml.text
    | _ -> failwith ("Invalid value for attribute "^att_escamp))
 
-(*** !!!when fixing/changing one of these funs, change also in Xtmpl_js. *)
+(* !!!when fixing/changing one of these funs, change also in Xtmpl_js. *)
 let rec to_string ?xml_atts trees =
   Xml.to_string (to_xmls ?xml_atts trees)
 
