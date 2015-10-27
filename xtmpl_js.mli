@@ -27,4 +27,4 @@
 
 (** Create a new tree of DOM nodes from a given XML tree.
   Errors are logged to the firebug console. *)
-val dom_of_xtmpl : Xtmpl.rewrite_tree -> Dom.node Js.t
+val dom_of_xtmpl : Xtmpl_rewrite.tree -> Dom.node Js.t

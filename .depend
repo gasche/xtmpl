@@ -1,6 +1,15 @@
-xtmpl.cmo : xtmpl.cmi
-xtmpl.cmx : xtmpl.cmi
+xtmpl_misc.cmo : xtmpl_misc.cmi
+xtmpl_misc.cmx : xtmpl_misc.cmi
+xtmpl_misc.cmi :
+xtmpl.cmo : xtmpl_xml.cmi xtmpl_rewrite.cmi xtmpl_misc.cmi xtmpl.cmi
+xtmpl.cmx : xtmpl_xml.cmx xtmpl_rewrite.cmx xtmpl_misc.cmx xtmpl.cmi
 xtmpl.cmi :
+xtmpl_rewrite.cmo : xtmpl_xml.cmi xtmpl_misc.cmi xtmpl_rewrite.cmi
+xtmpl_rewrite.cmx : xtmpl_xml.cmx xtmpl_misc.cmx xtmpl_rewrite.cmi
+xtmpl_rewrite.cmi : xtmpl_xml.cmi
 xtmpl_xhtml.cmo : xtmpl.cmi xtmpl_xhtml.cmi
 xtmpl_xhtml.cmx : xtmpl.cmx xtmpl_xhtml.cmi
 xtmpl_xhtml.cmi : xtmpl.cmi
+xtmpl_xml.cmo : xtmpl_xml.cmi
+xtmpl_xml.cmx : xtmpl_xml.cmi
+xtmpl_xml.cmi :

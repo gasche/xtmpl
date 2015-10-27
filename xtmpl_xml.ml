@@ -30,22 +30,33 @@ module U = Sedlexing.Utf8
 
 type name = string * string
 
-type loc = { line: int ; char: int ; len: int ; file: string option }
-type pos = { pline: int ; pbol : int; pchar: int ; pfile : string option }
+type pos = { line: int ; bol : int; char: int ; file : string option }
+type loc = { loc_start: pos; loc_stop: pos }
 
 type error = loc * string
 exception Error of error
 let error loc msg = raise (Error (loc, msg))
 
 let string_of_loc loc =
+  let start = loc.loc_start in
+  let stop = loc.loc_stop in
+  let line = start.line in
+  let char = start.char - start.bol in
+  let len =
+    if start.file = stop.file then
+      stop.char - start.char
+    else
+      1
+  in
+  let file = start.file in
   Printf.sprintf "%sline %d, character%s %d%s"
-    (match loc.file with
+    (match file with
      | None -> ""
      | Some s -> Printf.sprintf "File %s, " s)
-    loc.line
-    (if loc.len > 1 then "s" else "")
-    loc.char
-    (if loc.len > 1 then Printf.sprintf "-%d" (loc.char + loc.len) else "")
+    line
+    (if len > 1 then "s" else "")
+    char
+    (if len > 1 then Printf.sprintf "-%d" (char + len) else "")
 
 let string_of_error (loc, str) =
   Printf.sprintf "%s: %s" (string_of_loc loc) str
@@ -66,18 +77,10 @@ let name_of_string str =
   with
     Not_found -> ("", str)
 
+let loc loc_start loc_stop = { loc_start ; loc_stop }
 let loc_of_pos pos len =
-  { line = pos.pline;
-    char = pos.pchar - pos.pbol ;
-    len ;
-    file = pos.pfile ;
-  }
-
-let loc_of_pos2 pos pos2 =
-  { line = pos.pline;
-    char = pos.pchar - pos.pbol ;
-    len = pos2.pchar - pos.pchar ;
-    file = pos.pfile ;
+  { loc_start = pos ;
+    loc_stop = { pos with char = pos.char + len } ;
   }
 
 let nl_code = Char.code '\n'
@@ -86,13 +89,13 @@ let update_pos pos str =
   let f pos i = function
   | `Malformed msg -> error (loc_of_pos pos 1) msg
   | `Uchar c when c = nl_code ->
-      let pbol = pos.pchar in
+      let bol = pos.char in
       { pos with
-        pline = pos.pline + 1;
-        pbol ;
-        pchar = pos.pchar + 1 ;
+        line = pos.line + 1;
+        bol ;
+        char = pos.char + 1 ;
       }
-  | _ -> { pos with pchar = pos.pchar + 1}
+  | _ -> { pos with char = pos.char + 1}
   in
   Uutf.String.fold_utf_8 f pos str
 
@@ -112,10 +115,11 @@ module Name_set = Set.Make (Name_ord)
 type cdata = { loc: loc option; text: string ; quoted: bool}
 type comment = { loc: loc option; comment: string }
 type proc_inst = { loc: loc option; app: name; args: string}
-type attributes = (string * loc option) Name_map.t
-type xml_decl = { loc: loc option; atts: attributes }
+type 'a attributes = 'a Name_map.t
+type str_attributes = (string * loc option) attributes
+type xml_decl = { loc: loc option; atts: str_attributes }
 type doctype = { loc: loc option; name: name; args: string}
-type node = { loc: loc option; name: name ; atts: attributes ; subs: tree list }
+type node = { loc: loc option; name: name ; atts: str_attributes ; subs: tree list }
 and tree =
 | E of node
 | D of cdata
@@ -127,12 +131,22 @@ and tree =
 let atts_empty = Name_map.empty
 let node ?loc name ?(atts=atts_empty) subs = E { loc; name; atts; subs}
 let cdata ?loc ?(quoted=false) text = D { loc ; text ; quoted }
+let merge_cdata (c1 : cdata) (c2 : cdata) =
+  let loc =
+    match c1.loc, c2.loc with
+      None, _ | _, None -> None
+    | Some l1, Some l2 -> Some (loc l1.loc_start l2.loc_stop)
+  in
+  { loc ; text = c1.text ^ c2.text ; 
+    quoted = c1.quoted || c2.quoted ;
+  }
+
 let comment ?loc comment = C { loc ; comment }
 let proc_inst ?loc app args = PI { loc ; app ; args }
 let xml_decl ?loc atts = X { loc ; atts }
 let doctype ?loc name args = DT { loc ; name ; args }
 
-type stack = (pos * name * attributes) Stack.t
+type stack = (pos * name * str_attributes) Stack.t
 
 let e_nameStartChar = [%sedlex.regexp? ":" | 'A'..'Z' | "_" | 'a'..'z' | 0xC0..0xD6 | 0xD8..0xF6 | 0xF8..0x02FF | 0x0370..0x037D | 0x037F..0x1FFF | 0x200C..0x200D | 0x2070..0x218F | 0x2C00..0x2FEF | 0x3001..0xD7FF | 0xF900..0xFDCF | 0xFDF0..0xFFFD | 0x010000..0x0EFFFF]
 let e_nameChar = [%sedlex.regexp? e_nameStartChar | "-" | "." | '0'..'9' | 0xB7 | 0x0300..0x036F | 0x203F..0x2040]
@@ -312,7 +326,7 @@ let pop stack pos_end name =
   | ((n,pos_start,atts), subs) :: q ->
       if n = name then
         (
-         let loc = loc_of_pos2 pos_start pos_end in
+         let loc = loc pos_start pos_end in
          let elt = node ~loc ~atts name (List.rev subs) in
          add_elt q elt
         )
@@ -329,7 +343,7 @@ let rec parse_text stack pos lb =
       let pos2 = update_pos pos text in
       (* update pos2 with the "-->" lexeme just read *)
       let pos2 = update_pos_from_lb pos2 lb in
-      let loc = loc_of_pos2 pos pos2 in
+      let loc = loc pos pos2 in
       let stack = add_elt stack (comment ~loc text) in
       parse_text stack pos2 lb
 
@@ -339,7 +353,7 @@ let rec parse_text stack pos lb =
       let pos2 = update_pos pos text in
       (* update pos2 with the "]]>" lexeme just read *)
       let pos2 = update_pos_from_lb pos2 lb in
-      let loc = loc_of_pos2 pos pos2 in
+      let loc = loc pos pos2 in
       let stack = add_elt stack (cdata ~loc ~quoted: true text) in
       parse_text stack pos2 lb
   | "<!DOCTYPE",Plus(e_space) ->
@@ -352,7 +366,7 @@ let rec parse_text stack pos lb =
                 ("Invalid character in doctype decl: "^(U.lexeme lb))
         in
         let (args, pos2) = parse_doctype pos2 (Buffer.create 256) lb in
-        let loc = loc_of_pos2 pos pos2 in
+        let loc = loc pos pos2 in
         let stack = add_elt stack (doctype ~loc name args) in
         parse_text stack pos2 lb
       end
@@ -369,12 +383,12 @@ let rec parse_text stack pos lb =
             let (atts, pos2, _) = parse_attributes
               ~xml_decl: true atts_empty pos2 lb
             in
-            let loc = loc_of_pos2 pos pos2 in
+            let loc = loc pos pos2 in
             let stack = add_elt stack (xml_decl ~loc atts) in
             parse_text stack pos2 lb
         | _ ->
             let (args, pos2) = parse_proc_inst pos2 (Buffer.create 256) lb in
-            let loc = loc_of_pos2 pos pos2 in
+            let loc = loc pos pos2 in
             let stack = add_elt stack (proc_inst ~loc app args) in
             parse_text stack pos2 lb
       end
@@ -389,7 +403,7 @@ let rec parse_text stack pos lb =
       let stack =
         if closed then
           (
-           let loc = loc_of_pos2 pos pos2 in
+           let loc = loc pos pos2 in
            let elt = node ~loc ~atts name [] in
            add_elt stack elt
           )
@@ -410,12 +424,12 @@ let rec parse_text stack pos lb =
   | Plus(e_attValueChar | e_reference) ->
       let str = unescape (U.lexeme lb) in
       let pos2 = update_pos_from_lb pos lb in
-      let loc = loc_of_pos2 pos pos2 in
+      let loc = loc pos pos2 in
       let stack = add_elt stack (cdata ~loc str) in
       parse_text stack pos2 lb
   | '<', any ->
       let pos2 = update_pos_from_lb pos lb in
-      error (loc_of_pos2 pos pos2)
+      error (loc pos pos2)
         (Printf.sprintf "Unexpected characters: %s" (U.lexeme lb))
   | any ->
       error (loc_of_pos pos 1) "Unexpected characters from this point"
@@ -479,7 +493,7 @@ and parse_attribute_value pos lb =
     let pos2 = update_pos_from_lb pos lb in
     let len = String.length lexeme in
     let v = unescape (String.sub lexeme 1 (len - 2)) in
-    let loc = loc_of_pos2 pos pos2 in
+    let loc = loc pos pos2 in
     ((v, Some loc), pos2)
   | any ->
       error (loc_of_pos pos 1)
@@ -540,7 +554,7 @@ let to_string l =
   Buffer.contents buf
 
 let from_lexbuf
-  ?(pos_start={ pline = 1; pchar = 1 ; pbol = 0 ; pfile = None }) lb =
+  ?(pos_start={ line = 1; char = 1 ; bol = 0 ; file = None }) lb =
     parse_text [(("",""), pos_start, atts_empty), []]
     pos_start lb
 
@@ -559,6 +573,31 @@ let from_file file =
     close_in ic;
     raise e
 
+let atts_of_list =
+  let f acc (name,v) = Name_map.add name v acc in
+  fun ?(atts=atts_empty) l -> List.fold_left f atts l
+
+let atts_one ?(atts=atts_empty) name v = Name_map.add name v atts;;
+let atts_replace = Name_map.add;;
+let atts_remove = Name_map.remove;;
+
+let get_att atts name =
+  try Some (Name_map.find name atts)
+  with Not_found -> None
+
+let opt_att atts ?(def="") name =
+  match get_att atts name with None -> (def, None) | Some s -> s
+
+let string_of_atts atts =
+  let buf = Buffer.create 256 in
+  Name_map.iter
+    (fun name (value,_) ->
+         Buffer.add_string buf " ";
+         print_att buf name value
+    )
+    atts;
+    Buffer.contents buf
+(*
 let xml = {|<?xml version='1' ?>
   <!DOCTYPE toto sdkfsdl>
   <!--hello comment !-->
@@ -572,7 +611,7 @@ let tree =
   with
   Error e ->
       prerr_endline (string_of_error e)
-
+*)
 
 
 

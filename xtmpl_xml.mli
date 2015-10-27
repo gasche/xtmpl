@@ -23,33 +23,51 @@
 (*                                                                                  *)
 (************************************************************************************)
 
-(** *)
+(** Regular XML trees *)
 
-type name = string * string
-val string_of_name : string * string -> string
-val name_of_string : string -> string * string
+(** {2 Locations} *)
 
-type loc = { line: int ; char: int ; len: int ; file: string option }
+(** A position in a source (file, string, ...). *)
+type pos = { line: int; bol: int; char: int; file: string option }
+
+(** A location is a range defined by two positions.*)
+type loc = { loc_start: pos; loc_stop: pos}
 val string_of_loc : loc -> string
 
-type pos = { pline: int; pbol: int; pchar: int; pfile: string option }
+(** [loc loc_start loc_stop] creates a {!loc} structure with
+  the given positions. *)
+val loc : pos -> pos -> loc
+
+(** {2 Errors} *)
 
 type error = loc * string
 exception Error of error
 val error : loc -> string -> 'a
 val string_of_error : loc * string -> string
 
+(** {2 Names} *)
+
+type name = string * string
+val string_of_name : string * string -> string
+
+(** [name_of_string str] cuts a name according to first ':' character.
+     If no such character is found, return [("",str)]. *)
+val name_of_string : string -> string * string
+
 module Name_ord : Map.OrderedType with type t = name
 module Name_map : Map.S with type key = name
 module Name_set : Set.S with type elt = name
 
+(** {2 XML trees} *)
+
 type cdata = { loc: loc option; text: string; quoted: bool }
 type comment = { loc: loc option; comment: string }
 type proc_inst = { loc: loc option; app: name; args: string}
-type attributes = (string * loc option) Name_map.t
-type xml_decl = { loc: loc option; atts: attributes }
+type 'a attributes = 'a Name_map.t
+type str_attributes = (string * loc option) attributes
+type xml_decl = { loc: loc option; atts: str_attributes }
 type doctype = { loc: loc option; name: name; args: string}
-type node = { loc: loc option; name: name ; atts: attributes ; subs: tree list }
+type node = { loc: loc option; name: name ; atts: str_attributes ; subs: tree list }
 and tree =
 | E of node
 | D of cdata
@@ -58,15 +76,30 @@ and tree =
 | X of xml_decl
 | DT of doctype
 
-val atts_empty : attributes
-val node : ?loc:loc -> name -> ?atts:attributes -> tree list -> tree
+(** {2 Constructors} *)
+
+val node : ?loc:loc -> name -> ?atts:str_attributes -> tree list -> tree
 val cdata : ?loc:loc -> ?quoted:bool -> string -> tree
 val comment : ?loc:loc -> string -> tree
 val proc_inst : ?loc:loc -> name -> string -> tree
-val xml_decl : ?loc:loc -> attributes -> tree
+val xml_decl : ?loc:loc -> str_attributes -> tree
 val doctype : ?loc:loc -> name -> string -> tree
 
+val merge_cdata : cdata -> cdata -> cdata
+
+(** {2 Input/output} *)
+
+(** Unescape character references and some common entity references:
+     [&lt;], [&gt;], [&amp;], [&quot;], [&apos;].
+     @param entities can be set to [false] not to unescape
+     entity references.
+*)
 val unescape : ?entities:bool -> string -> string
+
+(** Replace the following characters: [<] by [&lt;],
+  [>] by [&gt;], [&] by [&amp;]. Also replace simple
+  and double quotes by [&apos;] and [&quot;] if
+  [quotes = true] (which is false by default). *)
 val escape : ?quotes:bool -> string -> string
 
 val from_string : ?pos_start:pos -> string -> tree list
@@ -74,3 +107,29 @@ val from_channel : ?pos_start:pos -> in_channel -> tree list
 val from_file : string -> tree list
 
 val to_string : tree list -> string
+
+(** {2 Attributes} *)
+
+val atts_empty : 'a attributes
+
+(** Same as {!Xtmpl_rewrite.atts_of_list} but for generic attributes. *)
+val atts_of_list : ?atts: 'a attributes -> (name * 'a) list -> 'a attributes
+
+(** Same as {!Xtmpl_rewrite.atts_one} but for generic attributes. *)
+val atts_one : ?atts: 'a attributes -> name -> 'a -> 'a attributes
+
+(** Same as {!Xtmpl_rewrite.atts_remove} but for generic attributes. *)
+val atts_remove : name -> 'a attributes -> 'a attributes
+
+(** Same as {!Xtmpl_rewrite.atts_replace} but for generic attributes. *)
+val atts_replace : name -> 'a -> 'a attributes -> 'a attributes
+
+(** Same as {!Xtmpl_rewrite.get_att} but for generic attributes. *)
+val get_att : 'a attributes -> name -> 'a option
+
+(** Same as {!Xtmpl_rewrite.opt_att} but for {!str_attributes}. *)
+val opt_att : str_attributes -> ?def: string -> name -> string * loc option
+
+(** Return a string representation of the given {!str_attributes}. *)
+val string_of_atts : str_attributes -> string
+

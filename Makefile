@@ -49,8 +49,6 @@ LIB_CMXFILES= \
 	xtmpl_misc.cmx \
 	xtmpl_xml.cmx \
 	xtmpl_rewrite.cmx \
-	xtmpl_base.cmx \
-	xtmpl.cmx \
 	xtmpl_xhtml.cmx
 LIB_CMOFILES=$(LIB_CMXFILES:.cmx=.cmo)
 LIB_CMIFILES=$(LIB_CMXFILES:.cmx=.cmi)

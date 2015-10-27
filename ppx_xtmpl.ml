@@ -31,6 +31,9 @@ open Asttypes
 open Parsetree
 open Longident
 
+module X = Xtmpl_rewrite
+module Xml = Xtmpl_xml
+
 let lid loc s = Location.mkloc (Longident.parse s) loc
 
 (*c==v=[File.string_of_file]=1.1====*)
@@ -79,15 +82,13 @@ let file_path exp =
 let read_template loc file =
   try
     let str = string_of_file file in
-    match Xtmpl.xml_of_string str with
-      Xtmpl.E(_,_,xmls) -> xmls
-    | _ -> assert false
+    X.from_string str
   with
     Sys_error msg -> error loc (Printf.sprintf "File %S: %s" file msg)
 
 type parameter =
-  { name : Xtmpl.name ;
-    default : Xtmpl.rewrite_tree list option ;
+  { name : Xtmpl_xml.name ;
+    default : X.tree list option ;
     typ : [ `CData | `Xmls | `Other of string * string ] ;
     mlname : string option ;
   }
@@ -97,13 +98,13 @@ let string_of_name = function
 | p, s -> Printf.sprintf "%s:%s" p s
 
 let prune_param_atts =
-  List.fold_right Xtmpl.atts_remove
+  List.fold_right X.atts_remove
     [ "", "param_" ; "", "optional_" ; "", "type_" ; "", "to_xml_" ; "", "name_"]
 
 let gather_params loc xmls =
   let rec add_param acc tag atts subs =
     let (acc, default) =
-      match Xtmpl.get_att_cdata atts ("","optional_") with
+      match X.get_att_cdata atts ("","optional_") with
       | Some "true" ->
           let (acc, subs) = iter_list acc subs in
           (acc, Some subs)
@@ -111,32 +112,32 @@ let gather_params loc xmls =
           (acc, None)
     in
     let typ =
-      match Xtmpl.get_att_cdata atts ("","type_") with
+      match X.get_att_cdata atts ("","type_") with
         None | Some "cdata" -> `CData
       | Some "xml"
       | Some "xmls" -> `Xmls
       | Some typ ->
-          match Xtmpl.get_att_cdata atts ("","to_xml_") with
+          match X.get_att_cdata atts ("","to_xml_") with
             None -> error loc
               (Printf.sprintf "Missing to_xml attribute for param %S of type %S"
                  (string_of_name tag) typ)
           | Some code ->
             `Other (typ, code)
     in
-    let mlname = Xtmpl.get_att_cdata atts ("", "name_") in
-    let acc = Xtmpl.Name_map.add tag { name = tag ; default ; typ ; mlname } acc in
+    let mlname = X.get_att_cdata atts ("", "name_") in
+    let acc = Xtmpl_xml.Name_map.add tag { name = tag ; default ; typ ; mlname } acc in
     let atts = prune_param_atts atts in
-    (acc, Xtmpl.E (tag, atts, []))
+    (acc, X.node tag ~atts [])
   and iter acc xml =
     match xml with
-      Xtmpl.D _ -> (acc, xml)
-    | Xtmpl.E (tag, atts, subs) ->
-        match Xtmpl.get_att_cdata atts ("","param_") with
-        | Some "true" -> add_param acc tag atts subs
+      X.D _ | X.C _ | X.PI _ | X.X _ | X.DT _ -> (acc, xml)
+    | X.E {X.name ; atts ; subs} ->
+        match X.get_att_cdata atts ("","param_") with
+        | Some "true" -> add_param acc name atts subs
         | _ ->
             let (acc, atts) = iter_atts acc atts in
             let (acc, subs) = iter_list acc subs in
-            (acc, Xtmpl.E(tag,atts,subs))
+            (acc, X.node name ~atts subs)
   and iter_list acc xmls =
     let (acc, xmls) = List.fold_left
               (fun (acc, acc_xmls) xml ->
@@ -147,12 +148,12 @@ let gather_params loc xmls =
     in
     (acc, List.rev xmls)
   and iter_atts acc atts =
-     Xtmpl.Name_map.fold iter_att atts (acc, Xtmpl.Name_map.empty)
+     Xml.Name_map.fold iter_att atts (acc, Xml.Name_map.empty)
   and iter_att name v (acc, atts) =
     let (acc, xmls) = iter_list acc v in
-    (acc, Xtmpl.Name_map.add name xmls atts)
+    (acc, Xml.Name_map.add name xmls atts)
   in
-  iter_list Xtmpl.Name_map.empty xmls
+  iter_list Xml.Name_map.empty xmls
 
 let parse_ocaml_expression loc str =
   let lexbuf = Lexing.from_string str in
@@ -198,7 +199,7 @@ let fun_of_param loc body (name, p) =
 let funs_of_params loc params body =
   let exp = [%expr fun () -> [%e body]] in
   (* list parameters in reverse order to generate them in name order *)
-  let params = Xtmpl.Name_map.fold (fun name p acc -> (name, p) :: acc) params [] in
+  let params = Xml.Name_map.fold (fun name p acc -> (name, p) :: acc) params [] in
   let exp = List.fold_left (fun_of_param loc) exp params in
   [%expr fun ?(env=Xtmpl.env_empty()) -> [%e exp]]
 
@@ -225,15 +226,15 @@ let env_or_defaults loc params exp =
     in
     let default_def v =
       match p.typ, v with
-      | `CData, [Xtmpl.D v] -> Exp.constant (Const_string (v, None))
+      | `CData, [X.D v] -> Exp.constant (Const_string (v.Xml.text, None))
       | `CData, [] -> Exp.constant (Const_string ("", None))
       | `CData, _ ->
               error loc
             (Printf.sprintf "Parameter %S should have CData default value"
              (string_of_name name))
       | `Xmls, xmls -> Exp.ident (lid loc ("__default_"^id))
-      | `Other _, [Xtmpl.D code] ->
-          parse_ocaml_expression loc code
+      | `Other _, [X.D code] ->
+          parse_ocaml_expression loc code.Xml.text
       | `Other _, _ ->
           error loc
             (Printf.sprintf "Parameter %S should have OCaml code as default value (given as CDATA)"
@@ -255,13 +256,15 @@ let env_or_defaults loc params exp =
           [%e exp]
         ]
   in
-  Xtmpl.Name_map.fold f params exp
+  Xml.Name_map.fold f params exp
 
 let defaults_of_params loc params exp =
   let f name p exp =
     match p.typ, p.default with
     | `Xmls, Some xmls ->
-        let const_tmpl = Exp.constant ~loc (Const_string (Xtmpl.string_of_xmls xmls, None)) in
+        let const_tmpl = Exp.constant ~loc
+          (Const_string (X.to_string xmls, None))
+        in
         let id = "__default_"^(ml_id_of_param p) in
         Exp.let_ Nonrecursive
           [Vb.mk (Pat.var (Location.mkloc id loc))
@@ -270,11 +273,12 @@ let defaults_of_params loc params exp =
           exp
     | _ -> exp
   in
-  Xtmpl.Name_map.fold f params exp
+  Xml.Name_map.fold f params exp
 
 let map_tmpl loc tmpl =
   let (params, tmpl) = gather_params loc tmpl in
-  let const_tmpl = Exp.constant ~loc (Const_string (Xtmpl.string_of_xmls tmpl, None)) in
+  let const_tmpl = Exp.constant ~loc
+    (Const_string (X.to_string tmpl, None)) in
   let call = [%expr let (_, res) = Xtmpl.apply_to_xmls () env [tmpl_] in res] in
   (*let envs = Xtmpl.Name_map.fold (env_of_param loc) params call in*)
   let envs = env_or_defaults loc params call in
@@ -285,12 +289,7 @@ let map_tmpl loc tmpl =
 
 let template_of_inline_string loc node exp =
   match exp.pexp_desc with
-  | Pexp_constant (Const_string (str, _)) ->
-      begin
-        match Xtmpl.xml_of_string str with
-          Xtmpl.E(_,_,xmls) -> xmls
-        | _ -> assert false
-      end
+  | Pexp_constant (Const_string (str, _)) -> X.from_string str
   | _ -> kerror loc "String constant expected in %s extension node" node
 
 let map_xtmpl_string exp =
@@ -327,7 +326,7 @@ let typ_of_params loc params =
     Typ.arrow label typ acc
   in
  (* list parameters in reverse order to generate them in name order *)
-  let params = Xtmpl.Name_map.fold (fun name p acc -> (name, p) :: acc) params [] in
+  let params = Xml.Name_map.fold (fun name p acc -> (name, p) :: acc) params [] in
   let typ = List.fold_left f [%type: unit -> Xtmpl.tree list] params in
   [%type: ?env: unit Xtmpl.env -> [%t typ] ]
 

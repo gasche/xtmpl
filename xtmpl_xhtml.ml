@@ -24,10 +24,8 @@
 (************************************************************************************)
 
 (** *)
-open Xtmpl
+open Xtmpl_rewrite
 
-type tree = rewrite_tree
-type attributes = xml_attributes
 type elt_fun =
   ?xid: tree list -> ?id: string ->
   ?xclass: tree list -> ?class_: string -> ?classes: string list ->
@@ -43,9 +41,10 @@ type elt_fun_ =
 let add atts name cdata xml =
   match cdata, xml with
   | None, None -> atts
-  | Some s, None -> atts_one ~atts ("",name) [D s]
+  | Some text, None -> atts_one ~atts ("",name) [Xtmpl_rewrite.cdata text]
   | None, Some xmls -> atts_one ~atts ("", name) xmls
-  | Some s, Some xmls -> atts_one ~atts ("",name) ((D (s^" ")) :: xmls)
+  | Some text, Some xmls -> 
+      atts_one ~atts ("",name) ((Xtmpl_rewrite.cdata text) :: xmls)
 
 let elt : elt_fun_ = fun ?(prefix="") tag ?xid ?id
   ?xclass ?class_ ?classes
@@ -67,7 +66,7 @@ let elt : elt_fun_ = fun ?(prefix="") tag ?xid ?id
     in
     add atts "class" class_ xclass
   in
-  E ((prefix, tag), atts, subs)
+  Xtmpl_rewrite.node  (prefix, tag) ~atts subs
 
 let html = elt "html"
 
