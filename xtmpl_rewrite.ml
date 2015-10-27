@@ -25,52 +25,84 @@
 
 (** *)
 
+module Xml = Xtmpl_xml
 type name = string * string
-val string_of_name : string * string -> string
-val name_of_string : string -> string * string
 
-type loc = { line: int ; char: int ; len: int ; file: string option }
-val string_of_loc : loc -> string
+module Name_map = Xml.Name_map
 
-type pos = { pline: int; pbol: int; pchar: int; pfile: string option }
-
-type error = loc * string
-exception Error of error
-val error : loc -> string -> 'a
-val string_of_error : loc * string -> string
-
-module Name_ord : Map.OrderedType with type t = name
-module Name_map : Map.S with type key = name
-module Name_set : Set.S with type elt = name
-
-type cdata = { loc: loc option; text: string; quoted: bool }
-type comment = { loc: loc option; comment: string }
-type proc_inst = { loc: loc option; app: name; args: string}
-type attributes = (string * loc option) Name_map.t
-type xml_decl = { loc: loc option; atts: attributes }
-type doctype = { loc: loc option; name: name; args: string}
-type node = { loc: loc option; name: name ; atts: attributes ; subs: tree list }
+type attributes = tree list Name_map.t
+and node = { loc: Xml.loc option; name: name ; atts: attributes ; subs: tree list }
 and tree =
 | E of node
-| D of cdata
-| C of comment
-| PI of proc_inst
-| X of xml_decl
-| DT of doctype
+| D of Xml.cdata
+| C of Xml.comment
+| PI of Xml.proc_inst
+| X of Xml.xml_decl
+| DT of Xml.doctype
 
-val atts_empty : attributes
-val node : ?loc:loc -> name -> ?atts:attributes -> tree list -> tree
-val cdata : ?loc:loc -> ?quoted:bool -> string -> tree
-val comment : ?loc:loc -> string -> tree
-val proc_inst : ?loc:loc -> name -> string -> tree
-val xml_decl : ?loc:loc -> attributes -> tree
-val doctype : ?loc:loc -> name -> string -> tree
+let atts_empty = Name_map.empty
 
-val unescape : ?entities:bool -> string -> string
-val escape : ?quotes:bool -> string -> string
+let node ?loc name ?(atts=atts_empty) subs = E { loc ; name ; atts; subs }
+let cdata = Xml.cdata
+let comment = Xml.comment
+let proc_inst = Xml.proc_inst
+let xml_decl = Xml.xml_decl
+let doctype = Xml.doctype
 
-val from_string : ?pos_start:pos -> string -> tree list
-val from_channel : ?pos_start:pos -> in_channel -> tree list
-val from_file : string -> tree list
+type rewrite_stack = (name * attributes * tree list) list
 
-val to_string : tree list -> string
+type error =
+  Loop of rewrite_stack
+| Parse_error of Xml.loc
+
+exception Error of error
+let error e = raise (Error e)
+let loop_error stack = error (Loop stack)
+let parse_error loc = error (Parse_error loc)
+
+
+
+let rec string_of_xmls trees =
+  Xml.to_string (to_xmls trees)
+
+and to_xml tree = function
+| D cdata -> Xml.D cdata
+| C comment -> Xml.C comment
+| PI pi -> Xml.PI pi
+| X decl -> Xml.X decl
+| DT dt -> Xml.DT dt
+| E { loc ; name ; atts ; subs } ->
+    let atts = Name_map.map string_of_xmls atts in
+    let subs = to_xmls subs in
+    Xml.node ?loc name ~atts subs
+
+and to_xmls = List.map to_xml
+
+
+let string_of_rewrite_stack l =
+  let b = Buffer.create 256 in
+  let f ((prefix,t), atts, subs) =
+    Buffer.add_string b "==================\n";
+    Buffer.add_string b ("Apply <"^prefix^":"^t^">\nAttributes:");
+    Name_map.iter
+      (fun (p,s) v ->
+         Buffer.add_string b "\n  ";
+         if p <> "" then Buffer.add_string b (p^":");
+         Printf.bprintf b "%s=%S " s (string_of_xmls v))
+      atts;
+    Buffer.add_string b "\nSubs=\n";
+    List.iter (fun xml -> Buffer.add_string b (string_of_xml xml)) subs;
+    Buffer.add_string b "\n"
+  in
+  List.iter f (List.rev l);
+  Buffer.contents b
+
+let string_of_error = function
+  Loop stack -> 
+    "Max rewrite depth reached:\n"^(string_of_rewrite_stack stack)
+| Parse_error (loc, msg) ->
+    Printf.sprintf "%s: Parse error: %s" (Xml.string_of_loc loc) msg
+
+
+let from_xml xmls = []
+

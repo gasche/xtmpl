@@ -534,10 +534,30 @@ let string_of_xml t =
   print_tree buf t ;
   Buffer.contents buf
 
-let string_of_xmls l =
+let to_string l =
   let buf = Buffer.create 512 in
   List.iter (print_tree buf) l;
   Buffer.contents buf
+
+let from_lexbuf
+  ?(pos_start={ pline = 1; pchar = 1 ; pbol = 0 ; pfile = None }) lb =
+    parse_text [(("",""), pos_start, atts_empty), []]
+    pos_start lb
+
+let from_string ?pos_start str =
+  let lb=  U.from_string str in
+  from_lexbuf ?pos_start lb
+
+let from_channel ?pos_start ic =
+  let lb=  U.from_channel ic in
+  from_lexbuf ?pos_start lb
+
+let from_file file =
+  let ic = open_in_bin file in
+  try from_channel ic
+  with e ->
+    close_in ic;
+    raise e
 
 let xml = {|<?xml version='1' ?>
   <!DOCTYPE toto sdkfsdl>
@@ -547,15 +567,8 @@ let xml = {|<?xml version='1' ?>
 let xml = Xtmpl_misc.string_of_file Sys.argv.(1)
 let tree =
   try
-    let pos_start =
-      { pline = 1; pchar = 1 ; pbol = 0 ; pfile = None }
-    in
-    let xmls =
-      parse_text [(("",""), pos_start, atts_empty), []]
-        pos_start
-        (U.from_string xml)
-    in
-    print_endline (string_of_xmls xmls)
+    let xmls = from_string xml in
+    print_endline (to_string xmls)
   with
   Error e ->
       prerr_endline (string_of_error e)

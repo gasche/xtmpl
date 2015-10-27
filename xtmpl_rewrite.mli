@@ -25,52 +25,41 @@
 
 (** *)
 
+module Xml = Xtmpl_xml
 type name = string * string
-val string_of_name : string * string -> string
-val name_of_string : string -> string * string
 
-type loc = { line: int ; char: int ; len: int ; file: string option }
-val string_of_loc : loc -> string
-
-type pos = { pline: int; pbol: int; pchar: int; pfile: string option }
-
-type error = loc * string
-exception Error of error
-val error : loc -> string -> 'a
-val string_of_error : loc * string -> string
-
-module Name_ord : Map.OrderedType with type t = name
-module Name_map : Map.S with type key = name
-module Name_set : Set.S with type elt = name
-
-type cdata = { loc: loc option; text: string; quoted: bool }
-type comment = { loc: loc option; comment: string }
-type proc_inst = { loc: loc option; app: name; args: string}
-type attributes = (string * loc option) Name_map.t
-type xml_decl = { loc: loc option; atts: attributes }
-type doctype = { loc: loc option; name: name; args: string}
-type node = { loc: loc option; name: name ; atts: attributes ; subs: tree list }
+type attributes = tree list Xml.Name_map.t
+and node = { loc: Xml.loc option; name: name ; atts: attributes ; subs: tree list }
 and tree =
 | E of node
-| D of cdata
-| C of comment
-| PI of proc_inst
-| X of xml_decl
-| DT of doctype
+| D of Xml.cdata
+| C of Xml.comment
+| PI of Xml.proc_inst
+| X of Xml.xml_decl
+| DT of Xml.doctype
 
 val atts_empty : attributes
-val node : ?loc:loc -> name -> ?atts:attributes -> tree list -> tree
-val cdata : ?loc:loc -> ?quoted:bool -> string -> tree
-val comment : ?loc:loc -> string -> tree
-val proc_inst : ?loc:loc -> name -> string -> tree
-val xml_decl : ?loc:loc -> attributes -> tree
-val doctype : ?loc:loc -> name -> string -> tree
 
-val unescape : ?entities:bool -> string -> string
-val escape : ?quotes:bool -> string -> string
+val node : ?loc:Xml.loc -> name -> ?atts:attributes -> tree list -> tree
+val cdata : ?loc:Xml.loc -> ?quoted:bool -> string -> tree
+val comment : ?loc:Xml.loc -> string -> tree
+val proc_inst : ?loc:Xml.loc -> name -> string -> tree
+val xml_decl : ?loc:Xml.loc -> Xml.attributes -> tree
+val doctype : ?loc:Xml.loc -> name -> string -> tree
 
-val from_string : ?pos_start:pos -> string -> tree list
-val from_channel : ?pos_start:pos -> in_channel -> tree list
-val from_file : string -> tree list
 
-val to_string : tree list -> string
+type rewrite_stack = (name * attributes * tree list) list
+
+type error =
+  Loop of rewrite_stack
+| Parse_error of Xml.loc
+
+exception Error of error
+val loop_error : rewrite_stack -> 'a
+val parse_error : Xml.loc -> 'a
+
+val string_of_error : error -> string
+
+
+val from_xml : Xml.tree list -> tree list
+
