@@ -130,10 +130,7 @@ and 'a callback = 'a -> 'a env -> attributes -> tree list -> 'a * tree list
   node to be rewritten remains unchanged. *)
 exception No_change
 
-(** An environment that contains only one binding, associating
-  {!val:tag_main} to a function such as [(fun data _env _atts subs -> (data, subs))],
-  i.e. only returning the given data and subnodes.
-*)
+(** An environment that contains no binding.*)
 val env_empty : unit -> 'a env
 
 (** Add a binding to an environment.
@@ -242,8 +239,6 @@ val att_defer : string
   will be removed. Several attribute names can be indicated, using [',']
   or [';'] as separator, as in
   [ <a escamp_="href, foo, gee:buz" href="..." ...>...</a> ].
-
-  This treatment is done in {!xmls_of_atts} (escaping) and {!string_of_xml_atts} (unescaping).
 *)
 val att_escamp : string
 
@@ -328,10 +323,8 @@ val merge_cdata_list : tree list -> tree list
     {i Example}: [<x2><x2>A</x2></x2>] is first rewritten as
     [<x2>A</x2><x2>A</x2>], and then as [AAAA].
 }
-{-  The [env_] and [main_] elements (see {!val:tag_env}
-    and {!val:tag_main}) are a special case: both are automatically
-    replaced with their children (as if their callback was
-    [(fun data _ _ xml -> (data, xml))]).
+{-  The [env_] element (see {!val:tag_env} is a special case: it is automatically
+    replaced with its children (as if its callback was [(fun data _ _ xml -> (data, xml))]).
 
     [env_] effectively changes the environment
     used when processing its children by adding the bindings defined by

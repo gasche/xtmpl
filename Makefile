@@ -114,7 +114,7 @@ test_ppx_xtmpl: ppx_xtmpl test_ppx_xtmpl.ml
 .PHONY: doc
 dump.odoc:
 	$(OCAMLFIND) ocamldoc -package $(JS_PACKAGES) -dump $@ -rectypes \
-	xtmpl.mli xtmpl_xhtml.mli xtmpl_js.mli
+	xtmpl_*.mli
 
 doc: dump.odoc
 	$(MKDIR) doc
