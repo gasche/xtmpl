@@ -250,14 +250,24 @@ val att_protect : string
 
 (** {2 Input/output} *)
 
-val from_xml : Xml.tree list -> tree list
+(** Convert from a {!Xtmpl_xml.tree} list. Attribute values must
+     be valid XML.*)
+val from_xml : Xml.tree -> tree
 
-(** Output an XML string.
+(** Same as {!from_xml} but for a list of trees. *)
+val from_xmls : Xml.tree list -> tree list
 
+(** Convert to a {!Xtmpl_xml.tree}.
     @param xml_atts indicates whether the code in attributes remains valid XML
     of not. Default is [true] but it should be set to [false] when outputting
-    final documents like XHTML pages.
-*)
+    final documents like XHTML pages. *)
+val to_xml : ?xml_atts: bool -> tree -> Xml.tree
+
+(** Same as {!to_xml} but for a list of trees. *)
+val to_xmls : ?xml_atts: bool -> tree list -> Xml.tree list
+
+(** Output an XML string.
+  @param xml_atts see {!to_xml}. *)
 val to_string : ?xml_atts: bool -> tree list -> string
 
 (** Parses a string as {!tree} list. *)

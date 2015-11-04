@@ -210,11 +210,13 @@ let from_xml =
 
   and map_xmls l = List.map map l
   in
-  fun xmls -> map_xmls xmls
+  map
 
-let from_string str = from_xml (Xml.from_string str)
+let from_xmls = List.map from_xml
+
+let from_string str = from_xmls (Xml.from_string str)
 let from_file file =
-  try from_xml (Xml.from_file file)
+  try from_xmls (Xml.from_file file)
   with Xml.Error (loc, msg) -> parse_error loc msg
 
 let atts_replace = Xml.atts_replace
