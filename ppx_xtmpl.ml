@@ -130,7 +130,7 @@ let gather_params loc xmls =
     (acc, X.node tag ~atts [])
   and iter acc xml =
     match xml with
-      X.D _ | X.C _ | X.PI _ | X.X _ | X.DT _ -> (acc, xml)
+      X.D _ | X.C _ | X.PI _ -> (acc, xml)
     | X.E {X.name ; atts ; subs} ->
         match X.get_att_cdata atts ("","param_") with
         | Some "true" -> add_param acc name atts subs

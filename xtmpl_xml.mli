@@ -76,17 +76,27 @@ and tree =
 | D of cdata
 | C of comment
 | PI of proc_inst
-| X of xml_decl
-| DT of doctype
+
+type prolog_misc = PC of comment | PPI of proc_inst
+type prolog = {
+      decl : xml_decl option ;
+      misc : prolog_misc list ;
+      doctype : doctype option ;
+    }
+type 'a doc = { prolog : prolog ; elements : 'a list }
 
 (** {2 Constructors} *)
 
 val node : ?loc:loc -> name -> ?atts:str_attributes -> tree list -> tree
 val cdata : ?loc:loc -> ?quoted:bool -> string -> tree
 val comment : ?loc:loc -> string -> tree
-val proc_inst : ?loc:loc -> name -> string -> tree
-val xml_decl : ?loc:loc -> str_attributes -> tree
-val doctype : ?loc:loc -> name -> string -> tree
+val prolog_comment : ?loc:loc -> string -> prolog_misc
+val pi : ?loc:loc -> name -> string -> tree
+val prolog_pi : ?loc:loc -> name -> string -> prolog_misc
+val xml_decl : ?loc:loc -> str_attributes -> xml_decl
+val doctype : ?loc:loc -> name -> string -> doctype
+val prolog : ?decl: xml_decl -> ?doctype: doctype -> prolog_misc list -> prolog
+val doc : prolog -> tree list -> tree doc
 
 val merge_cdata : cdata -> cdata -> cdata
 
@@ -109,7 +119,12 @@ val from_string : ?pos_start:pos -> string -> tree list
 val from_channel : ?pos_start:pos -> in_channel -> tree list
 val from_file : string -> tree list
 
+val doc_from_string : ?pos_start:pos -> string -> tree doc
+val doc_from_channel : ?pos_start:pos -> in_channel -> tree doc
+val doc_from_file : string -> tree doc
+
 val to_string : tree list -> string
+val doc_to_string : tree doc -> string
 
 (** {2 Attributes} *)
 

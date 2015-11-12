@@ -54,18 +54,14 @@ and tree =
 | D of Xml.cdata  (** CDATA *)
 | C of Xml.comment  (** Comment *)
 | PI of Xml.proc_inst  (** Processing instruction *)
-| X of Xml.xml_decl  (** XML declaration *)
-| DT of Xml.doctype  (** Doctype *)
 
 (** {2 Constructors} *)
-
 
 val node : ?loc:Xml.loc -> name -> ?atts:attributes -> tree list -> tree
 val cdata : ?loc:Xml.loc -> ?quoted:bool -> string -> tree
 val comment : ?loc:Xml.loc -> string -> tree
-val proc_inst : ?loc:Xml.loc -> name -> string -> tree
-val xml_decl : ?loc:Xml.loc -> Xml.str_attributes -> tree
-val doctype : ?loc:Xml.loc -> name -> string -> tree
+val pi : ?loc:Xml.loc -> name -> string -> tree
+val doc : Xml.prolog -> tree list -> tree Xml.doc
 
 (** [upto_first_element trees] returns the list of trees until
   the first [E] element, included.
@@ -130,7 +126,7 @@ val opt_att_cdata : attributes -> ?def:string -> name -> string
     environments.
 *)
 type 'a env = ('a callback) Xml.Name_map.t
-and 'a callback = 
+and 'a callback =
   'a -> 'a env -> ?loc: Xml.loc -> attributes -> tree list -> 'a * tree list
 
 (** This exception can be raised by callbacks to indicate that the
@@ -264,6 +260,9 @@ val from_xml : Xml.tree -> tree
 (** Same as {!from_xml} but for a list of trees. *)
 val from_xmls : Xml.tree list -> tree list
 
+(** Convert from a {!Xtmpl_xml.doc}. Attribute values must be valid XML.*)
+val from_doc : Xml.tree Xml.doc -> tree Xml.doc
+
 (** Convert to a {!Xtmpl_xml.tree}.
     @param xml_atts indicates whether the code in attributes remains valid XML
     of not. Default is [true] but it should be set to [false] when outputting
@@ -273,15 +272,28 @@ val to_xml : ?xml_atts: bool -> tree -> Xml.tree
 (** Same as {!to_xml} but for a list of trees. *)
 val to_xmls : ?xml_atts: bool -> tree list -> Xml.tree list
 
+(** Same as {!to_xml} but for a doc. *)
+val to_doc : ?xml_atts: bool -> tree Xml.doc  -> Xml.tree Xml.doc
+
 (** Output an XML string.
   @param xml_atts see {!to_xml}. *)
 val to_string : ?xml_atts: bool -> tree list -> string
 
+(** Output an XML document.
+  @param xml_atts see {!to_xml}. *)
+val doc_to_string : ?xml_atts: bool -> tree Xml.doc -> string
+
 (** Parses a string as {!tree} list. *)
 val from_string : string -> tree list
 
+(** Parses a {!tree} doc. *)
+val doc_from_string : string -> tree Xml.doc
+
 (** Same as {!from_string} but read from a file. *)
 val from_file : string -> tree list
+
+(** Same as {!doc_from_string} but read from a file. *)
+val doc_from_file : string -> tree Xml.doc
 
 (** {2 XML Manipulation} *)
 
@@ -379,6 +391,9 @@ val apply_to_file : 'a -> 'a env -> string -> 'a * tree list
 
 (** As {!val:apply_to_string}, but applies to a list of XML trees.*)
 val apply_to_xmls : 'a -> 'a env -> tree list -> 'a * tree list
+
+(** As {!val:apply_to_string}, but applies to a doc. *)
+val apply_to_doc : 'a -> 'a env -> tree Xml.doc -> 'a * tree Xml.doc
 
 (** As {!val:apply_to_file}, but writes the result back to a file.
 

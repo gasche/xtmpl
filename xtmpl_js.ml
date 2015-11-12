@@ -140,8 +140,6 @@ and to_xml ?xml_atts = function
 | X.D cdata -> Xml.D cdata
 | X.C comment -> Xml.C comment
 | X.PI pi -> Xml.PI pi
-| X.X decl -> Xml.X decl
-| X.DT dt -> Xml.DT dt
 | X.E { X.loc ; name ; atts ; subs } ->
     let atts = Name_map.map (fun t -> (to_string t, None)) atts in
     let subs = to_xmls subs in
@@ -188,20 +186,31 @@ and string_of_xml_atts ?(xml_atts=true) atts =
 *)
 
 let dom_of_xtmpl =
-  let rec map (doc : Dom_html.document Js.t) = function
+  let rec map (doc : Dom_html.document Js.t) ns = function
     X.D s ->
       let n = doc##createTextNode (Js.string s.Xml.text) in
       (n :> Dom.node Js.t)
-  | X.C _ | X.PI _ | X.X _ | X.DT _ ->
+  | X.C _ | X.PI _ ->
       let n = doc##createComment (Js.string " ") in
       (n :> Dom.node Js.t)
   | X.E { X.name ; atts ; subs} ->
-      let n =
-        match name with
-          ("", tag) -> doc##createElement (Js.string tag)
-        | (uri, tag) ->
+      let (ns, n) =
+        match ns, name with
+        | ("", ("", tag)) -> 
+            begin
+              match X.get_att_cdata atts ("","xmlns") with
+              | None -> ("", doc##createElement (Js.string tag))
+              | Some ns -> (ns, doc##createElementNS (Js.string ns, Js.string tag))
+            end
+        | ("", (uri, tag)) ->
             (*log ("createElementNS("^uri^", "^tag^")");*)
-            doc##createElementNS (Js.string uri, Js.string tag)
+            (uri, doc##createElementNS (Js.string uri, Js.string tag))
+        | (ns, ("", tag)) ->
+            let ns = X.opt_att_cdata ~def: ns atts ("","xmlns") in
+            (ns, doc##createElementNS (Js.string ns, Js.string tag))
+        | (_, (ns, tag)) ->
+            let ns = X.opt_att_cdata ~def: ns atts ("","xmlns") in
+            (ns, doc##createElementNS (Js.string ns, Js.string tag))
       in
       let atts =
         try atts_to_string ~xml_atts: false atts
@@ -224,11 +233,11 @@ let dom_of_xtmpl =
                    log ("could not add attribute "^(Xml.string_of_name name))
         )
         atts;
-      let subs = List.map (map doc) subs in
+      let subs = List.map (map doc ns) subs in
       List.iter (Dom.appendChild n) subs;
       (n :> Dom.node Js.t)
   in
   fun t ->
     let doc = Dom_html.document in
-    map doc t
+    map doc "" t
 ;;

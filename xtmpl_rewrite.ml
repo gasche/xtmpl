@@ -38,18 +38,14 @@ and tree =
 | D of Xml.cdata
 | C of Xml.comment
 | PI of Xml.proc_inst
-| X of Xml.xml_decl
-| DT of Xml.doctype
 
 let atts_empty = Name_map.empty
 
 let node ?loc name ?(atts=atts_empty) subs = E { loc ; name ; atts; subs }
 let cdata ?loc ?(quoted=false) text = D { Xml.loc ; text ; quoted }
 let comment ?loc comment = C { Xml.loc ; Xml.comment = comment }
-let proc_inst ?loc app args = PI { Xml.loc ; app ; args }
-let xml_decl ?loc atts = X { Xml.loc ; atts }
-let doctype ?loc name args = DT { Xml.loc ; name ; args }
-
+let pi ?loc app args = PI { Xml.loc ; app ; args }
+let doc prolog elements = { Xml.prolog ; elements }
 
 type 'a env = ('a callback) Xml.Name_map.t
 and 'a callback =
@@ -144,14 +140,17 @@ and to_xml ?xml_atts = function
 | D cdata -> Xml.D cdata
 | C comment -> Xml.C comment
 | PI pi -> Xml.PI pi
-| X decl -> Xml.X decl
-| DT dt -> Xml.DT dt
 | E { loc ; name ; atts ; subs } ->
     let atts = Name_map.map (fun t -> (to_string t, None)) atts in
     let subs = to_xmls subs in
     Xml.node ?loc name ~atts subs
 
 and to_xmls ?xml_atts l = List.map (to_xml ?xml_atts) l
+
+let to_doc ?xml_atts d =
+  Xml.doc d.Xml.prolog (to_xmls ?xml_atts d.Xml.elements)
+
+let doc_to_string ?xml_atts d = Xml.doc_to_string (to_doc ?xml_atts d)
 
 let string_of_rewrite_stack l =
   let b = Buffer.create 256 in
@@ -202,8 +201,6 @@ let from_xml =
   | Xml.D cdata -> D cdata
   | Xml.C comment -> C comment
   | Xml.PI pi -> PI pi
-  | Xml.X decl -> X decl
-  | Xml.DT dt -> DT dt
   | Xml.E { Xml.loc ; name ; atts ; subs } ->
       let atts = map_atts atts in
       let subs = map_xmls subs in
@@ -214,10 +211,22 @@ let from_xml =
   map
 
 let from_xmls = List.map from_xml
+let from_doc d = doc d.Xml.prolog (from_xmls d.Xml.elements)
 
-let from_string str = from_xmls (Xml.from_string str)
+let from_string str =
+  try from_xmls (Xml.from_string str)
+  with Xml.Error (loc, msg) -> parse_error loc msg
+
 let from_file file =
   try from_xmls (Xml.from_file file)
+  with Xml.Error (loc, msg) -> parse_error loc msg
+
+let doc_from_string str =
+  try from_doc (Xml.doc_from_string str)
+  with Xml.Error (loc, msg) -> parse_error loc msg
+
+let doc_from_file file =
+  try from_doc (Xml.doc_from_file file)
   with Xml.Error (loc, msg) -> parse_error loc msg
 
 let atts_replace = Xml.atts_replace
@@ -339,7 +348,7 @@ and eval_atts =
 
 and eval_xml stack data env xml =
   match xml with
-  | D _ | C _ | PI _ | X _ | DT _ -> (data, [ xml ])
+  | D _ | C _ | PI _ -> (data, [ xml ])
   | E { name ; atts ; subs ; loc } ->
       let (data, atts) = eval_atts stack data env atts in
       let env_protect = protect_in_env env atts in
@@ -432,6 +441,10 @@ let apply_to_xmls data env xmls =
   fix_point_snd f (data, xmls)
 
 let apply_to_xml data env xml = apply_to_xmls data env [xml] ;;
+
+let apply_to_doc data env d =
+  let (data, elements) = apply_to_xmls data env d.Xml.elements in
+  (data, doc d.Xml.prolog elements)
 
 let (apply_to_string : 'a -> 'a env -> string -> 'a * tree list) = fun data env s ->
   let xmls = from_string s in

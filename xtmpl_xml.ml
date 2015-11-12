@@ -133,8 +133,14 @@ and tree =
 | D of cdata
 | C of comment
 | PI of proc_inst
-| X of xml_decl
-| DT of doctype
+
+type prolog_misc = PC of comment | PPI of proc_inst
+type prolog = {
+      decl : xml_decl option ;
+      misc : prolog_misc list ;
+      doctype : doctype option ;
+    }
+type 'a doc = { prolog : prolog ; elements : 'a list }
 
 let atts_empty = Name_map.empty
 let node ?loc name ?(atts=atts_empty) subs = E { loc; name; atts; subs}
@@ -150,9 +156,13 @@ let merge_cdata (c1 : cdata) (c2 : cdata) =
   }
 
 let comment ?loc comment = C { loc ; comment }
-let proc_inst ?loc app args = PI { loc ; app ; args }
-let xml_decl ?loc atts = X { loc ; atts }
-let doctype ?loc name args = DT { loc ; name ; args }
+let prolog_comment ?loc comment = PC { loc ; comment }
+let pi ?loc app args = PI { loc ; app ; args }
+let prolog_pi ?loc app args = PPI { loc ; app ; args }
+let xml_decl ?loc atts : xml_decl = { loc ; atts }
+let doctype ?loc name args : doctype = { loc ; name ; args }
+let prolog ?decl ?doctype misc = { decl ; doctype ; misc }
+let doc prolog elements = { prolog ; elements }
 
 type stack = (pos * name * str_attributes) Stack.t
 
@@ -180,6 +190,8 @@ let e_attValue = [%sedlex.regexp?
     '"', Star(e_attValueChar_noquot | e_reference), '"'
   | "'", Star(e_attValueChar_noapos | e_reference), "'"
   ]
+
+let e_xml = [%sedlex.regexp? ('x'|'X'),('m'|'M'),('l'|'L')]
 
 let map_string lexer str =
   let buf = Buffer.create (String.length str) in
@@ -368,20 +380,7 @@ let rec parse_text stack pos lb =
       let loc = loc pos pos2 in
       let stack = add_elt stack (cdata ~loc ~quoted: true text) in
       parse_text stack pos2 lb
-  | "<!DOCTYPE",Plus(e_space) ->
-      let pos2 = update_pos_from_lb pos lb in
-      begin
-        let name = match%sedlex lb with
-          | e_name -> name_of_string (U.lexeme lb)
-          | _ ->
-            error (loc_of_pos pos 1)
-                ("Invalid character in doctype decl: "^(U.lexeme lb))
-        in
-        let (args, pos2) = parse_doctype pos2 (Buffer.create 256) lb in
-        let loc = loc pos pos2 in
-        let stack = add_elt stack (doctype ~loc name args) in
-        parse_text stack pos2 lb
-      end
+
   | "<?",e_name ->
       let pos2 = update_pos_from_lb pos lb in
       let app =
@@ -392,16 +391,12 @@ let rec parse_text stack pos lb =
       begin
         match app with
           ("", s) when String.lowercase s = "xml" ->
-            let (atts, pos2, _) = parse_attributes
-              ~xml_decl: true atts_empty pos2 lb
-            in
             let loc = loc pos pos2 in
-            let stack = add_elt stack (xml_decl ~loc atts) in
-            parse_text stack pos2 lb
+            error loc "Illegal XML declaration here"
         | _ ->
             let (args, pos2) = parse_proc_inst pos2 (Buffer.create 256) lb in
             let loc = loc pos pos2 in
-            let stack = add_elt stack (proc_inst ~loc app args) in
+            let stack = add_elt stack (pi ~loc app args) in
             parse_text stack pos2 lb
       end
   | '<',e_name ->
@@ -515,6 +510,75 @@ and parse_attribute_value pos lb =
       error (loc_of_pos pos 1)
         "Unexpected end of stream while parsing attribute value"
 
+let new_stack pos_start = [(("",""), pos_start, atts_empty), []]
+
+let rec parse_prolog ?xml_decl misc pos lb =
+  match%sedlex lb with
+  | "<!DOCTYPE",Plus(e_space) ->
+      let pos2 = update_pos_from_lb pos lb in
+      let name = match%sedlex lb with
+        | e_name -> name_of_string (U.lexeme lb)
+        | _ ->
+            error (loc_of_pos pos 1)
+              ("Invalid character in doctype decl: "^(U.lexeme lb))
+      in
+      let (args, pos2) = parse_doctype pos2 (Buffer.create 256) lb in
+      let loc = loc pos pos2 in
+      let doctype = doctype ~loc name args in
+      let prolog = prolog ?decl: xml_decl ~doctype (List.rev misc) in
+      let elements = parse_text (new_stack pos2) pos2 lb in
+      doc prolog elements
+
+  | "<!--" ->
+      let pos = update_pos_from_lb pos lb in
+      let text = parse_comment pos (Buffer.create 256) lb in
+      let pos2 = update_pos pos text in
+      (* update pos2 with the "-->" lexeme just read *)
+      let pos2 = update_pos_from_lb pos2 lb in
+      let loc = loc pos pos2 in
+      let comment = prolog_comment ~loc text in
+      parse_prolog ?xml_decl (comment::misc) pos2 lb
+
+  | "<?",e_name ->
+      let pos2 = update_pos_from_lb pos lb in
+      let app =
+        let s = U.lexeme lb in
+        let len = String.length s in
+        name_of_string (String.sub s 2 (len - 2))
+      in
+      begin
+        match app with
+          ("", s) when String.lowercase s = "xml" ->
+            let loc = loc pos pos2 in
+            error loc "Illegal XML declaration here"
+        | _ ->
+            let (args, pos2) = parse_proc_inst pos2 (Buffer.create 256) lb in
+            let loc = loc pos pos2 in
+            let pi = prolog_pi ~loc app args in
+            parse_prolog ?xml_decl (pi :: misc) pos2 lb
+      end
+  | e_space ->
+      let pos2 = update_pos_from_lb pos lb in
+      parse_prolog ?xml_decl misc pos2 lb
+  | _ ->
+      let pos2 = update_pos_from_lb pos lb in
+      let loc = loc pos pos2 in
+      error loc (Printf.sprintf "Illegal character %S" (U.lexeme lb))
+
+let parse_doc pos lb =
+  match%sedlex lb with
+  | "<?",e_xml,Plus(e_space) ->
+      let pos2 = update_pos_from_lb pos lb in
+      let (atts, pos2, _) = parse_attributes
+        ~xml_decl: true atts_empty pos2 lb
+      in
+      let loc = loc pos pos2 in
+      let xml_decl = xml_decl ~loc atts in
+      parse_prolog ~xml_decl [] pos2 lb
+  | _ ->
+      Sedlexing.rollback lb ;
+      parse_prolog [] pos lb
+
 let get_att atts name =
   try Some (Name_map.find name atts)
   with Not_found -> None
@@ -539,23 +603,8 @@ let rec print_tree buf = function
 | PI { app ; args } ->
     Printf.bprintf buf "<?%s %s?>"
       (string_of_name app) (escape args)
-| X { atts } ->
-    Printf.bprintf buf "<?xml " ;
-    let (v, _) = opt_att ~def: "1.0" atts version_name in
-    print_att buf version_name v;
-    Name_map.iter
-      (fun name (value,_) ->
-         if name <> version_name then
-           (
-            Buffer.add_string buf " ";
-            print_att buf name value
-           )
-      )
-      atts;
-    Buffer.add_string buf "?>"
-| DT { name ; args } ->
-    Printf.bprintf buf "<!DOCTYPE %s %s>"
-      (string_of_name name) (escape args)
+
+
 | E { name ; atts ; subs } ->
     Printf.bprintf buf "<%s" (string_of_name name);
     Name_map.iter
@@ -571,6 +620,44 @@ let rec print_tree buf = function
         List.iter (print_tree buf) subs;
         Printf.bprintf buf "</%s>" (string_of_name name)
 
+let print_prolog_misc buf = function
+| PC { comment } ->
+    Printf.bprintf buf "<!--%s-->\n" (escape comment)
+| PPI { app ; args } ->
+    Printf.bprintf buf "<?%s %s?>\n"
+      (string_of_name app) (escape args)
+
+let print_prolog buf p =
+  (match p.decl with
+   | None -> ()
+   | Some { atts } ->
+       Printf.bprintf buf "<?xml " ;
+       let (v, _) = opt_att ~def: "1.0" atts version_name in
+       print_att buf version_name v;
+       Name_map.iter
+         (fun name (value,_) ->
+            if name <> version_name then
+              (
+               Buffer.add_string buf " ";
+               print_att buf name value
+              )
+         )
+         atts;
+       Buffer.add_string buf "?>\n"
+  );
+  List.iter (print_prolog_misc buf) p.misc;
+  (
+   match p.doctype with
+   | None -> ()
+   | Some { name ; args } ->
+       Printf.bprintf buf "<!DOCTYPE %s %s>\n"
+         (string_of_name name) (escape args)
+  )
+
+let print_doc buf elt_to_string doc =
+  print_prolog buf doc.prolog ;
+  List.iter (elt_to_string buf) doc.elements
+
 let string_of_xml t =
   let buf = Buffer.create 512 in
   print_tree buf t ;
@@ -581,23 +668,50 @@ let to_string l =
   List.iter (print_tree buf) l;
   Buffer.contents buf
 
+let doc_to_string_ f doc =
+  let buf = Buffer.create 512 in
+  print_doc buf f doc;
+  Buffer.contents buf
+
+let doc_to_string = doc_to_string_ print_tree
+
 let from_lexbuf
   ?(pos_start={ line = 1; char = 1 ; bol = 0 ; file = None }) lb =
-    parse_text [(("",""), pos_start, atts_empty), []]
+    parse_text (new_stack pos_start)
     pos_start lb
+
+let doc_from_lexbuf
+  ?(pos_start={ line = 1; char = 1 ; bol = 0 ; file = None }) lb =
+    parse_doc pos_start lb
 
 let from_string ?pos_start str =
   let lb=  U.from_string str in
   from_lexbuf ?pos_start lb
 
+let doc_from_string ?pos_start str =
+  let lb=  U.from_string str in
+  doc_from_lexbuf ?pos_start lb
+
 let from_channel ?pos_start ic =
   let lb=  U.from_channel ic in
   from_lexbuf ?pos_start lb
+
+let doc_from_channel ?pos_start ic =
+  let lb=  U.from_channel ic in
+  doc_from_lexbuf ?pos_start lb
 
 let from_file file =
   let ic = open_in_bin file in
   let pos_start= { line = 1; char = 1 ; bol = 0 ; file = Some file } in
   try let xmls = from_channel ~pos_start ic in close_in ic; xmls
+  with e ->
+    close_in ic;
+    raise e
+
+let doc_from_file file =
+  let ic = open_in_bin file in
+  let pos_start= { line = 1; char = 1 ; bol = 0 ; file = Some file } in
+  try let xmls = doc_from_channel ~pos_start ic in close_in ic; xmls
   with e ->
     close_in ic;
     raise e

@@ -7,8 +7,8 @@ let () =
       failwith (Printf.sprintf "Usage: %s <file>" Sys.argv.(0));
 
 
-    let xml = X.from_file Sys.argv.(1) in
-    print_endline (X.to_string xml)
+    let doc = X.doc_from_file Sys.argv.(1) in
+    print_endline (X.doc_to_string doc)
   with
     Failure msg ->
       prerr_endline msg ; exit 1
