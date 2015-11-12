@@ -1,3 +1,9 @@
+Next release:
+- include own XML parser, keeping locations (do not depend on Xmlm any more)
+- big interface change (with modules Xtmpl_xml, Xtmpl_rewrite, ...)
+- new package xtmpl.ppx (ppx instruction for ocamlfind not included in xtmpl
+  package any more)
+
 Release 0.12:
 - fix Xtmpl_js.Dom_of_xtmpl to unescape xml in attributes, using
   Regexp module of Js_of_ocaml

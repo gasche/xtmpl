@@ -186,6 +186,10 @@ let map_string lexer str =
   lexer buf (U.from_string str);
   Buffer.contents buf
 
+let cp_to_string cp =
+  let b = Buffer.create 10 in
+  Uutf.Buffer.add_utf_8 b cp ;
+  Buffer.contents b
 let unescape =
   let add = Buffer.add_string in
   let rec iter entities buf lb =
@@ -215,7 +219,7 @@ let unescape =
               let s = String.sub lexeme 2 (len - 3) in
               int_of_string s
             in
-            Uutf.cp_to_string n
+            cp_to_string n
           with _ -> lexeme
         in
         add buf s ;
@@ -229,7 +233,7 @@ let unescape =
               let s = "0"^(String.sub lexeme 2 (len - 3)) in
               int_of_string s
             in
-            Uutf.cp_to_string n
+            cp_to_string n
           with
             _ -> lexeme
         in

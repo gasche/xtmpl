@@ -5,8 +5,11 @@ archive(toploop) = "xtmpl.cma"
 archive(byte) = "xtmpl.cma"
 archive(native) = "xtmpl.cmxa"
 archive(native,plugin) = "xtmpl.cmxs"
-ppx(-byte)="./ppx_xtmpl"
-ppx(byte)="./ppx_xtmpl.byte"
+
+package "ppx" (
+  ppx(-byte)="./ppx_xtmpl"
+  ppx(byte)="./ppx_xtmpl.byte"
+)
 
 package "js" (
   version = "0.13"
