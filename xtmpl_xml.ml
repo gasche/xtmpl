@@ -515,9 +515,19 @@ and parse_attribute_value pos lb =
       error (loc_of_pos pos 1)
         "Unexpected end of stream while parsing attribute value"
 
+let get_att atts name =
+  try Some (Name_map.find name atts)
+  with Not_found -> None
+
+let opt_att atts ?(def="") name =
+  match get_att atts name with None -> (def, None) | Some s -> s
+
 let print_att buf name value =
   Printf.bprintf buf "%s=\"%s\"" (string_of_name name)
     (escape ~quotes: true value)
+
+let xmlns_name = ("","xmlns") ;;
+let version_name = ("", "version") ;;
 
 let rec print_tree buf = function
 | C { comment } ->
@@ -530,11 +540,16 @@ let rec print_tree buf = function
     Printf.bprintf buf "<?%s %s?>"
       (string_of_name app) (escape args)
 | X { atts } ->
-    Printf.bprintf buf "<?xml" ;
+    Printf.bprintf buf "<?xml " ;
+    let (v, _) = opt_att ~def: "1.0" atts version_name in
+    print_att buf version_name v;
     Name_map.iter
       (fun name (value,_) ->
-         Buffer.add_string buf " ";
-         print_att buf name value
+         if name <> version_name then
+           (
+            Buffer.add_string buf " ";
+            print_att buf name value
+           )
       )
       atts;
     Buffer.add_string buf "?>"
@@ -594,13 +609,6 @@ let atts_of_list =
 let atts_one ?(atts=atts_empty) name v = Name_map.add name v atts;;
 let atts_replace = Name_map.add;;
 let atts_remove = Name_map.remove;;
-
-let get_att atts name =
-  try Some (Name_map.find name atts)
-  with Not_found -> None
-
-let opt_att atts ?(def="") name =
-  match get_att atts name with None -> (def, None) | Some s -> s
 
 let string_of_atts atts =
   let buf = Buffer.create 256 in
