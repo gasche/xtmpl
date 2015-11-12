@@ -33,6 +33,9 @@ type pos = { line: int; bol: int; char: int; file: string option }
 (** A location is a range defined by two positions.*)
 type loc = { loc_start: pos; loc_stop: pos}
 val string_of_loc : loc -> string
+val loc_sprintf : loc option -> ('a, unit, string) format -> 'a
+
+type 'a with_loc = 'a * loc option
 
 (** [loc loc_start loc_stop] creates a {!loc} structure with
   the given positions. *)
@@ -64,7 +67,7 @@ type cdata = { loc: loc option; text: string; quoted: bool }
 type comment = { loc: loc option; comment: string }
 type proc_inst = { loc: loc option; app: name; args: string}
 type 'a attributes = 'a Name_map.t
-type str_attributes = (string * loc option) attributes
+type str_attributes = string with_loc attributes
 type xml_decl = { loc: loc option; atts: str_attributes }
 type doctype = { loc: loc option; name: name; args: string}
 type node = { loc: loc option; name: name ; atts: str_attributes ; subs: tree list }

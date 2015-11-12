@@ -52,9 +52,10 @@ let doctype ?loc name args = DT { Xml.loc ; name ; args }
 
 
 type 'a env = ('a callback) Xml.Name_map.t
-and 'a callback = 'a -> 'a env -> attributes -> tree list -> 'a * tree list
+and 'a callback =
+  'a -> 'a env -> ?loc: Xml.loc -> attributes -> tree list -> 'a * tree list
 
-type rewrite_stack = (name * attributes * tree list) list
+type rewrite_stack = (name * attributes * tree list * Xml.loc option) list
 
 type error =
   Loop of rewrite_stack
@@ -154,7 +155,7 @@ and to_xmls ?xml_atts l = List.map (to_xml ?xml_atts) l
 
 let string_of_rewrite_stack l =
   let b = Buffer.create 256 in
-  let f ((prefix,t), atts, subs) =
+  let f ((prefix,t), atts, subs, loc) =
     Buffer.add_string b "==================\n";
     Buffer.add_string b ("Apply <"^prefix^":"^t^">\nAttributes:");
     Name_map.iter
@@ -172,7 +173,7 @@ let string_of_rewrite_stack l =
 
 let string_of_error = function
   Loop stack ->
-    "Max rewrite depth reached:\n"^(string_of_rewrite_stack stack)
+    "Max rewrite depth reached -- possible loop ?\nRewrite stack:\n"^(string_of_rewrite_stack stack)
 | Parse_error (loc, msg) ->
     Printf.sprintf "%s: Parse error: %s" (Xml.string_of_loc loc) msg
 | Invalid_attribute_value (att, v) ->
@@ -238,6 +239,14 @@ let get_att_cdata atts name =
 let opt_att_cdata atts ?(def="") name =
   match get_att_cdata atts name with None -> def | Some s -> s
 
+let upto_first_element =
+  let rec iter acc = function
+  | [] -> raise Not_found
+  | (E _) as xml :: _ -> List.rev (xml :: acc)
+  | xml :: q -> iter (xml :: acc) q
+  in
+  iter []
+
 let env_add_cb ?(prefix="") name = Name_map.add (prefix, name)
 
 let env_get k env =
@@ -247,7 +256,7 @@ let env_get k env =
 let env_empty () = Name_map.empty
 
 let env_add_xml ?prefix a v env =
-  env_add_cb ?prefix a (fun data _ _ _ -> data, v) env
+  env_add_cb ?prefix a (fun data _ ?loc _ _ -> data, v) env
 
 let env_of_list ?(env=env_empty()) l =
   List.fold_right (fun ((prefix,name), f) env -> env_add_cb ~prefix name f env) l env
@@ -286,8 +295,8 @@ let max_rewrite_depth =
   try int_of_string (Sys.getenv "XTMPL_REWRITE_DEPTH_LIMIT")
   with _ -> 100
 
-let push stack tag atts subs =
-  let stack = (tag, atts, subs) :: stack in
+let push stack tag ?loc atts subs =
+  let stack = (tag, atts, subs, loc) :: stack in
   if List.length stack > max_rewrite_depth then
     loop_error stack
   else
@@ -295,7 +304,7 @@ let push stack tag atts subs =
 
 exception No_change
 
-let rec eval_env stack data env atts subs =
+let rec eval_env stack data env ?loc atts subs =
 (*  prerr_endline
     (Printf.sprintf "env: subs=%s"
       (String.concat "" (List.map string_of_xml subs)));
@@ -331,13 +340,13 @@ and eval_atts =
 and eval_xml stack data env xml =
   match xml with
   | D _ | C _ | PI _ | X _ | DT _ -> (data, [ xml ])
-  | E { name ; atts ; subs } ->
+  | E { name ; atts ; subs ; loc } ->
       let (data, atts) = eval_atts stack data env atts in
       let env_protect = protect_in_env env atts in
       match name with
         ("", t) when t = tag_env ->
           let stack = push stack name atts subs in
-          eval_env stack data env_protect atts subs
+          eval_env stack data env_protect ?loc atts subs
       | (prefix, tag) ->
           match env_get (prefix, tag) env with
           | Some f ->
@@ -358,21 +367,21 @@ and eval_xml stack data env xml =
                  let atts = Name_map.add ("",att_defer)
                    [cdata (string_of_int (defer-1))] atts
                  in
-                 (data, [ node (prefix, tag) ~atts subs ])
+                 (data, [ node ?loc (prefix, tag) ~atts subs ])
                 )
               else
                 (
                  let xml =
                    try
-                     let stack = push stack (prefix,tag) atts subs in
-                     Some (stack, f data env_protect atts subs)
+                     let stack = push stack (prefix,tag) ?loc atts subs in
+                     Some (stack, f data env_protect ?loc atts subs)
                    with No_change -> None
                  in
                  match xml with
                    None ->
                      (* no change in node, eval children anyway *)
                      let (data, subs) = eval_xmls stack data env_protect subs in
-                     (data, [node (prefix, tag) ~atts subs])
+                     (data, [node ?loc (prefix, tag) ~atts subs])
                  | Some (stack, (data, xmls)) ->
                      (*prerr_endline
                         (Printf.sprintf "=== Evaluated tag %s -> %s\n"
@@ -382,7 +391,7 @@ and eval_xml stack data env xml =
                   (* eval f before subs *)
           | None ->
               let (data, subs) = eval_xmls stack data env_protect subs in
-              (data, [ node (prefix, tag) ~atts subs ])
+              (data, [ node ?loc (prefix, tag) ~atts subs ])
 
 and (eval_string : rewrite_stack -> 'a -> 'a env -> string -> 'a * string) =
   fun stack data env s ->

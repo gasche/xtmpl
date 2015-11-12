@@ -102,13 +102,17 @@ xtmpl_js.cmi: xtmpl_js.mli
 
 .PHONY: test_ppx_xtmpl
 
-test: test_ppx_xtmpl
+test: test_ppx_xtmpl test_cat
 
 test_ppx_xtmpl: ppx_xtmpl test_ppx_xtmpl.ml
 	$(OCAMLFIND) ocamlopt -o $@ -dsource -rectypes -package uutf,sedlex,str -linkpkg \
 	-ppx ./ppx_xtmpl xtmpl.cmxa test_ppx_xtmpl.ml
 	@echo "======"
 	./$@
+
+test_cat: xtmpl.cmxa test_cat.ml
+	$(OCAMLFIND) ocamlopt -o $@ -rectypes -package uutf,sedlex,str -linkpkg \
+	xtmpl.cmxa test_cat.ml
 
 ##########
 .PHONY: doc

@@ -32,6 +32,7 @@ type name = string * string
 
 type pos = { line: int ; bol : int; char: int ; file : string option }
 type loc = { loc_start: pos; loc_stop: pos }
+type 'a with_loc = 'a * loc option
 
 type error = loc * string
 exception Error of error
@@ -58,6 +59,13 @@ let string_of_loc loc =
     char
     (if len > 1 then Printf.sprintf "-%d" (char + len) else "")
 
+let loc_sprintf loc fmt =
+  match loc with
+  | None -> Printf.sprintf fmt
+  | Some loc -> Printf.ksprintf
+      (fun s -> Printf.sprintf "%s:\n%s" (string_of_loc loc) s)
+      fmt
+
 let string_of_error (loc, str) =
   Printf.sprintf "%s: %s" (string_of_loc loc) str
 
@@ -71,7 +79,7 @@ let name_of_string str =
     let len = String.length str in
     let prefix = String.sub str 0 p in
     let suffix =
-      if p + 1 < len then String.sub str p (len - (p + 1)) else ""
+      if p + 1 < len then String.sub str (p+1) (len - (p + 1)) else ""
     in
     (prefix, suffix)
   with
@@ -116,7 +124,7 @@ type cdata = { loc: loc option; text: string ; quoted: bool}
 type comment = { loc: loc option; comment: string }
 type proc_inst = { loc: loc option; app: name; args: string}
 type 'a attributes = 'a Name_map.t
-type str_attributes = (string * loc option) attributes
+type str_attributes = string with_loc attributes
 type xml_decl = { loc: loc option; atts: str_attributes }
 type doctype = { loc: loc option; name: name; args: string}
 type node = { loc: loc option; name: name ; atts: str_attributes ; subs: tree list }
@@ -137,7 +145,7 @@ let merge_cdata (c1 : cdata) (c2 : cdata) =
       None, _ | _, None -> None
     | Some l1, Some l2 -> Some (loc l1.loc_start l2.loc_stop)
   in
-  { loc ; text = c1.text ^ c2.text ; 
+  { loc ; text = c1.text ^ c2.text ;
     quoted = c1.quoted || c2.quoted ;
   }
 
@@ -411,10 +419,11 @@ let rec parse_text stack pos lb =
           push stack pos name atts
       in
       parse_text stack pos2 lb
-  | "</",e_name,'>' ->
+  | "</",e_name,Star(e_space),'>' ->
       let lexeme = U.lexeme lb in
       let len = String.length lexeme in
-      let name = name_of_string (String.sub lexeme 2 (len - 3)) in
+      let name = String.sub lexeme 2 (len - 3) in
+      let name = name_of_string (Xtmpl_misc.strip_string name) in
       let pos2 = update_pos_from_lb pos lb in
       let stack = pop stack pos2 name in
       parse_text stack pos2 lb
@@ -568,7 +577,8 @@ let from_channel ?pos_start ic =
 
 let from_file file =
   let ic = open_in_bin file in
-  try from_channel ic
+  let pos_start= { line = 1; char = 1 ; bol = 0 ; file = Some file } in
+  try let xmls = from_channel ~pos_start ic in close_in ic; xmls
   with e ->
     close_in ic;
     raise e

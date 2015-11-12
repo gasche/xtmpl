@@ -67,6 +67,12 @@ val proc_inst : ?loc:Xml.loc -> name -> string -> tree
 val xml_decl : ?loc:Xml.loc -> Xml.str_attributes -> tree
 val doctype : ?loc:Xml.loc -> name -> string -> tree
 
+(** [upto_first_element trees] returns the list of trees until
+  the first [E] element, included.
+  @raise Not_found if there is no element in the list.
+*)
+val upto_first_element : tree list -> tree list
+
 (** {2:attributes Attributes} *)
 
 (** Empty {!attributes} structure. *)
@@ -124,7 +130,8 @@ val opt_att_cdata : attributes -> ?def:string -> name -> string
     environments.
 *)
 type 'a env = ('a callback) Xml.Name_map.t
-and 'a callback = 'a -> 'a env -> attributes -> tree list -> 'a * tree list
+and 'a callback = 
+  'a -> 'a env -> ?loc: Xml.loc -> attributes -> tree list -> 'a * tree list
 
 (** This exception can be raised by callbacks to indicate that the
   node to be rewritten remains unchanged. *)
@@ -188,7 +195,7 @@ val env_of_list : ?env: 'a env -> (name * 'a callback) list -> 'a env
 
 (** To catch eventual infinite loops in rewriting, we keep a
   stack of the rules called. *)
-type rewrite_stack = (name * attributes * tree list) list
+type rewrite_stack = (name * attributes * tree list * Xml.loc option) list
 
 type error =
   Loop of rewrite_stack
