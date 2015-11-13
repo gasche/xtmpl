@@ -560,6 +560,11 @@ let rec parse_prolog ?xml_decl misc pos lb =
   | e_space ->
       let pos2 = update_pos_from_lb pos lb in
       parse_prolog ?xml_decl misc pos2 lb
+  | '<',e_name ->
+      Sedlexing.rollback lb ;
+      let prolog = prolog ?decl: xml_decl (List.rev misc) in
+      let elements = parse_text (new_stack pos) pos lb in
+      doc prolog elements
   | _ ->
       let pos2 = update_pos_from_lb pos lb in
       let loc = loc pos pos2 in
