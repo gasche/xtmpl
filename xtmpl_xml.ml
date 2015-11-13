@@ -287,7 +287,7 @@ let rec parse_comment pos buf lb =
       Buffer.add_string buf (U.lexeme lb);
       parse_comment pos buf lb
   | any ->
-      error (loc_of_pos pos 1) ("Invalid comment character: "^(U.lexeme lb))
+      error (loc_of_pos pos 1) ("Illegal comment character: "^(U.lexeme lb))
   | _ ->
       let pos = update_pos pos (Buffer.contents buf) in
       error (loc_of_pos pos 1) "Unexpected end of stream while parsing comment"
@@ -299,7 +299,7 @@ let rec parse_cdata pos buf lb =
       Buffer.add_string buf (U.lexeme lb);
       parse_cdata pos buf lb
   | any ->
-      error (loc_of_pos pos 1) ("Invalid cdata character: "^(U.lexeme lb))
+      error (loc_of_pos pos 1) ("Illegal cdata character: "^(U.lexeme lb))
   | _ ->
       let pos = update_pos pos (Buffer.contents buf) in
       error (loc_of_pos pos 1) "Unexpected end of stream while parsing cdata"
@@ -315,7 +315,7 @@ let rec parse_proc_inst pos buf lb =
       Buffer.add_string buf (U.lexeme lb);
       parse_proc_inst pos buf lb
   | any ->
-      error (loc_of_pos pos 1) ("Invalid character in processing instruction: "^(U.lexeme lb))
+      error (loc_of_pos pos 1) ("Illegal character in processing instruction: "^(U.lexeme lb))
   | _ ->
       let pos = update_pos pos (Buffer.contents buf) in
       error (loc_of_pos pos 1)
@@ -332,7 +332,7 @@ let rec parse_doctype pos buf lb =
       Buffer.add_string buf (U.lexeme lb);
       parse_doctype pos buf lb
   | any ->
-      error (loc_of_pos pos 1) ("Invalid character in doctype decl: "^(U.lexeme lb))
+      error (loc_of_pos pos 1) ("Illegal character in doctype decl: "^(U.lexeme lb))
   | _ ->
       let pos = update_pos pos (Buffer.contents buf) in
       error (loc_of_pos pos 1)
@@ -360,6 +360,9 @@ let pop stack pos_end name =
         error (loc_of_pos pos_end 1)
           (Printf.sprintf "Found </%s> instead of </%s>"
            (string_of_name name) (string_of_name n))
+
+let new_stack pos_start = [(("",""), pos_start, atts_empty), []]
+let stack_is_empty l = List.length l <= 1
 
 let rec parse_text stack pos lb =
   match%sedlex lb with
@@ -430,13 +433,18 @@ let rec parse_text stack pos lb =
       parse_text stack pos2 lb
   | "]]>" ->
       error (loc_of_pos pos 3)
-        ("Invalid sequence in character data: "^(U.lexeme lb))
+        ("Illegal sequence in character data: "^(U.lexeme lb))
   | Plus(e_attValueChar | e_reference) ->
       let str = unescape (U.lexeme lb) in
       let pos2 = update_pos_from_lb pos lb in
-      let loc = loc pos pos2 in
-      let stack = add_elt stack (cdata ~loc str) in
-      parse_text stack pos2 lb
+      if stack_is_empty stack && Xtmpl_misc.strip_string str = "" then
+        parse_text stack pos2 lb
+      else
+        (
+         let loc = loc pos pos2 in
+         let stack = add_elt stack (cdata ~loc str) in
+         parse_text stack pos2 lb
+        )
   | '<', any ->
       let pos2 = update_pos_from_lb pos lb in
       error (loc pos pos2)
@@ -512,8 +520,6 @@ and parse_attribute_value pos lb =
       error (loc_of_pos pos 1)
         "Unexpected end of stream while parsing attribute value"
 
-let new_stack pos_start = [(("",""), pos_start, atts_empty), []]
-
 let rec parse_prolog ?xml_decl misc pos lb =
   match%sedlex lb with
   | "<!DOCTYPE",Plus(e_space) ->
@@ -567,10 +573,13 @@ let rec parse_prolog ?xml_decl misc pos lb =
       let prolog = prolog ?decl: xml_decl (List.rev misc) in
       let elements = parse_text (new_stack pos) pos lb in
       doc prolog elements
-  | _ ->
+  | any ->
       let pos2 = update_pos_from_lb pos lb in
       let loc = loc pos pos2 in
       error loc (Printf.sprintf "Illegal character %S" (U.lexeme lb))
+  | _ ->
+      let loc = loc_of_pos pos 0 in
+      error loc ("Unexpected end of stream while parsing prolog")
 
 let parse_doc pos lb =
   match%sedlex lb with
