@@ -181,8 +181,16 @@ let string_of_error = function
     Printf.sprintf "Xtmpl fixpoint iteration limit reached (%d)" n
 
 
-let from_xml =
-  let rec map_atts atts =
+let rec from_xml = function
+  | Xml.D cdata -> D cdata
+  | Xml.C comment -> C comment
+  | Xml.PI pi -> PI pi
+  | Xml.E { Xml.loc ; name ; atts ; subs } ->
+      let atts = from_xml_atts atts in
+      let subs = from_xmls subs in
+      node ?loc name ~atts subs
+
+and from_xml_atts atts =
     let to_escape = atts_to_escape atts in
     Name_map.mapi
       (fun name (s,loc) ->
@@ -193,24 +201,12 @@ let from_xml =
          in
          let escamp = Name_set.mem name to_escape in
          let s = if escamp then escape_ampersand s else s in
-         try map_xmls (Xml.from_string ?pos_start s)
+         try from_xmls (Xml.from_string ?pos_start s)
          with Xml.Error (loc, msg) -> parse_error loc msg
       )
       atts
-  and map = function
-  | Xml.D cdata -> D cdata
-  | Xml.C comment -> C comment
-  | Xml.PI pi -> PI pi
-  | Xml.E { Xml.loc ; name ; atts ; subs } ->
-      let atts = map_atts atts in
-      let subs = map_xmls subs in
-      node ?loc name ~atts subs
+and from_xmls l = List.map from_xml l
 
-  and map_xmls l = List.map map l
-  in
-  map
-
-let from_xmls = List.map from_xml
 let from_doc d = doc d.Xml.prolog (from_xmls d.Xml.elements)
 
 let from_string str =

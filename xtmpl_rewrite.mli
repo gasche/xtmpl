@@ -260,6 +260,8 @@ val from_xml : Xml.tree -> tree
 (** Same as {!from_xml} but for a list of trees. *)
 val from_xmls : Xml.tree list -> tree list
 
+val from_xml_atts : Xml.str_attributes -> attributes
+
 (** Convert from a {!Xtmpl_xml.doc}. Attribute values must be valid XML.*)
 val from_doc : Xml.tree Xml.doc -> tree Xml.doc
 
@@ -278,6 +280,8 @@ val to_doc : ?xml_atts: bool -> tree Xml.doc  -> Xml.tree Xml.doc
 (** Output an XML string.
   @param xml_atts see {!to_xml}. *)
 val to_string : ?xml_atts: bool -> tree list -> string
+
+val atts_to_string : ?xml_atts: bool -> attributes -> Xml.str_attributes
 
 (** Output an XML document.
   @param xml_atts see {!to_xml}. *)
