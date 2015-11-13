@@ -164,6 +164,8 @@ let doctype ?loc name args : doctype = { loc ; name ; args }
 let prolog ?decl ?doctype misc = { decl ; doctype ; misc }
 let doc prolog elements = { prolog ; elements }
 
+let doctype_name doc = match doc.prolog.doctype with None -> None | Some dt -> Some dt.name
+
 type stack = (pos * name * str_attributes) Stack.t
 
 let e_nameStartChar = [%sedlex.regexp? ":" | 'A'..'Z' | "_" | 'a'..'z' | 0xC0..0xD6 | 0xD8..0xF6 | 0xF8..0x02FF | 0x0370..0x037D | 0x037F..0x1FFF | 0x200C..0x200D | 0x2070..0x218F | 0x2C00..0x2FEF | 0x3001..0xD7FF | 0xF900..0xFDCF | 0xFDF0..0xFFFD | 0x010000..0x0EFFFF]

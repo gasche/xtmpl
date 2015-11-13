@@ -196,21 +196,18 @@ let dom_of_xtmpl =
   | X.E { X.name ; atts ; subs} ->
       let (ns, n) =
         match ns, name with
-        | ("", ("", tag)) -> 
+        | ("", ("", tag)) ->
             begin
               match X.get_att_cdata atts ("","xmlns") with
               | None -> ("", doc##createElement (Js.string tag))
               | Some ns -> (ns, doc##createElementNS (Js.string ns, Js.string tag))
             end
-        | ("", (uri, tag)) ->
-            (*log ("createElementNS("^uri^", "^tag^")");*)
-            (uri, doc##createElementNS (Js.string uri, Js.string tag))
         | (ns, ("", tag)) ->
             let ns = X.opt_att_cdata ~def: ns atts ("","xmlns") in
             (ns, doc##createElementNS (Js.string ns, Js.string tag))
-        | (_, (ns, tag)) ->
-            let ns = X.opt_att_cdata ~def: ns atts ("","xmlns") in
-            (ns, doc##createElementNS (Js.string ns, Js.string tag))
+        | (ns1, (ns2, tag)) ->
+            let ns = X.opt_att_cdata ~def: ns1 atts ("","xmlns") in
+            (ns, doc##createElementNS (Js.string ns2, Js.string tag))
       in
       let atts =
         try atts_to_string ~xml_atts: false atts

@@ -99,6 +99,7 @@ val prolog : ?decl: xml_decl -> ?doctype: doctype -> prolog_misc list -> prolog
 val doc : prolog -> tree list -> tree doc
 
 val merge_cdata : cdata -> cdata -> cdata
+val doctype_name : 'a doc -> name option
 
 (** {2 Input/output} *)
 
