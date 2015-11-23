@@ -185,8 +185,37 @@ and string_of_xml_atts ?(xml_atts=true) atts =
 (* end of js_of_ocaml specific implementation *)
 *)
 
+module SMap = Map.Make(String)
+type ns_env = { ns : string ; map : string SMap.t }
+let ns_env_empty = { ns = "" ; map = SMap.empty }
+
+let apply_ns ?(att=false) env = function
+  | ("",tag) -> if att then ("", tag) else (env.ns, tag)
+  | (pref,tag) ->
+    match SMap.find pref env.map with
+    | exception Not_found -> (pref, tag)
+    | s -> (s, tag)
+
+let ns_env_of_att name (str,_) env =
+ match name with
+    ("xmlns", tag) -> { env with map = SMap.add tag str env.map }
+  | ("", "xmlns") -> { env with ns = str }
+  | _ -> env
+
+let ns_env_of_atts env atts = Name_map.fold ns_env_of_att atts env
+
+let atts_to_string name atts =
+  try atts_to_string ~xml_atts: false atts
+  with e ->
+      let msg = Printf.sprintf
+        "problem with attributes of %s: %s"
+          (Xtmpl_xml.string_of_name name) (Printexc.to_string e)
+      in
+      log msg ;
+      Xml.atts_empty
+
 let dom_of_xtmpl =
-  let rec map (doc : Dom_html.document Js.t) ns = function
+  let rec map (doc : Dom_html.document Js.t) ns_env = function
     X.D s ->
       let n = doc##createTextNode (Js.string s.Xml.text) in
       (n :> Dom.node Js.t)
@@ -194,35 +223,17 @@ let dom_of_xtmpl =
       let n = doc##createComment (Js.string " ") in
       (n :> Dom.node Js.t)
   | X.E { X.name ; atts ; subs} ->
-      let (ns, n) =
-        match ns, name with
-        | ("", ("", tag)) ->
-            begin
-              match X.get_att_cdata atts ("","xmlns") with
-              | None -> ("", doc##createElement (Js.string tag))
-              | Some ns -> (ns, doc##createElementNS (Js.string ns, Js.string tag))
-            end
-        | (ns, ("", tag)) ->
-            let ns = X.opt_att_cdata ~def: ns atts ("","xmlns") in
-            (ns, doc##createElementNS (Js.string ns, Js.string tag))
-        | (ns1, (ns2, tag)) ->
-            let ns = X.opt_att_cdata ~def: ns1 atts ("","xmlns") in
-            (ns, doc##createElementNS (Js.string ns2, Js.string tag))
-      in
-      let atts =
-        try atts_to_string ~xml_atts: false atts
-        with e ->
-            let msg = Printf.sprintf
-              "problem with attributes of %s: %s"
-                (Xtmpl_xml.string_of_name name) (Printexc.to_string e)
-            in
-            log msg ;
-            Xml.atts_empty
+      let atts = atts_to_string name atts in
+      let ns_env = ns_env_of_atts ns_env atts in
+      let n =
+        match apply_ns ns_env name with
+        | ("", tag) -> doc##createElement (Js.string tag)
+        | (ns, tag) -> doc##createElementNS (Js.string ns, Js.string tag)
       in
       Name_map.iter
         (fun name (v, _) ->
            let v = Js.string v in
-           match name with
+           match apply_ns ~att: true ns_env name with
              ("", att) -> ignore (n##setAttribute (Js.string att, v))
            | (uri, att) ->
                try n##setAttributeNS(Js.string uri, Js.string att, v)
@@ -230,11 +241,11 @@ let dom_of_xtmpl =
                    log ("could not add attribute "^(Xml.string_of_name name))
         )
         atts;
-      let subs = List.map (map doc ns) subs in
+      let subs = List.map (map doc ns_env) subs in
       List.iter (Dom.appendChild n) subs;
       (n :> Dom.node Js.t)
   in
   fun t ->
     let doc = Dom_html.document in
-    map doc "" t
+    map doc ns_env_empty t
 ;;
