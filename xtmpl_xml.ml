@@ -364,7 +364,7 @@ let pop stack pos_end name =
 let new_stack pos_start = [(("",""), pos_start, atts_empty), []]
 let stack_is_empty l = List.length l <= 1
 
-let rec parse_text stack pos lb =
+let rec parse_text stack ~first pos lb =
   match%sedlex lb with
     "<!--" ->
       let pos = update_pos_from_lb pos lb in
@@ -374,7 +374,7 @@ let rec parse_text stack pos lb =
       let pos2 = update_pos_from_lb pos2 lb in
       let loc = loc pos pos2 in
       let stack = add_elt stack (comment ~loc text) in
-      parse_text stack pos2 lb
+      parse_text stack ~first pos2 lb
 
   | "<![CDATA[" ->
       let pos = update_pos_from_lb pos lb in
@@ -384,7 +384,7 @@ let rec parse_text stack pos lb =
       let pos2 = update_pos_from_lb pos2 lb in
       let loc = loc pos pos2 in
       let stack = add_elt stack (cdata ~loc ~quoted: true text) in
-      parse_text stack pos2 lb
+      parse_text stack ~first: false pos2 lb
 
   | "<?",e_name ->
       let pos2 = update_pos_from_lb pos lb in
@@ -402,7 +402,7 @@ let rec parse_text stack pos lb =
             let (args, pos2) = parse_proc_inst pos2 (Buffer.create 256) lb in
             let loc = loc pos pos2 in
             let stack = add_elt stack (pi ~loc app args) in
-            parse_text stack pos2 lb
+            parse_text stack ~first: false pos2 lb
       end
   | '<',e_name ->
       let name =
@@ -422,7 +422,7 @@ let rec parse_text stack pos lb =
         else
           push stack pos name atts
       in
-      parse_text stack pos2 lb
+      parse_text stack ~first: false pos2 lb
   | "</",e_name,Star(e_space),'>' ->
       let lexeme = U.lexeme lb in
       let len = String.length lexeme in
@@ -430,20 +430,20 @@ let rec parse_text stack pos lb =
       let name = name_of_string (Xtmpl_misc.strip_string name) in
       let pos2 = update_pos_from_lb pos lb in
       let stack = pop stack pos2 name in
-      parse_text stack pos2 lb
+      parse_text stack ~first: false pos2 lb
   | "]]>" ->
       error (loc_of_pos pos 3)
         ("Illegal sequence in character data: "^(U.lexeme lb))
   | Plus(e_attValueChar | e_reference) ->
       let str = unescape (U.lexeme lb) in
       let pos2 = update_pos_from_lb pos lb in
-      if stack_is_empty stack && Xtmpl_misc.strip_string str = "" then
-        parse_text stack pos2 lb
+      if first && Xtmpl_misc.strip_string str = "" then
+        parse_text stack ~first pos2 lb
       else
         (
          let loc = loc pos pos2 in
          let stack = add_elt stack (cdata ~loc str) in
-         parse_text stack pos2 lb
+         parse_text stack ~first: false pos2 lb
         )
   | '<', any ->
       let pos2 = update_pos_from_lb pos lb in
@@ -534,7 +534,7 @@ let rec parse_prolog ?xml_decl misc pos lb =
       let loc = loc pos pos2 in
       let doctype = doctype ~loc name args in
       let prolog = prolog ?decl: xml_decl ~doctype (List.rev misc) in
-      let elements = parse_text (new_stack pos2) pos2 lb in
+      let elements = parse_text (new_stack pos2) ~first: true pos2 lb in
       doc prolog elements
 
   | "<!--" ->
@@ -571,7 +571,7 @@ let rec parse_prolog ?xml_decl misc pos lb =
   | '<',e_name ->
       Sedlexing.rollback lb ;
       let prolog = prolog ?decl: xml_decl (List.rev misc) in
-      let elements = parse_text (new_stack pos) pos lb in
+      let elements = parse_text (new_stack pos) ~first: true pos lb in
       doc prolog elements
   | any ->
       let pos2 = update_pos_from_lb pos lb in
@@ -693,7 +693,7 @@ let doc_to_string = doc_to_string_ print_tree
 
 let from_lexbuf
   ?(pos_start={ line = 1; char = 1 ; bol = 0 ; file = None }) lb =
-    parse_text (new_stack pos_start)
+    parse_text (new_stack pos_start) ~first: true
     pos_start lb
 
 let doc_from_lexbuf
