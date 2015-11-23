@@ -7,5 +7,6 @@ doc
 ppx_xtmpl
 ppx_xtmpl.byte
 test_ppx_xtmpl
+test_cat
 dump.odoc
 
