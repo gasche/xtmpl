@@ -1,4 +1,4 @@
-version = "0.13"
+version = "0.13.0"
 description = "OCaml XML templating library"
 requires = "str,sedlex,uutf"
 archive(toploop) = "xtmpl.cma"
@@ -7,12 +7,13 @@ archive(native) = "xtmpl.cmxa"
 archive(native,plugin) = "xtmpl.cmxs"
 
 package "ppx" (
+  version = "0.13.0"
   ppx(-byte)="./ppx_xtmpl"
   ppx(byte)="./ppx_xtmpl.byte"
 )
 
 package "js" (
-  version = "0.13"
+  version = "0.13.0"
   description = "Js code of Xtmpl templating library"
   requires = "xtmpl"
   archive(byte) = "xtmpl_js.cma"

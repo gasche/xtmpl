@@ -24,7 +24,7 @@
 ####################################################################################
 
 # DO NOT FORGET TO UPDATE META FILE
-VERSION=0.13
+VERSION=0.13.0
 
 OCAMLFIND=ocamlfind
 PACKAGES=xmlm,sedlex,uutf
