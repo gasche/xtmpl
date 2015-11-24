@@ -36,12 +36,8 @@ CP=cp -f
 build:
 	$(MAKE) site
 
-style.css: less/*.less
-	$(LESSC) less/style.less > $@
-
-site: style.css
+site:
 	$(STOG) $(STOG_OPTIONS) .
-	$(CP) style.css $(DEST_DIR)/style.css
 
 ocamldoc:
 	rm -f refdoc/*html ref-doc/style.css
