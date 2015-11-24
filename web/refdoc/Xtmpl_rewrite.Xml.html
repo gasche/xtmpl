@@ -1,0 +1,423 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<ocamldoc with-contents="true">
+<title>Xtmpl reference documentation : Xtmpl_rewrite.Xml</title><contents><div class="ocamldoc-page">
+<div class="navbar">&#160;<a class="up" href="Xtmpl_rewrite.html" title="Xtmpl_rewrite">Up</a>
+&#160;</div>
+<h1>Module <a href="type_Xtmpl_rewrite.Xml.html">Xtmpl_rewrite.Xml</a></h1>
+
+<pre><span class="keyword">module</span> Xml: <code class="type"><a href="Xtmpl_xml.html">Xtmpl_xml</a></code></pre><hr width="100%"/>
+<br/>
+<div class="section-title" id="2_Locations">Locations</div><br/>
+
+<pre><code><span id="TYPEpos"><span class="keyword">type</span> pos</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&#160;&#160;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTpos.line">line</span>&#160;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&#160;&#160;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTpos.bol">bol</span>&#160;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&#160;&#160;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTpos.char">char</span>&#160;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&#160;&#160;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTpos.file">file</span>&#160;: <code class="type">string option</code>;</code></td>
+
+</tr></table>
+}
+
+<div class="info ">
+A position in a source (file, string, ...).<br/>
+</div>
+
+
+<pre><code><span id="TYPEloc"><span class="keyword">type</span> loc</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&#160;&#160;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTloc.loc_start">loc_start</span>&#160;: <code class="type"><a href="Xtmpl_xml.html#TYPEpos">pos</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&#160;&#160;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTloc.loc_stop">loc_stop</span>&#160;: <code class="type"><a href="Xtmpl_xml.html#TYPEpos">pos</a></code>;</code></td>
+
+</tr></table>
+}
+
+<div class="info ">
+A location is a range defined by two positions.<br/>
+</div>
+
+
+<pre><span id="VALstring_of_loc"><span class="keyword">val</span> string_of_loc</span> : <code class="type"><a href="Xtmpl_xml.html#TYPEloc">loc</a> -&gt; string</code></pre>
+<pre><span id="VALloc_sprintf"><span class="keyword">val</span> loc_sprintf</span> : <code class="type"><a href="Xtmpl_xml.html#TYPEloc">loc</a> option -&gt; ('a, unit, string) Pervasives.format -&gt; 'a</code></pre>
+<pre><span id="TYPEwith_loc"><span class="keyword">type</span> <code class="type">'a</code> with_loc</span> = <code class="type">'a * <a href="Xtmpl_xml.html#TYPEloc">loc</a> option</code> </pre>
+
+
+<pre><span id="VALloc"><span class="keyword">val</span> loc</span> : <code class="type"><a href="Xtmpl_xml.html#TYPEpos">pos</a> -&gt; <a href="Xtmpl_xml.html#TYPEpos">pos</a> -&gt; <a href="Xtmpl_xml.html#TYPEloc">loc</a></code></pre><div class="info ">
+<code class="code">loc loc_start loc_stop</code> creates a <a href="Xtmpl_xml.html#VALloc"><code class="code">Xtmpl_xml.loc</code></a> structure with
+  the given positions.<br/>
+</div>
+<br/>
+<div class="section-title" id="2_Errors">Errors</div><br/>
+
+<pre><span id="TYPEerror"><span class="keyword">type</span> error</span> = <code class="type"><a href="Xtmpl_xml.html#TYPEloc">loc</a> * string</code> </pre>
+
+
+<pre><span id="EXCEPTIONError"><span class="keyword">exception</span> Error</span> <span class="keyword">of</span> <code class="type"><a href="Xtmpl_xml.html#TYPEerror">error</a></code></pre>
+
+<pre><span id="VALerror"><span class="keyword">val</span> error</span> : <code class="type"><a href="Xtmpl_xml.html#TYPEloc">loc</a> -&gt; string -&gt; 'a</code></pre>
+<pre><span id="VALstring_of_error"><span class="keyword">val</span> string_of_error</span> : <code class="type"><a href="Xtmpl_xml.html#TYPEloc">loc</a> * string -&gt; string</code></pre><br/>
+<div class="section-title" id="2_Names">Names</div><br/>
+
+<pre><span id="TYPEname"><span class="keyword">type</span> name</span> = <code class="type">string * string</code> </pre>
+
+
+<pre><span id="VALstring_of_name"><span class="keyword">val</span> string_of_name</span> : <code class="type">string * string -&gt; string</code></pre>
+<pre><span id="VALname_of_string"><span class="keyword">val</span> name_of_string</span> : <code class="type">string -&gt; string * string</code></pre><div class="info ">
+<code class="code">name_of_string str</code> cuts a name according to first ':' character.
+     If no such character is found, return <code class="code">("",str)</code>.<br/>
+</div>
+
+<pre><span class="keyword">module</span> <a href="Xtmpl_xml.Name_ord.html">Name_ord</a>: <code class="type">Map.OrderedType</code><code class="type">  with type t = name</code></pre>
+<pre><span class="keyword">module</span> <a href="Xtmpl_xml.Name_map.html">Name_map</a>: <code class="type">Map.S</code><code class="type">  with type key = name</code></pre>
+<pre><span class="keyword">module</span> <a href="Xtmpl_xml.Name_set.html">Name_set</a>: <code class="type">Set.S</code><code class="type">  with type elt = name</code></pre><br/>
+<div class="section-title" id="2_XMLtrees">XML trees</div><br/>
+
+<pre><code><span id="TYPEcdata"><span class="keyword">type</span> cdata</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&#160;&#160;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcdata.loc">loc</span>&#160;: <code class="type"><a href="Xtmpl_xml.html#TYPEloc">loc</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&#160;&#160;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcdata.text">text</span>&#160;: <code class="type">string</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&#160;&#160;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcdata.quoted">quoted</span>&#160;: <code class="type">bool</code>;</code></td>
+
+</tr></table>
+}
+
+
+
+<pre><code><span id="TYPEcomment"><span class="keyword">type</span> comment</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&#160;&#160;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcomment.loc">loc</span>&#160;: <code class="type"><a href="Xtmpl_xml.html#TYPEloc">loc</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&#160;&#160;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcomment.comment">comment</span>&#160;: <code class="type">string</code>;</code></td>
+
+</tr></table>
+}
+
+
+
+<pre><code><span id="TYPEproc_inst"><span class="keyword">type</span> proc_inst</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&#160;&#160;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTproc_inst.loc">loc</span>&#160;: <code class="type"><a href="Xtmpl_xml.html#TYPEloc">loc</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&#160;&#160;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTproc_inst.app">app</span>&#160;: <code class="type"><a href="Xtmpl_xml.html#TYPEname">name</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&#160;&#160;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTproc_inst.args">args</span>&#160;: <code class="type">string</code>;</code></td>
+
+</tr></table>
+}
+
+
+
+<pre><span id="TYPEattributes"><span class="keyword">type</span> <code class="type">'a</code> attributes</span> = <code class="type">'a Name_map.t</code> </pre>
+
+
+<pre><span id="TYPEstr_attributes"><span class="keyword">type</span> str_attributes</span> = <code class="type">string <a href="Xtmpl_xml.html#TYPEwith_loc">with_loc</a> <a href="Xtmpl_xml.html#TYPEattributes">attributes</a></code> </pre>
+
+
+<pre><code><span id="TYPExml_decl"><span class="keyword">type</span> xml_decl</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&#160;&#160;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTxml_decl.loc">loc</span>&#160;: <code class="type"><a href="Xtmpl_xml.html#TYPEloc">loc</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&#160;&#160;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTxml_decl.atts">atts</span>&#160;: <code class="type"><a href="Xtmpl_xml.html#TYPEstr_attributes">str_attributes</a></code>;</code></td>
+
+</tr></table>
+}
+
+
+
+<pre><code><span id="TYPEdoctype"><span class="keyword">type</span> doctype</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&#160;&#160;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTdoctype.loc">loc</span>&#160;: <code class="type"><a href="Xtmpl_xml.html#TYPEloc">loc</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&#160;&#160;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTdoctype.name">name</span>&#160;: <code class="type"><a href="Xtmpl_xml.html#TYPEname">name</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&#160;&#160;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTdoctype.args">args</span>&#160;: <code class="type">string</code>;</code></td>
+
+</tr></table>
+}
+
+
+
+<pre><code><span id="TYPEnode"><span class="keyword">type</span> node</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&#160;&#160;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTnode.loc">loc</span>&#160;: <code class="type"><a href="Xtmpl_xml.html#TYPEloc">loc</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&#160;&#160;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTnode.name">name</span>&#160;: <code class="type"><a href="Xtmpl_xml.html#TYPEname">name</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&#160;&#160;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTnode.atts">atts</span>&#160;: <code class="type"><a href="Xtmpl_xml.html#TYPEstr_attributes">str_attributes</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&#160;&#160;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTnode.subs">subs</span>&#160;: <code class="type"><a href="Xtmpl_xml.html#TYPEtree">tree</a> list</code>;</code></td>
+
+</tr></table>
+}
+
+
+
+<pre><code><span id="TYPEtree"><span class="keyword">type</span> tree</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtree.E"><span class="constructor">E</span></span> <span class="keyword">of</span> <code class="type"><a href="Xtmpl_xml.html#TYPEnode">node</a></code></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtree.D"><span class="constructor">D</span></span> <span class="keyword">of</span> <code class="type"><a href="Xtmpl_xml.html#TYPEcdata">cdata</a></code></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtree.C"><span class="constructor">C</span></span> <span class="keyword">of</span> <code class="type"><a href="Xtmpl_xml.html#TYPEcomment">comment</a></code></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtree.PI"><span class="constructor">PI</span></span> <span class="keyword">of</span> <code class="type"><a href="Xtmpl_xml.html#TYPEproc_inst">proc_inst</a></code></code></td>
+
+</tr></table>
+
+
+
+<pre><code><span id="TYPEprolog_misc"><span class="keyword">type</span> prolog_misc</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTprolog_misc.PC"><span class="constructor">PC</span></span> <span class="keyword">of</span> <code class="type"><a href="Xtmpl_xml.html#TYPEcomment">comment</a></code></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTprolog_misc.PPI"><span class="constructor">PPI</span></span> <span class="keyword">of</span> <code class="type"><a href="Xtmpl_xml.html#TYPEproc_inst">proc_inst</a></code></code></td>
+
+</tr></table>
+
+
+
+<pre><code><span id="TYPEprolog"><span class="keyword">type</span> prolog</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&#160;&#160;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTprolog.decl">decl</span>&#160;: <code class="type"><a href="Xtmpl_xml.html#TYPExml_decl">xml_decl</a> option</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&#160;&#160;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTprolog.misc">misc</span>&#160;: <code class="type"><a href="Xtmpl_xml.html#TYPEprolog_misc">prolog_misc</a> list</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&#160;&#160;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTprolog.doctype">doctype</span>&#160;: <code class="type"><a href="Xtmpl_xml.html#TYPEdoctype">doctype</a> option</code>;</code></td>
+
+</tr></table>
+}
+
+
+
+<pre><code><span id="TYPEdoc"><span class="keyword">type</span> <code class="type">'a</code> doc</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&#160;&#160;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTdoc.prolog">prolog</span>&#160;: <code class="type"><a href="Xtmpl_xml.html#TYPEprolog">prolog</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&#160;&#160;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTdoc.elements">elements</span>&#160;: <code class="type">'a list</code>;</code></td>
+
+</tr></table>
+}
+
+
+<br/>
+<div class="section-title" id="2_Constructors">Constructors</div><br/>
+
+<pre><span id="VALnode"><span class="keyword">val</span> node</span> : <code class="type">?loc:<a href="Xtmpl_xml.html#TYPEloc">loc</a> -&gt;<br/>       <a href="Xtmpl_xml.html#TYPEname">name</a> -&gt;<br/>       ?atts:<a href="Xtmpl_xml.html#TYPEstr_attributes">str_attributes</a> -&gt; <a href="Xtmpl_xml.html#TYPEtree">tree</a> list -&gt; <a href="Xtmpl_xml.html#TYPEtree">tree</a></code></pre>
+<pre><span id="VALcdata"><span class="keyword">val</span> cdata</span> : <code class="type">?loc:<a href="Xtmpl_xml.html#TYPEloc">loc</a> -&gt; ?quoted:bool -&gt; string -&gt; <a href="Xtmpl_xml.html#TYPEtree">tree</a></code></pre>
+<pre><span id="VALcomment"><span class="keyword">val</span> comment</span> : <code class="type">?loc:<a href="Xtmpl_xml.html#TYPEloc">loc</a> -&gt; string -&gt; <a href="Xtmpl_xml.html#TYPEtree">tree</a></code></pre>
+<pre><span id="VALprolog_comment"><span class="keyword">val</span> prolog_comment</span> : <code class="type">?loc:<a href="Xtmpl_xml.html#TYPEloc">loc</a> -&gt; string -&gt; <a href="Xtmpl_xml.html#TYPEprolog_misc">prolog_misc</a></code></pre>
+<pre><span id="VALpi"><span class="keyword">val</span> pi</span> : <code class="type">?loc:<a href="Xtmpl_xml.html#TYPEloc">loc</a> -&gt; <a href="Xtmpl_xml.html#TYPEname">name</a> -&gt; string -&gt; <a href="Xtmpl_xml.html#TYPEtree">tree</a></code></pre>
+<pre><span id="VALprolog_pi"><span class="keyword">val</span> prolog_pi</span> : <code class="type">?loc:<a href="Xtmpl_xml.html#TYPEloc">loc</a> -&gt; <a href="Xtmpl_xml.html#TYPEname">name</a> -&gt; string -&gt; <a href="Xtmpl_xml.html#TYPEprolog_misc">prolog_misc</a></code></pre>
+<pre><span id="VALxml_decl"><span class="keyword">val</span> xml_decl</span> : <code class="type">?loc:<a href="Xtmpl_xml.html#TYPEloc">loc</a> -&gt; <a href="Xtmpl_xml.html#TYPEstr_attributes">str_attributes</a> -&gt; <a href="Xtmpl_xml.html#TYPExml_decl">xml_decl</a></code></pre>
+<pre><span id="VALdoctype"><span class="keyword">val</span> doctype</span> : <code class="type">?loc:<a href="Xtmpl_xml.html#TYPEloc">loc</a> -&gt; <a href="Xtmpl_xml.html#TYPEname">name</a> -&gt; string -&gt; <a href="Xtmpl_xml.html#TYPEdoctype">doctype</a></code></pre>
+<pre><span id="VALprolog"><span class="keyword">val</span> prolog</span> : <code class="type">?decl:<a href="Xtmpl_xml.html#TYPExml_decl">xml_decl</a> -&gt;<br/>       ?doctype:<a href="Xtmpl_xml.html#TYPEdoctype">doctype</a> -&gt; <a href="Xtmpl_xml.html#TYPEprolog_misc">prolog_misc</a> list -&gt; <a href="Xtmpl_xml.html#TYPEprolog">prolog</a></code></pre>
+<pre><span id="VALdoc"><span class="keyword">val</span> doc</span> : <code class="type"><a href="Xtmpl_xml.html#TYPEprolog">prolog</a> -&gt; <a href="Xtmpl_xml.html#TYPEtree">tree</a> list -&gt; <a href="Xtmpl_xml.html#TYPEtree">tree</a> <a href="Xtmpl_xml.html#TYPEdoc">doc</a></code></pre>
+<pre><span id="VALmerge_cdata"><span class="keyword">val</span> merge_cdata</span> : <code class="type"><a href="Xtmpl_xml.html#TYPEcdata">cdata</a> -&gt; <a href="Xtmpl_xml.html#TYPEcdata">cdata</a> -&gt; <a href="Xtmpl_xml.html#TYPEcdata">cdata</a></code></pre>
+<pre><span id="VALdoctype_name"><span class="keyword">val</span> doctype_name</span> : <code class="type">'a <a href="Xtmpl_xml.html#TYPEdoc">doc</a> -&gt; <a href="Xtmpl_xml.html#TYPEname">name</a> option</code></pre><br/>
+<div class="section-title" id="2_Inputoutput">Input/output</div><br/>
+
+<pre><span id="VALunescape"><span class="keyword">val</span> unescape</span> : <code class="type">?entities:bool -&gt; string -&gt; string</code></pre><div class="info ">
+Unescape character references and some common entity references:
+     <code class="code">&amp;lt;</code>, <code class="code">&amp;gt;</code>, <code class="code">&amp;amp;</code>, <code class="code">&amp;quot;</code>, <code class="code">&amp;apos;</code>.<br/>
+</div>
+<div class="param_info"><code class="code">entities</code> : can be set to <code class="code">false</code> not to unescape
+     entity references.</div>
+
+<pre><span id="VALescape"><span class="keyword">val</span> escape</span> : <code class="type">?quotes:bool -&gt; string -&gt; string</code></pre><div class="info ">
+Replace the following characters: <code class="code">&lt;</code> by <code class="code">&amp;lt;</code>,
+  <code class="code">&gt;</code> by <code class="code">&amp;gt;</code>, <code class="code">&amp;</code> by <code class="code">&amp;amp;</code>. Also replace simple
+  and double quotes by <code class="code">&amp;apos;</code> and <code class="code">&amp;quot;</code> if
+  <code class="code">quotes = true</code> (which is false by default).<br/>
+</div>
+
+<pre><span id="VALfrom_string"><span class="keyword">val</span> from_string</span> : <code class="type">?pos_start:<a href="Xtmpl_xml.html#TYPEpos">pos</a> -&gt; string -&gt; <a href="Xtmpl_xml.html#TYPEtree">tree</a> list</code></pre>
+<pre><span id="VALfrom_channel"><span class="keyword">val</span> from_channel</span> : <code class="type">?pos_start:<a href="Xtmpl_xml.html#TYPEpos">pos</a> -&gt; Pervasives.in_channel -&gt; <a href="Xtmpl_xml.html#TYPEtree">tree</a> list</code></pre>
+<pre><span id="VALfrom_file"><span class="keyword">val</span> from_file</span> : <code class="type">string -&gt; <a href="Xtmpl_xml.html#TYPEtree">tree</a> list</code></pre>
+<pre><span id="VALdoc_from_string"><span class="keyword">val</span> doc_from_string</span> : <code class="type">?pos_start:<a href="Xtmpl_xml.html#TYPEpos">pos</a> -&gt; string -&gt; <a href="Xtmpl_xml.html#TYPEtree">tree</a> <a href="Xtmpl_xml.html#TYPEdoc">doc</a></code></pre>
+<pre><span id="VALdoc_from_channel"><span class="keyword">val</span> doc_from_channel</span> : <code class="type">?pos_start:<a href="Xtmpl_xml.html#TYPEpos">pos</a> -&gt;<br/>       Pervasives.in_channel -&gt; <a href="Xtmpl_xml.html#TYPEtree">tree</a> <a href="Xtmpl_xml.html#TYPEdoc">doc</a></code></pre>
+<pre><span id="VALdoc_from_file"><span class="keyword">val</span> doc_from_file</span> : <code class="type">string -&gt; <a href="Xtmpl_xml.html#TYPEtree">tree</a> <a href="Xtmpl_xml.html#TYPEdoc">doc</a></code></pre>
+<pre><span id="VALto_string"><span class="keyword">val</span> to_string</span> : <code class="type"><a href="Xtmpl_xml.html#TYPEtree">tree</a> list -&gt; string</code></pre>
+<pre><span id="VALdoc_to_string"><span class="keyword">val</span> doc_to_string</span> : <code class="type"><a href="Xtmpl_xml.html#TYPEtree">tree</a> <a href="Xtmpl_xml.html#TYPEdoc">doc</a> -&gt; string</code></pre><br/>
+<div class="section-title" id="2_Attributes">Attributes</div><br/>
+
+<pre><span id="VALatts_empty"><span class="keyword">val</span> atts_empty</span> : <code class="type">'a <a href="Xtmpl_xml.html#TYPEattributes">attributes</a></code></pre>
+<pre><span id="VALatts_of_list"><span class="keyword">val</span> atts_of_list</span> : <code class="type">?atts:'a <a href="Xtmpl_xml.html#TYPEattributes">attributes</a> -&gt;<br/>       (<a href="Xtmpl_xml.html#TYPEname">name</a> * 'a) list -&gt; 'a <a href="Xtmpl_xml.html#TYPEattributes">attributes</a></code></pre><div class="info ">
+Same as <a href="Xtmpl_rewrite.html#VALatts_of_list"><code class="code">Xtmpl_rewrite.atts_of_list</code></a> but for generic attributes.<br/>
+</div>
+
+<pre><span id="VALatts_one"><span class="keyword">val</span> atts_one</span> : <code class="type">?atts:'a <a href="Xtmpl_xml.html#TYPEattributes">attributes</a> -&gt;<br/>       <a href="Xtmpl_xml.html#TYPEname">name</a> -&gt; 'a -&gt; 'a <a href="Xtmpl_xml.html#TYPEattributes">attributes</a></code></pre><div class="info ">
+Same as <a href="Xtmpl_rewrite.html#VALatts_one"><code class="code">Xtmpl_rewrite.atts_one</code></a> but for generic attributes.<br/>
+</div>
+
+<pre><span id="VALatts_remove"><span class="keyword">val</span> atts_remove</span> : <code class="type"><a href="Xtmpl_xml.html#TYPEname">name</a> -&gt; 'a <a href="Xtmpl_xml.html#TYPEattributes">attributes</a> -&gt; 'a <a href="Xtmpl_xml.html#TYPEattributes">attributes</a></code></pre><div class="info ">
+Same as <a href="Xtmpl_rewrite.html#VALatts_remove"><code class="code">Xtmpl_rewrite.atts_remove</code></a> but for generic attributes.<br/>
+</div>
+
+<pre><span id="VALatts_replace"><span class="keyword">val</span> atts_replace</span> : <code class="type"><a href="Xtmpl_xml.html#TYPEname">name</a> -&gt; 'a -&gt; 'a <a href="Xtmpl_xml.html#TYPEattributes">attributes</a> -&gt; 'a <a href="Xtmpl_xml.html#TYPEattributes">attributes</a></code></pre><div class="info ">
+Same as <a href="Xtmpl_rewrite.html#VALatts_replace"><code class="code">Xtmpl_rewrite.atts_replace</code></a> but for generic attributes.<br/>
+</div>
+
+<pre><span id="VALget_att"><span class="keyword">val</span> get_att</span> : <code class="type">'a <a href="Xtmpl_xml.html#TYPEattributes">attributes</a> -&gt; <a href="Xtmpl_xml.html#TYPEname">name</a> -&gt; 'a option</code></pre><div class="info ">
+Same as <a href="Xtmpl_rewrite.html#VALget_att"><code class="code">Xtmpl_rewrite.get_att</code></a> but for generic attributes.<br/>
+</div>
+
+<pre><span id="VALopt_att"><span class="keyword">val</span> opt_att</span> : <code class="type"><a href="Xtmpl_xml.html#TYPEstr_attributes">str_attributes</a> -&gt;<br/>       ?def:string -&gt; <a href="Xtmpl_xml.html#TYPEname">name</a> -&gt; string * <a href="Xtmpl_xml.html#TYPEloc">loc</a> option</code></pre><div class="info ">
+Same as <a href="Xtmpl_rewrite.html#VALopt_att"><code class="code">Xtmpl_rewrite.opt_att</code></a> but for <a href="Xtmpl_xml.html#TYPEstr_attributes"><code class="code">Xtmpl_xml.str_attributes</code></a>.<br/>
+</div>
+
+<pre><span id="VALstring_of_atts"><span class="keyword">val</span> string_of_atts</span> : <code class="type"><a href="Xtmpl_xml.html#TYPEstr_attributes">str_attributes</a> -&gt; string</code></pre><div class="info ">
+Return a string representation of the given <a href="Xtmpl_xml.html#TYPEstr_attributes"><code class="code">Xtmpl_xml.str_attributes</code></a>.<br/>
+</div>
+</div></contents></ocamldoc>

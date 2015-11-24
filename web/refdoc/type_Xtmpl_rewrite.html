@@ -1,0 +1,136 @@
+<ocamldoc with-contents="true"><title>Xtmpl reference documentation : Xtmpl_rewrite</title><contents><div class="ocamldoc-page">
+<code class="code"><span class="keyword">sig</span><br/>
+&#160;&#160;<span class="keyword">module</span>&#160;<span class="constructor">Xml</span>&#160;=&#160;<span class="constructor">Xtmpl_xml</span><br/>
+&#160;&#160;<span class="keyword">type</span>&#160;name&#160;=&#160;string&#160;*&#160;string<br/>
+&#160;&#160;<span class="keyword">type</span>&#160;attributes&#160;=&#160;<span class="constructor">Xtmpl_rewrite</span>.tree&#160;list&#160;<span class="constructor">Xml</span>.attributes<br/>
+&#160;&#160;<span class="keyword">and</span>&#160;node&#160;=&#160;{<br/>
+&#160;&#160;&#160;&#160;loc&#160;:&#160;<span class="constructor">Xml</span>.loc&#160;option;<br/>
+&#160;&#160;&#160;&#160;name&#160;:&#160;<span class="constructor">Xtmpl_rewrite</span>.name;<br/>
+&#160;&#160;&#160;&#160;atts&#160;:&#160;<span class="constructor">Xtmpl_rewrite</span>.attributes;<br/>
+&#160;&#160;&#160;&#160;subs&#160;:&#160;<span class="constructor">Xtmpl_rewrite</span>.tree&#160;list;<br/>
+&#160;&#160;}<br/>
+&#160;&#160;<span class="keyword">and</span>&#160;tree&#160;=<br/>
+&#160;&#160;&#160;&#160;&#160;&#160;<span class="constructor">E</span>&#160;<span class="keyword">of</span>&#160;<span class="constructor">Xtmpl_rewrite</span>.node<br/>
+&#160;&#160;&#160;&#160;<span class="keywordsign">|</span>&#160;<span class="constructor">D</span>&#160;<span class="keyword">of</span>&#160;<span class="constructor">Xml</span>.cdata<br/>
+&#160;&#160;&#160;&#160;<span class="keywordsign">|</span>&#160;<span class="constructor">C</span>&#160;<span class="keyword">of</span>&#160;<span class="constructor">Xml</span>.comment<br/>
+&#160;&#160;&#160;&#160;<span class="keywordsign">|</span>&#160;<span class="constructor">PI</span>&#160;<span class="keyword">of</span>&#160;<span class="constructor">Xml</span>.proc_inst<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;node&#160;:<br/>
+&#160;&#160;&#160;&#160;?loc:<span class="constructor">Xml</span>.loc&#160;<span class="keywordsign">-&gt;</span><br/>
+&#160;&#160;&#160;&#160;<span class="constructor">Xtmpl_rewrite</span>.name&#160;<span class="keywordsign">-&gt;</span><br/>
+&#160;&#160;&#160;&#160;?atts:<span class="constructor">Xtmpl_rewrite</span>.attributes&#160;<span class="keywordsign">-&gt;</span><br/>
+&#160;&#160;&#160;&#160;<span class="constructor">Xtmpl_rewrite</span>.tree&#160;list&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="constructor">Xtmpl_rewrite</span>.tree<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;cdata&#160;:&#160;?loc:<span class="constructor">Xml</span>.loc&#160;<span class="keywordsign">-&gt;</span>&#160;?quoted:bool&#160;<span class="keywordsign">-&gt;</span>&#160;string&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="constructor">Xtmpl_rewrite</span>.tree<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;comment&#160;:&#160;?loc:<span class="constructor">Xml</span>.loc&#160;<span class="keywordsign">-&gt;</span>&#160;string&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="constructor">Xtmpl_rewrite</span>.tree<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;pi&#160;:&#160;?loc:<span class="constructor">Xml</span>.loc&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="constructor">Xtmpl_rewrite</span>.name&#160;<span class="keywordsign">-&gt;</span>&#160;string&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="constructor">Xtmpl_rewrite</span>.tree<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;doc&#160;:<br/>
+&#160;&#160;&#160;&#160;<span class="constructor">Xml</span>.prolog&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="constructor">Xtmpl_rewrite</span>.tree&#160;list&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="constructor">Xtmpl_rewrite</span>.tree&#160;<span class="constructor">Xml</span>.doc<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;upto_first_element&#160;:&#160;<span class="constructor">Xtmpl_rewrite</span>.tree&#160;list&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="constructor">Xtmpl_rewrite</span>.tree&#160;list<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;atts_empty&#160;:&#160;<span class="constructor">Xtmpl_rewrite</span>.attributes<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;atts_of_list&#160;:<br/>
+&#160;&#160;&#160;&#160;?atts:<span class="constructor">Xtmpl_rewrite</span>.attributes&#160;<span class="keywordsign">-&gt;</span><br/>
+&#160;&#160;&#160;&#160;(<span class="constructor">Xtmpl_rewrite</span>.name&#160;*&#160;<span class="constructor">Xtmpl_rewrite</span>.tree&#160;list)&#160;list&#160;<span class="keywordsign">-&gt;</span><br/>
+&#160;&#160;&#160;&#160;<span class="constructor">Xtmpl_rewrite</span>.attributes<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;atts_one&#160;:<br/>
+&#160;&#160;&#160;&#160;?atts:<span class="constructor">Xtmpl_rewrite</span>.attributes&#160;<span class="keywordsign">-&gt;</span><br/>
+&#160;&#160;&#160;&#160;<span class="constructor">Xtmpl_rewrite</span>.name&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="constructor">Xtmpl_rewrite</span>.tree&#160;list&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="constructor">Xtmpl_rewrite</span>.attributes<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;atts_remove&#160;:<br/>
+&#160;&#160;&#160;&#160;<span class="constructor">Xtmpl_rewrite</span>.name&#160;<span class="keywordsign">-&gt;</span><br/>
+&#160;&#160;&#160;&#160;<span class="constructor">Xtmpl_rewrite</span>.attributes&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="constructor">Xtmpl_rewrite</span>.attributes<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;atts_replace&#160;:<br/>
+&#160;&#160;&#160;&#160;<span class="constructor">Xtmpl_rewrite</span>.name&#160;<span class="keywordsign">-&gt;</span><br/>
+&#160;&#160;&#160;&#160;<span class="constructor">Xtmpl_rewrite</span>.tree&#160;list&#160;<span class="keywordsign">-&gt;</span><br/>
+&#160;&#160;&#160;&#160;<span class="constructor">Xtmpl_rewrite</span>.attributes&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="constructor">Xtmpl_rewrite</span>.attributes<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;get_att&#160;:<br/>
+&#160;&#160;&#160;&#160;<span class="constructor">Xtmpl_rewrite</span>.attributes&#160;<span class="keywordsign">-&gt;</span><br/>
+&#160;&#160;&#160;&#160;<span class="constructor">Xtmpl_rewrite</span>.name&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="constructor">Xtmpl_rewrite</span>.tree&#160;list&#160;option<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;get_att_cdata&#160;:<br/>
+&#160;&#160;&#160;&#160;<span class="constructor">Xtmpl_rewrite</span>.attributes&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="constructor">Xtmpl_rewrite</span>.name&#160;<span class="keywordsign">-&gt;</span>&#160;string&#160;option<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;opt_att&#160;:<br/>
+&#160;&#160;&#160;&#160;<span class="constructor">Xtmpl_rewrite</span>.attributes&#160;<span class="keywordsign">-&gt;</span><br/>
+&#160;&#160;&#160;&#160;?def:<span class="constructor">Xtmpl_rewrite</span>.tree&#160;list&#160;<span class="keywordsign">-&gt;</span><br/>
+&#160;&#160;&#160;&#160;<span class="constructor">Xtmpl_rewrite</span>.name&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="constructor">Xtmpl_rewrite</span>.tree&#160;list<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;opt_att_cdata&#160;:<br/>
+&#160;&#160;&#160;&#160;<span class="constructor">Xtmpl_rewrite</span>.attributes&#160;<span class="keywordsign">-&gt;</span>&#160;?def:string&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="constructor">Xtmpl_rewrite</span>.name&#160;<span class="keywordsign">-&gt;</span>&#160;string<br/>
+&#160;&#160;<span class="keyword">type</span>&#160;<span class="keywordsign">'</span>a&#160;env&#160;=&#160;<span class="keywordsign">'</span>a&#160;<span class="constructor">Xtmpl_rewrite</span>.callback&#160;<span class="constructor">Xml</span>.<span class="constructor">Name_map</span>.t<br/>
+&#160;&#160;<span class="keyword">and</span>&#160;<span class="keywordsign">'</span>a&#160;callback&#160;=<br/>
+&#160;&#160;&#160;&#160;&#160;&#160;<span class="keywordsign">'</span>a&#160;<span class="keywordsign">-&gt;</span><br/>
+&#160;&#160;&#160;&#160;&#160;&#160;<span class="keywordsign">'</span>a&#160;<span class="constructor">Xtmpl_rewrite</span>.env&#160;<span class="keywordsign">-&gt;</span><br/>
+&#160;&#160;&#160;&#160;&#160;&#160;?loc:<span class="constructor">Xml</span>.loc&#160;<span class="keywordsign">-&gt;</span><br/>
+&#160;&#160;&#160;&#160;&#160;&#160;<span class="constructor">Xtmpl_rewrite</span>.attributes&#160;<span class="keywordsign">-&gt;</span><br/>
+&#160;&#160;&#160;&#160;&#160;&#160;<span class="constructor">Xtmpl_rewrite</span>.tree&#160;list&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="keywordsign">'</span>a&#160;*&#160;<span class="constructor">Xtmpl_rewrite</span>.tree&#160;list<br/>
+&#160;&#160;<span class="keyword">exception</span>&#160;<span class="constructor">No_change</span><br/>
+&#160;&#160;<span class="keyword">val</span>&#160;env_empty&#160;:&#160;unit&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="keywordsign">'</span>a&#160;<span class="constructor">Xtmpl_rewrite</span>.env<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;env_add_cb&#160;:<br/>
+&#160;&#160;&#160;&#160;?prefix:string&#160;<span class="keywordsign">-&gt;</span><br/>
+&#160;&#160;&#160;&#160;string&#160;<span class="keywordsign">-&gt;</span><br/>
+&#160;&#160;&#160;&#160;<span class="keywordsign">'</span>a&#160;<span class="constructor">Xtmpl_rewrite</span>.callback&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="keywordsign">'</span>a&#160;<span class="constructor">Xtmpl_rewrite</span>.env&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="keywordsign">'</span>a&#160;<span class="constructor">Xtmpl_rewrite</span>.env<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;env_add_xml&#160;:<br/>
+&#160;&#160;&#160;&#160;?prefix:string&#160;<span class="keywordsign">-&gt;</span><br/>
+&#160;&#160;&#160;&#160;string&#160;<span class="keywordsign">-&gt;</span><br/>
+&#160;&#160;&#160;&#160;<span class="constructor">Xtmpl_rewrite</span>.tree&#160;list&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="keywordsign">'</span>a&#160;<span class="constructor">Xtmpl_rewrite</span>.env&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="keywordsign">'</span>a&#160;<span class="constructor">Xtmpl_rewrite</span>.env<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;env_get&#160;:<br/>
+&#160;&#160;&#160;&#160;<span class="constructor">Xtmpl_rewrite</span>.name&#160;<span class="keywordsign">-&gt;</span><br/>
+&#160;&#160;&#160;&#160;<span class="keywordsign">'</span>a&#160;<span class="constructor">Xtmpl_rewrite</span>.env&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="keywordsign">'</span>a&#160;<span class="constructor">Xtmpl_rewrite</span>.callback&#160;option<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;string_of_env&#160;:&#160;<span class="keywordsign">'</span>a&#160;<span class="constructor">Xtmpl_rewrite</span>.env&#160;<span class="keywordsign">-&gt;</span>&#160;string<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;env_of_list&#160;:<br/>
+&#160;&#160;&#160;&#160;?env:<span class="keywordsign">'</span>a&#160;<span class="constructor">Xtmpl_rewrite</span>.env&#160;<span class="keywordsign">-&gt;</span><br/>
+&#160;&#160;&#160;&#160;(<span class="constructor">Xtmpl_rewrite</span>.name&#160;*&#160;<span class="keywordsign">'</span>a&#160;<span class="constructor">Xtmpl_rewrite</span>.callback)&#160;list&#160;<span class="keywordsign">-&gt;</span><br/>
+&#160;&#160;&#160;&#160;<span class="keywordsign">'</span>a&#160;<span class="constructor">Xtmpl_rewrite</span>.env<br/>
+&#160;&#160;<span class="keyword">type</span>&#160;rewrite_stack&#160;=<br/>
+&#160;&#160;&#160;&#160;&#160;&#160;(<span class="constructor">Xtmpl_rewrite</span>.name&#160;*&#160;<span class="constructor">Xtmpl_rewrite</span>.attributes&#160;*<br/>
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;<span class="constructor">Xtmpl_rewrite</span>.tree&#160;list&#160;*&#160;<span class="constructor">Xml</span>.loc&#160;option)<br/>
+&#160;&#160;&#160;&#160;&#160;&#160;list<br/>
+&#160;&#160;<span class="keyword">type</span>&#160;error&#160;=<br/>
+&#160;&#160;&#160;&#160;&#160;&#160;<span class="constructor">Loop</span>&#160;<span class="keyword">of</span>&#160;<span class="constructor">Xtmpl_rewrite</span>.rewrite_stack<br/>
+&#160;&#160;&#160;&#160;<span class="keywordsign">|</span>&#160;<span class="constructor">Parse_error</span>&#160;<span class="keyword">of</span>&#160;<span class="constructor">Xml</span>.loc&#160;*&#160;string<br/>
+&#160;&#160;&#160;&#160;<span class="keywordsign">|</span>&#160;<span class="constructor">Invalid_attribute_value</span>&#160;<span class="keyword">of</span>&#160;string&#160;*&#160;<span class="constructor">Xtmpl_rewrite</span>.tree&#160;list<br/>
+&#160;&#160;&#160;&#160;<span class="keywordsign">|</span>&#160;<span class="constructor">Fixpoint_limit</span>&#160;<span class="keyword">of</span>&#160;int<br/>
+&#160;&#160;<span class="keyword">exception</span>&#160;<span class="constructor">Error</span>&#160;<span class="keyword">of</span>&#160;<span class="constructor">Xtmpl_rewrite</span>.error<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;loop_error&#160;:&#160;<span class="constructor">Xtmpl_rewrite</span>.rewrite_stack&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="keywordsign">'</span>a<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;parse_error&#160;:&#160;<span class="constructor">Xml</span>.loc&#160;<span class="keywordsign">-&gt;</span>&#160;string&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="keywordsign">'</span>a<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;invalid_attribute_value&#160;:&#160;string&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="constructor">Xtmpl_rewrite</span>.tree&#160;list&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="keywordsign">'</span>a<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;fixpoint_limit&#160;:&#160;int&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="keywordsign">'</span>a<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;string_of_error&#160;:&#160;<span class="constructor">Xtmpl_rewrite</span>.error&#160;<span class="keywordsign">-&gt;</span>&#160;string<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;string_of_rewrite_stack&#160;:&#160;<span class="constructor">Xtmpl_rewrite</span>.rewrite_stack&#160;<span class="keywordsign">-&gt;</span>&#160;string<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;tag_env&#160;:&#160;string<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;att_defer&#160;:&#160;string<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;att_escamp&#160;:&#160;string<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;att_protect&#160;:&#160;string<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;from_xml&#160;:&#160;<span class="constructor">Xml</span>.tree&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="constructor">Xtmpl_rewrite</span>.tree<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;from_xmls&#160;:&#160;<span class="constructor">Xml</span>.tree&#160;list&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="constructor">Xtmpl_rewrite</span>.tree&#160;list<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;from_xml_atts&#160;:&#160;<span class="constructor">Xml</span>.str_attributes&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="constructor">Xtmpl_rewrite</span>.attributes<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;from_doc&#160;:&#160;<span class="constructor">Xml</span>.tree&#160;<span class="constructor">Xml</span>.doc&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="constructor">Xtmpl_rewrite</span>.tree&#160;<span class="constructor">Xml</span>.doc<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;to_xml&#160;:&#160;?xml_atts:bool&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="constructor">Xtmpl_rewrite</span>.tree&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="constructor">Xml</span>.tree<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;to_xmls&#160;:&#160;?xml_atts:bool&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="constructor">Xtmpl_rewrite</span>.tree&#160;list&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="constructor">Xml</span>.tree&#160;list<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;to_doc&#160;:<br/>
+&#160;&#160;&#160;&#160;?xml_atts:bool&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="constructor">Xtmpl_rewrite</span>.tree&#160;<span class="constructor">Xml</span>.doc&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="constructor">Xml</span>.tree&#160;<span class="constructor">Xml</span>.doc<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;to_string&#160;:&#160;?xml_atts:bool&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="constructor">Xtmpl_rewrite</span>.tree&#160;list&#160;<span class="keywordsign">-&gt;</span>&#160;string<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;atts_to_string&#160;:<br/>
+&#160;&#160;&#160;&#160;?xml_atts:bool&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="constructor">Xtmpl_rewrite</span>.attributes&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="constructor">Xml</span>.str_attributes<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;doc_to_string&#160;:&#160;?xml_atts:bool&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="constructor">Xtmpl_rewrite</span>.tree&#160;<span class="constructor">Xml</span>.doc&#160;<span class="keywordsign">-&gt;</span>&#160;string<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;from_string&#160;:&#160;string&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="constructor">Xtmpl_rewrite</span>.tree&#160;list<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;doc_from_string&#160;:&#160;string&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="constructor">Xtmpl_rewrite</span>.tree&#160;<span class="constructor">Xml</span>.doc<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;from_file&#160;:&#160;string&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="constructor">Xtmpl_rewrite</span>.tree&#160;list<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;doc_from_file&#160;:&#160;string&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="constructor">Xtmpl_rewrite</span>.tree&#160;<span class="constructor">Xml</span>.doc<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;merge_cdata&#160;:&#160;<span class="constructor">Xtmpl_rewrite</span>.tree&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="constructor">Xtmpl_rewrite</span>.tree<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;merge_cdata_list&#160;:&#160;<span class="constructor">Xtmpl_rewrite</span>.tree&#160;list&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="constructor">Xtmpl_rewrite</span>.tree&#160;list<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;apply_to_string&#160;:<br/>
+&#160;&#160;&#160;&#160;<span class="keywordsign">'</span>a&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="keywordsign">'</span>a&#160;<span class="constructor">Xtmpl_rewrite</span>.env&#160;<span class="keywordsign">-&gt;</span>&#160;string&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="keywordsign">'</span>a&#160;*&#160;<span class="constructor">Xtmpl_rewrite</span>.tree&#160;list<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;apply_to_file&#160;:<br/>
+&#160;&#160;&#160;&#160;<span class="keywordsign">'</span>a&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="keywordsign">'</span>a&#160;<span class="constructor">Xtmpl_rewrite</span>.env&#160;<span class="keywordsign">-&gt;</span>&#160;string&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="keywordsign">'</span>a&#160;*&#160;<span class="constructor">Xtmpl_rewrite</span>.tree&#160;list<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;apply_to_xmls&#160;:<br/>
+&#160;&#160;&#160;&#160;<span class="keywordsign">'</span>a&#160;<span class="keywordsign">-&gt;</span><br/>
+&#160;&#160;&#160;&#160;<span class="keywordsign">'</span>a&#160;<span class="constructor">Xtmpl_rewrite</span>.env&#160;<span class="keywordsign">-&gt;</span><br/>
+&#160;&#160;&#160;&#160;<span class="constructor">Xtmpl_rewrite</span>.tree&#160;list&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="keywordsign">'</span>a&#160;*&#160;<span class="constructor">Xtmpl_rewrite</span>.tree&#160;list<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;apply_to_doc&#160;:<br/>
+&#160;&#160;&#160;&#160;<span class="keywordsign">'</span>a&#160;<span class="keywordsign">-&gt;</span><br/>
+&#160;&#160;&#160;&#160;<span class="keywordsign">'</span>a&#160;<span class="constructor">Xtmpl_rewrite</span>.env&#160;<span class="keywordsign">-&gt;</span><br/>
+&#160;&#160;&#160;&#160;<span class="constructor">Xtmpl_rewrite</span>.tree&#160;<span class="constructor">Xml</span>.doc&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="keywordsign">'</span>a&#160;*&#160;<span class="constructor">Xtmpl_rewrite</span>.tree&#160;<span class="constructor">Xml</span>.doc<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;apply_into_file&#160;:<br/>
+&#160;&#160;&#160;&#160;<span class="keywordsign">'</span>a&#160;<span class="keywordsign">-&gt;</span><br/>
+&#160;&#160;&#160;&#160;?head:string&#160;<span class="keywordsign">-&gt;</span><br/>
+&#160;&#160;&#160;&#160;<span class="keywordsign">'</span>a&#160;<span class="constructor">Xtmpl_rewrite</span>.env&#160;<span class="keywordsign">-&gt;</span>&#160;infile:string&#160;<span class="keywordsign">-&gt;</span>&#160;outfile:string&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="keywordsign">'</span>a<br/>
+&#160;&#160;<span class="keyword">val</span>&#160;apply_string_into_file&#160;:<br/>
+&#160;&#160;&#160;&#160;<span class="keywordsign">'</span>a&#160;<span class="keywordsign">-&gt;</span><br/>
+&#160;&#160;&#160;&#160;?head:string&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="keywordsign">'</span>a&#160;<span class="constructor">Xtmpl_rewrite</span>.env&#160;<span class="keywordsign">-&gt;</span>&#160;outfile:string&#160;<span class="keywordsign">-&gt;</span>&#160;string&#160;<span class="keywordsign">-&gt;</span>&#160;<span class="keywordsign">'</span>a<br/>
+<span class="keyword">end</span></code></div></contents></ocamldoc>

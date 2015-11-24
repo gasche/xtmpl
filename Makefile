@@ -128,7 +128,7 @@ docstog: dump.odoc
 	$(MKDIR) web/refdoc
 	ocamldoc.opt \
 	-t "Xtmpl reference documentation" \
-	-load $^ -d web/refdoc -g odoc_stog.cmxs
+	-load $^ -d web/refdoc -i `ocamlfind query stog` -g odoc_stog.cmxs
 
 ##########
 install: xtmpl.cmo xtmpl.cmx
