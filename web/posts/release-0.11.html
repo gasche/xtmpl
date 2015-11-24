@@ -1,0 +1,30 @@
+<sw-post title="Xtmpl 0.11"
+date="2015/03/05"
+keywords="ppx,interface"
+published="true"
+topics="release"
+>
+<p>
+Release 0.11 of Xtmpl is available from
+the <doc href="download">download page</doc>.
+</p>
+<sep_/>
+<p>Changes:</p>
+<ul id="changes">
+<li>add <doc href="doc#ppx">ppx_xtmpl</doc>:
+     this preprocessor creates functions from template files or strings,
+     with the parameters described in the template. Usage:
+     <ocaml>
+let doc = [%xtmpl "file.xml"]
+let doc = [%xtmpl.string {| <div>...</div> |} ]
+</ocaml></li>
+<li>some functions renamed (deprecating original ones functions),</li>
+<li>add <ml>Xtmpl.node</ml> and <ml>Xtmpl.cdata</ml>,
+</li>
+<li>new <doc href="refdoc/Xtmpl_xhtml">Xtmpl_xhtml</doc> module, with convenient
+  functions to create Xhtml trees,</li>
+<li>new <doc href="refdoc/Xtmpl_js">Xtmpl_js</doc> module in a
+  new package <code>xtmpl.js</code>.
+</li>
+</ul>
+</sw-post>

@@ -175,9 +175,7 @@ Same as <a href="Xtmpl_rewrite.html#VALget_att"><code class="code">Xtmpl_rewrite
 Same as <a href="Xtmpl_rewrite.html#VALopt_att"><code class="code">Xtmpl_rewrite.opt_att</code></a> but looking for CDATA bounded values, as in
   <a href="Xtmpl_rewrite.html#VALget_att_cdata"><code class="code">Xtmpl_rewrite.get_att_cdata</code></a>.<br/>
 </div>
-
-<pre><span id="TYPEenv"><span class="keyword">type</span> <code class="type">'a</code> env</span> = <code class="type">'a <a href="Xtmpl_rewrite.html#TYPEcallback">callback</a> Xml.Name_map.t</code> </pre>
-<div class="info ">
+<br/>
 <div class="section-title" id="2_Environment">Environment</div>
 <div class="vertical-space"> </div>
 
@@ -188,7 +186,8 @@ Same as <a href="Xtmpl_rewrite.html#VALopt_att"><code class="code">Xtmpl_rewrite
 
     The environments are immutable, all mutating operations return new
     environments.<br/>
-</div>
+
+<pre><span id="TYPEenv"><span class="keyword">type</span> <code class="type">'a</code> env</span> = <code class="type">'a <a href="Xtmpl_rewrite.html#TYPEcallback">callback</a> Xml.Name_map.t</code> </pre>
 
 
 <pre><span id="TYPEcallback"><span class="keyword">type</span> <code class="type">'a</code> callback</span> = <code class="type">'a -&gt;<br/>       'a <a href="Xtmpl_rewrite.html#TYPEenv">env</a> -&gt;<br/>       ?loc:Xml.loc -&gt;<br/>       <a href="Xtmpl_rewrite.html#TYPEattributes">attributes</a> -&gt;<br/>       <a href="Xtmpl_rewrite.html#TYPEtree">tree</a> list -&gt; 'a * <a href="Xtmpl_rewrite.html#TYPEtree">tree</a> list</code> </pre>

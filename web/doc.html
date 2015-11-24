@@ -15,7 +15,7 @@ The ppx preprocessor allows the use of the following extension nodes:
 let doc = [%xtmpl "file.xml"]
 let doc = [%xtmpl.string {| &lt;div&gt;...&lt;/div&gt; |} ]
 </ocaml>
-<p>In the first case, the file "file.xml" is read at compilation time,
+<p>In the first case, the file <code>file.xml"</code> is read at compilation time,
 and its content is embedded in the code. A function is generated,
 taking the parameters defined in the file and returning the
 template where some nodes have been replaced by parameters.
@@ -31,10 +31,10 @@ the function to generate. These parameters are nodes with a
 <p>By default, a parameter will be of type <ml>string</ml>, but the type
 can be changed with the <xml>type_="..."</xml> attribute.
 If <xml>type_="xmls"</xml> or <xml>type_="xml"</xml>, then
-the parameter will be of type <ml>Xtmpl.tree list</ml>. If <xml>type_</xml>
+the parameter will be of type <ml>Xtmpl_rewrite.tree list</ml>. If <xml>type_</xml>
 has another value, say <ml>t</ml>, then an attribute <xml>to_xml_</xml>
 must be provided, containing code that will map a value of type <ml>t</ml>
-to <ml>Xtmpl.tree list</ml>.
+to <ml>Xtmpl_rewrite.tree list</ml>.
 </p>
 <p>
 A parameter is mandatory by default, but can be set as optional
@@ -50,19 +50,15 @@ name can be given, using the <xml>name_="..."</xml> attribute.
 <p>
 The following OCaml code in <code>example.ml</code>
 </p>
-<ocaml defer_="1"><include raw="true" file="./example.ml"/></ocaml>
+<oc toplevel="false" defer_="1"><include raw="true" file="./example.ml"/></oc>
 <p>can be compiled with </p>
-<command-line>ocamlfind ocamlc -c -package xtmpl -rectypes example.ml</command-line>
+<exec>ocamlfind ocamlc -c -package xtmpl,xtmpl.ppx -rectypes example.ml</exec>
 <p>
 And the interface of the <code>page</code> function is
 </p>
-<ocaml>
-val page :
-  ?env:unit Xtmpl.env ->
-  contents:Xtmpl.tree list ->
-  ?debug:Xtmpl.tree list ->
-  title:string -> ?value:int -> unit -> Xtmpl.tree list
-</ocaml>
+<exec show-code="false" show-stdout="false">
+ocamlfind ocamlc -i -package xtmpl,xtmpl.ppx -rectypes example.ml > foo.mli</exec>
+<ocaml defer_="1"><include raw="true" file="./foo.mli"/></ocaml>
 <p>
 The <ml>env</ml> parameter can be used to specify additional rewrite rules.
 Indeed, the Xtmpl rewrite engine is used to replace the parameter nodes in

@@ -1,6 +1,16 @@
 <sw-page title="Download/Install"
 navbar-download="active"
+with-contents="true"
 >
+<release version="">
+<if version=""><error_>&lt;release&gt;: missing version</error_></if>
+<li><a href="ocf-&lt;version/&gt;.tar.gz"><version/></a>
+<span class="date">[<doc-date doc-path="release-&lt;version/&gt;"/>]</span>
+<late-inc href="release-&lt;version/&gt;#changes"
+id="changes-&lt;version/&gt;"/>
+</li>
+</release>
+<contents>
 <prepare-toc depth="2">
 <toc/>
 <section id="download" title="Download">
@@ -9,36 +19,11 @@ Xtmpl is <a href="https://github.com/zoggy/xtmpl">hosted on Github</a>.
 </p>
 <subsection title="Releases">
 <ul>
-<li><strong><a href="xtmpl-0.12.tar.gz">0.12</a></strong>
-[2015-03-30]:
-  <ul id="changes0.12">
-    <li>fix <doc href="refdoc/Xtmpl_js.html#VALdom_of_xtmpl">Xtmpl_js.dom_of_xtml</doc>
-    to unescape xml in attributes, using Regexp module of Js_of_ocaml</li>
-  </ul>
-</li>
+<release version="0.13.0"/>
+<release version="0.12"/>
+<release version="0.11"/>
 
-<li><strong><a href="xtmpl-0.11.tar.gz">0.11</a></strong>
-[2015-03-05]:
-  <ul id="changes0.11">
-    <li>add <doc href="doc#ppx">ppx_xtmpl</doc>:
-     this preprocessor creates functions from template files or strings,
-     with the parameters described in the template. Usage:
-     <ocaml>
-let doc = [%xtmpl "file.xml"]
-let doc = [%xtmpl.string {| <div>...</div> |} ]
-</ocaml></li>
-<li>some functions renamed (deprecating original ones functions),</li>
-<li>add <ml>Xtmpl.node</ml> and <ml>Xtmpl.cdata</ml>,
-</li>
-<li>new <doc href="refdoc/Xtmpl_xhtml">Xtmpl_xhtml</doc> module, with convenient
-  functions to create Xhtml trees,</li>
-<li>new <doc href="refdoc/Xtmpl_js">Xtmpl_js</doc> module in a
-  new package <code>xtmpl.js</code>.
-</li>
-</ul>
-</li>
-
-<li><strong><a href="xtmpl-0.10.tar.gz">0.10</a></strong>
+<li><a href="xtmpl-0.10.tar.gz">0.10</a>
 [2014-09-25]:
 <ul>
 <li>Use safe-string mode (require OCaml &gt;= 4.02),</li>
@@ -54,14 +39,14 @@ let doc = [%xtmpl.string {| <div>...</div> |} ]
 </ul>
 </li>
 
-<li><strong><a href="xtmpl-0.9.tar.gz">0.9</a></strong>
+<li><a href="xtmpl-0.9.tar.gz">0.9</a>
 [2014-03-20]:
 <ul>
 <li>Add <code>Xtmpl.merge_cdata</code> and <code>Xtmpl.merge_cdata_list</code>.</li>
 </ul>
 </li>
 
-<li><strong><a href="xtmpl-0.8.tar.gz">0.8</a></strong>
+<li><a href="xtmpl-0.8.tar.gz">0.8</a>
 [2014-01-15]:
 <ul>
 <li>An attribute value is now a list Xml trees, to improve performance
@@ -79,7 +64,7 @@ let doc = [%xtmpl.string {| <div>...</div> |} ]
 </ul>
 </li>
 
-<li><strong><a href="xtmpl-0.7.tar.gz">0.7</a></strong>
+<li><a href="xtmpl-0.7.tar.gz">0.7</a>
 [2013-10-07]:
 <ul>
 <li>Re-introduce (un)escaping of ampersands, only in attributes
@@ -92,7 +77,7 @@ let doc = [%xtmpl.string {| <div>...</div> |} ]
 </ul>
 </li>
 
-<li><strong><a href="xtmpl-0.6.tar.gz">0.6</a></strong>
+<li><a href="xtmpl-0.6.tar.gz">0.6</a>
 [2013-03-19]:
 <ul>
 <li>do not (un)escape ampersand in attributes,</li>
@@ -100,7 +85,7 @@ let doc = [%xtmpl.string {| <div>...</div> |} ]
 <li>generate and install .cmxs file.</li>
 </ul>
 </li>
-<li><strong><a href="xtmpl-0.5.tar.gz">0.5</a></strong>
+<li><a href="xtmpl-0.5.tar.gz">0.5</a>
 [2012-12-18]:
   <ul>
     <li>mod: do not use string representation to check for changes in
@@ -112,25 +97,26 @@ let doc = [%xtmpl.string {| <div>...</div> |} ]
   </ul>
 </li>
 
-<li><strong><a href="xtmpl-0.4.tar.gz">0.4</a></strong>
+<li><a href="xtmpl-0.4.tar.gz">0.4</a>
 [2012-11-22]: Add <code>string_of_xmls</code>.
 </li>
 
-<li><strong><a href="xtmpl-0.3.tar.gz">0.3</a></strong>
+<li><a href="xtmpl-0.3.tar.gz">0.3</a>
 [2012-08-30]: Minor <a href="https://github.com/zoggy/xtmpl/blob/master/Changes">changes</a> and fixes.</li>
 
-<li><strong><a href="xtmpl-0.2.tar.gz">0.2</a></strong>
+<li><a href="xtmpl-0.2.tar.gz">0.2</a>
 [2012-08-28]: Minor <a href="https://github.com/zoggy/xtmpl/blob/master/Changes">changes</a>.</li>
 
-<li><strong><a href="xtmpl-0.1.tar.gz">0.1</a></strong> [2012-06-20]: Initial release.</li>
+<li><a href="xtmpl-0.1.tar.gz">0.1</a> [2012-06-20]: Initial release.</li>
 </ul>
 
 </subsection>
 </section>
 <section id="install" title="Install">
 <p>
-Xtmpl requires <ext-a href="http://erratique.ch/software/xmlm">Xmlm >= 1.1.0</ext-a>
-and <ext-a href="">Js_of_ocaml >= 2.5</ext-a> to be installed.
+Xtmpl requires <ext-a href="http://erratique.ch/software/uutf">Uutf >=0.9.4</ext-a>,
+<ext-a href="https://github.com/alainfrisch/sedlex">Sedlex >=1.99.2</ext-a>,
+and <ext-a href="">Js_of_ocaml >= 2.6</ext-a> to be installed.
 </p>
 <p>To compile and install:
 </p>
@@ -144,5 +130,5 @@ This will install the <tt>xtmpl</tt> package with findlib.
 </p>
 </section>
 </prepare-toc>
-
+</contents>
 </sw-page>
