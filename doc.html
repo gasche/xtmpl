@@ -1,16 +1,14 @@
-<!DOCTYPE HTML>
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>Xtmpl : Documentation</title><meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<title>Xtmpl : Documentation</title>
 <link href="https://zoggy.github.io/xtmpl/style.css" rel="stylesheet" type="text/css"/>
-<rssfeed></rssfeed>
-</head><body>
+<link href="/https://zoggy.github.io/xtmpl/news.rss" rel="alternate" title="Rss feed" type="application/rss+xml"/>
+</head>
+<body>
 <div id="page">
-<div class="navbar navbar-fixed-top">
+<div class="navbar">
 <div class="navbar-inner">
-<div class="container">
-
-  <div class="nav-collapse">
   <ul class="nav">
     <li class="&lt;navbar-home/&gt;"><a href="https://zoggy.github.io/xtmpl/">Xtmpl</a></li>
     <li class="&lt;navbar-download/&gt;"><a href="https://zoggy.github.io/xtmpl/download.html">Download/Install</a></li>
@@ -18,19 +16,14 @@
     <li class="&lt;navbar-blog/&gt;"><a href="https://zoggy.github.io/xtmpl/blog.html">Blog</a></li>
     <li class="&lt;navbar-about/&gt;"><a href="https://zoggy.github.io/xtmpl/about.html">?</a></li>
   </ul>
-  </div>
-  <div class="nav pull-right">
-
-  </div>
-</div>
 </div>
 </div>
 
 <div id="header">
-
 <div class="page-title">Documentation</div>
 </div>
-<span></span>
+<div id="page-body">
+
 
 
 
@@ -43,10 +36,10 @@ Reference documentation of the Xtmpl library is <a href="https://zoggy.github.io
 <p>
 The ppx preprocessor allows the use of the following extension nodes:
 </p>
-<pre class="code-ocaml"><span class="hl kwa">let</span><span class="hl std"> </span><span class="">doc</span><span class="hl std"> = [%</span><span class="">xtmpl</span><span class="hl std"> </span><span class="hl str">&quot;file.xml&quot;</span><span class="hl std">]
+<pre class="code-ocaml"><span class="hl kwa">let</span><span class="hl std"> </span><span class="">doc</span><span class="hl std"> = [%</span><span class="">xtmpl</span><span class="hl std"> </span><span class="hl str">"file.xml"</span><span class="hl std">]
 </span><span class="hl kwa">let</span><span class="hl std"> </span><span class="">doc</span><span class="hl std"> = [%</span><span class="">xtmpl</span><span class="hl std">.</span><span class="hl kwd">string</span><span class="hl std"> {| &lt;</span><span class="">div</span><span class="hl std">&gt;...&lt;/</span><span class="">div</span><span class="hl std">&gt; |} ]
 </span></pre>
-<p>In the first case, the file &quot;file.xml&quot; is read at compilation time,
+<p>In the first case, the file <code>file.xml"</code> is read at compilation time,
 and its content is embedded in the code. A function is generated,
 taking the parameters defined in the file and returning the
 template where some nodes have been replaced by parameters.
@@ -57,37 +50,37 @@ a file.</p>
 <p>
 In the given XML code, some nodes are described as parameters of
 the function to generate. These parameters are nodes with a
-<span class="icode"><span class="hl std">param_=&quot;true&quot;</span></span> attribute.
+<span class="icode"><span class="hl std">param_="true"</span></span> attribute.
 </p>
 <p>By default, a parameter will be of type <span class="icode"><span class="hl kwd">string</span></span>, but the type
-can be changed with the <span class="icode"><span class="hl std">type_=&quot;...&quot;</span></span> attribute.
-If <span class="icode"><span class="hl std">type_=&quot;xmls&quot;</span></span> or <span class="icode"><span class="hl std">type_=&quot;xml&quot;</span></span>, then
-the parameter will be of type <span class="icode"><span class="hl kwc">Xtmpl</span><span class="hl std">.</span><span class="">tree</span><span class="hl std"> </span><span class="hl kwd">list</span></span>. If <span class="icode"><span class="hl std">type_</span></span>
+can be changed with the <span class="icode"><span class="hl std">type_="..."</span></span> attribute.
+If <span class="icode"><span class="hl std">type_="xmls"</span></span> or <span class="icode"><span class="hl std">type_="xml"</span></span>, then
+the parameter will be of type <span class="icode"><span class="hl kwc">Xtmpl_rewrite</span><span class="hl std">.</span><span class="">tree</span><span class="hl std"> </span><span class="hl kwd">list</span></span>. If <span class="icode"><span class="hl std">type_</span></span>
 has another value, say <span class="icode"><span class="">t</span></span>, then an attribute <span class="icode"><span class="hl std">to_xml_</span></span>
 must be provided, containing code that will map a value of type <span class="icode"><span class="">t</span></span>
-to <span class="icode"><span class="hl kwc">Xtmpl</span><span class="hl std">.</span><span class="">tree</span><span class="hl std"> </span><span class="hl kwd">list</span></span>.
+to <span class="icode"><span class="hl kwc">Xtmpl_rewrite</span><span class="hl std">.</span><span class="">tree</span><span class="hl std"> </span><span class="hl kwd">list</span></span>.
 </p>
 <p>
 A parameter is mandatory by default, but can be set as optional
-with <span class="icode"><span class="hl std">optional_=&quot;true&quot;</span></span>. In this case, the default value
+with <span class="icode"><span class="hl std">optional_="true"</span></span>. In this case, the default value
 of the parameter is given in the subnodes of the parameter node.
 </p>
 <p>
 By default, the parameter name will be the name of the XML node. Another
-name can be given, using the <span class="icode"><span class="hl std">name_=&quot;...&quot;</span></span> attribute.
+name can be given, using the <span class="icode"><span class="hl std">name_="..."</span></span> attribute.
 </p>
 <p>Here is an example of template stored in <code>page.tmpl</code>:</p>
 <pre class="code-xml"><span class="hl kwa">&lt;html</span><span class="hl kwa">&gt;</span><span class="hl std">
   </span><span class="hl kwa">&lt;header</span><span class="hl kwa">&gt;</span><span class="hl std">
-    </span><span class="hl kwa">&lt;title</span><span class="hl kwa">&gt;</span><span class="hl kwa">&lt;title_</span><span class="hl std"> </span><span class="">param_</span><span class="hl std">=</span><span class="hl str">&quot;true&quot;</span><span class="hl std"> </span><span class="">name_</span><span class="hl std">=</span><span class="hl str">&quot;title&quot;</span><span class="hl kwa">/&gt;</span><span class="hl kwa">&lt;/title</span><span class="hl kwa">&gt;</span><span class="hl std">
+    </span><span class="hl kwa">&lt;title</span><span class="hl kwa">&gt;</span><span class="hl kwa">&lt;title_</span><span class="hl std"> </span><span class="">param_</span><span class="hl std">=</span><span class="hl str">"true"</span><span class="hl std"> </span><span class="">name_</span><span class="hl std">=</span><span class="hl str">"title"</span><span class="hl kwa">/&gt;</span><span class="hl kwa">&lt;/title</span><span class="hl kwa">&gt;</span><span class="hl std">
   </span><span class="hl kwa">&lt;/header</span><span class="hl kwa">&gt;</span><span class="hl std">
   </span><span class="hl kwa">&lt;body</span><span class="hl kwa">&gt;</span><span class="hl std">
     </span><span class="hl kwa">&lt;h1</span><span class="hl kwa">&gt;</span><span class="hl kwa">&lt;page-title</span><span class="hl kwa">/&gt;</span><span class="hl kwa">&lt;/h1</span><span class="hl kwa">&gt;</span><span class="hl std">
-    </span><span class="hl kwa">&lt;contents</span><span class="hl std"> </span><span class="">param_</span><span class="hl std">=</span><span class="hl str">&quot;true&quot;</span><span class="hl std"> </span><span class="">type_</span><span class="hl std">=</span><span class="hl str">&quot;xml&quot;</span><span class="hl kwa">/&gt;</span><span class="hl std">
-    </span><span class="hl kwa">&lt;debug</span><span class="hl std"> </span><span class="">param_</span><span class="hl std">=</span><span class="hl str">&quot;true&quot;</span><span class="hl std"> </span><span class="">type_</span><span class="hl std">=</span><span class="hl str">&quot;xml&quot;</span><span class="hl std"> </span><span class="">optional_</span><span class="hl std">=</span><span class="hl str">&quot;true&quot;</span><span class="hl kwa">&gt;</span><span class="hl std">Hello debug</span><span class="hl kwa">&lt;/debug</span><span class="hl kwa">&gt;</span><span class="hl std">
+    </span><span class="hl kwa">&lt;contents</span><span class="hl std"> </span><span class="">param_</span><span class="hl std">=</span><span class="hl str">"true"</span><span class="hl std"> </span><span class="">type_</span><span class="hl std">=</span><span class="hl str">"xml"</span><span class="hl kwa">/&gt;</span><span class="hl std">
+    </span><span class="hl kwa">&lt;debug</span><span class="hl std"> </span><span class="">param_</span><span class="hl std">=</span><span class="hl str">"true"</span><span class="hl std"> </span><span class="">type_</span><span class="hl std">=</span><span class="hl str">"xml"</span><span class="hl std"> </span><span class="">optional_</span><span class="hl std">=</span><span class="hl str">"true"</span><span class="hl kwa">&gt;</span><span class="hl std">Hello debug</span><span class="hl kwa">&lt;/debug</span><span class="hl kwa">&gt;</span><span class="hl std">
     </span><span class="hl kwa">&lt;p</span><span class="hl kwa">&gt;</span><span class="hl std">
-      </span><span class="hl kwa">&lt;value</span><span class="hl std"> </span><span class="">param_</span><span class="hl std">=</span><span class="hl str">&quot;true&quot;</span><span class="hl std"> </span><span class="">type_</span><span class="hl std">=</span><span class="hl str">&quot;int&quot;</span><span class="hl std"> </span><span class="">optional_</span><span class="hl std">=</span><span class="hl str">&quot;true&quot;</span><span class="hl std">
-             </span><span class="">to_xml_</span><span class="hl std">=</span><span class="hl str">&quot;fun x -&amp;gt; [Xtmpl.D (string_of_int x)]&quot;</span><span class="hl kwa">&gt;</span><span class="hl std">1+1
+      </span><span class="hl kwa">&lt;value</span><span class="hl std"> </span><span class="">param_</span><span class="hl std">=</span><span class="hl str">"true"</span><span class="hl std"> </span><span class="">type_</span><span class="hl std">=</span><span class="hl str">"int"</span><span class="hl std"> </span><span class="">optional_</span><span class="hl std">=</span><span class="hl str">"true"</span><span class="hl std">
+             </span><span class="">to_xml_</span><span class="hl std">=</span><span class="hl str">"fun x -&amp;gt; [Xtmpl_rewrite.cdata (string_of_int x)]"</span><span class="hl kwa">&gt;</span><span class="hl std">1+1
       </span><span class="hl kwa">&lt;/value</span><span class="hl kwa">&gt;</span><span class="hl std">
     </span><span class="hl kwa">&lt;/p</span><span class="hl kwa">&gt;</span><span class="hl std">
   </span><span class="hl kwa">&lt;/body</span><span class="hl kwa">&gt;</span><span class="hl std">
@@ -95,17 +88,20 @@ name can be given, using the <span class="icode"><span class="hl std">name_=&quo
 <p>
 The following OCaml code in <code>example.ml</code>
 </p>
-<pre class="code-ocaml"><span class="hl kwa">let</span><span class="hl std"> </span><span class="">page</span><span class="hl std"> = [%</span><span class="">xtmpl</span><span class="hl std"> </span><span class="hl str">&quot;page.tmpl&quot;</span><span class="hl std">]</span></pre>
+
+<pre class="code-ocaml"><div><span class="hl kwa">let</span><span class="hl std"> </span><span class="">page</span><span class="hl std"> = [%</span><span class="">xtmpl</span><span class="hl std"> </span><span class="hl str">"page.tmpl"</span><span class="hl std">];;</span></div></pre>
+
 <p>can be compiled with </p>
-<pre class="code-sh">ocamlfind ocamlc <span class="hl opt">-</span>c <span class="hl opt">-</span>package xtmpl <span class="hl opt">-</span>rectypes example.ml</pre>
+<pre class="command-exec"><div>ocamlfind ocamlc <span class="hl opt">-</span>c <span class="hl opt">-</span>package xtmpl<span class="hl opt">,</span>xtmpl.ppx <span class="hl opt">-</span>rectypes example.ml</div><div class="command-output"></div></pre>
 <p>
 And the interface of the <code>page</code> function is
 </p>
+
 <pre class="code-ocaml"><span class="hl kwa">val</span><span class="hl std"> </span><span class="">page</span><span class="hl std"> :
-  ?</span><span class="">env</span><span class="hl std">:</span><span class="hl kwd">unit</span><span class="hl std"> </span><span class="hl kwc">Xtmpl</span><span class="hl std">.</span><span class="">env</span><span class="hl std"> -&gt;
-  </span><span class="">contents</span><span class="hl std">:</span><span class="hl kwc">Xtmpl</span><span class="hl std">.</span><span class="">tree</span><span class="hl std"> </span><span class="hl kwd">list</span><span class="hl std"> -&gt;
-  ?</span><span class="">debug</span><span class="hl std">:</span><span class="hl kwc">Xtmpl</span><span class="hl std">.</span><span class="">tree</span><span class="hl std"> </span><span class="hl kwd">list</span><span class="hl std"> -&gt;
-  </span><span class="">title</span><span class="hl std">:</span><span class="hl kwd">string</span><span class="hl std"> -&gt; ?</span><span class="">value</span><span class="hl std">:</span><span class="hl kwd">int</span><span class="hl std"> -&gt; </span><span class="hl kwd">unit</span><span class="hl std"> -&gt; </span><span class="hl kwc">Xtmpl</span><span class="hl std">.</span><span class="">tree</span><span class="hl std"> </span><span class="hl kwd">list</span><span class="hl std">
+  ?</span><span class="">env</span><span class="hl std">:</span><span class="hl kwd">unit</span><span class="hl std"> </span><span class="hl kwc">Xtmpl_rewrite</span><span class="hl std">.</span><span class="">env</span><span class="hl std"> -&gt;
+  </span><span class="">contents</span><span class="hl std">:</span><span class="hl kwc">Xtmpl_rewrite</span><span class="hl std">.</span><span class="">tree</span><span class="hl std"> </span><span class="hl kwd">list</span><span class="hl std"> -&gt;
+  ?</span><span class="">debug</span><span class="hl std">:</span><span class="hl kwc">Xtmpl_rewrite</span><span class="hl std">.</span><span class="">tree</span><span class="hl std"> </span><span class="hl kwd">list</span><span class="hl std"> -&gt;
+  </span><span class="">title</span><span class="hl std">:</span><span class="hl kwd">string</span><span class="hl std"> -&gt; ?</span><span class="">value</span><span class="hl std">:</span><span class="hl kwd">int</span><span class="hl std"> -&gt; </span><span class="hl kwd">unit</span><span class="hl std"> -&gt; </span><span class="hl kwc">Xtmpl_rewrite</span><span class="hl std">.</span><span class="">tree</span><span class="hl std"> </span><span class="hl kwd">list</span><span class="hl std">
 </span></pre>
 <p>
 The <span class="icode"><span class="">env</span></span> parameter can be used to specify additional rewrite rules.
@@ -117,11 +113,6 @@ the template by the the parameter values.
 
 
 </div>
-
-<footer id="bottombar">
-</footer>
-<script src="https://zoggy.github.io/xtmpl/jquery.js" type="text/javascript">_</script>
-<script src="https://zoggy.github.io/xtmpl/bootstrap-collapse.js" type="text/javascript">_</script>
-
+</div>
 </body>
 </html>

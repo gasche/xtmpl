@@ -1,16 +1,14 @@
-<!DOCTYPE HTML>
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>Xtmpl : Xtmpl reference documentation : Xtmpl_xhtml</title><meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<title>Xtmpl reference documentation : Xtmpl_xhtml</title>
 <link href="https://zoggy.github.io/xtmpl/style.css" rel="stylesheet" type="text/css"/>
-<rssfeed></rssfeed>
-</head><body>
+<link href="/https://zoggy.github.io/xtmpl/news.rss" rel="alternate" title="Rss feed" type="application/rss+xml"/>
+</head>
+<body>
 <div id="page">
-<div class="navbar navbar-fixed-top">
+<div class="navbar">
 <div class="navbar-inner">
-<div class="container">
-
-  <div class="nav-collapse">
   <ul class="nav">
     <li class="&lt;navbar-home/&gt;"><a href="https://zoggy.github.io/xtmpl/">Xtmpl</a></li>
     <li class="&lt;navbar-download/&gt;"><a href="https://zoggy.github.io/xtmpl/download.html">Download/Install</a></li>
@@ -18,24 +16,19 @@
     <li class="&lt;navbar-blog/&gt;"><a href="https://zoggy.github.io/xtmpl/blog.html">Blog</a></li>
     <li class="&lt;navbar-about/&gt;"><a href="https://zoggy.github.io/xtmpl/about.html">?</a></li>
   </ul>
-  </div>
-  <div class="nav pull-right">
-
-  </div>
-</div>
 </div>
 </div>
 
 <div id="header">
-
-
+<main_/>
 </div>
-<span></span>
+<div id="page-body">
+
 
 <div class="ocamldoc-page">
-<div class="navbar"><a class="pre" href="Xtmpl.html" title="Xtmpl">Previous</a>
+<div class="navbar"><a class="pre" href="Xtmpl_rewrite.html" title="Xtmpl_rewrite">Previous</a>
  <a class="up" href="index.html" title="Index">Up</a>
- <a class="post" href="Xtmpl_js.html" title="Xtmpl_js">Next</a>
+ <a class="post" href="Xtmpl_xml.html" title="Xtmpl_xml">Next</a>
 </div>
 <h1>Module <a href="type_Xtmpl_xhtml.html">Xtmpl_xhtml</a></h1>
 
@@ -44,7 +37,7 @@ Creating XHTML nodes.<br/>
 </div>
 <hr width="100%"/>
 
-<pre><span id="TYPEelt_fun"><span class="keyword">type</span> elt_fun</span> = <code class="type">?xid:<a href="Xtmpl.html#TYPEtree">Xtmpl.tree</a> list -&gt;<br/>       ?id:string -&gt;<br/>       ?xclass:<a href="Xtmpl.html#TYPEtree">Xtmpl.tree</a> list -&gt;<br/>       ?class_:string -&gt;<br/>       ?classes:string list -&gt;<br/>       ?xhref:<a href="Xtmpl.html#TYPEtree">Xtmpl.tree</a> list -&gt;<br/>       ?href:string -&gt;<br/>       ?xtitle:<a href="Xtmpl.html#TYPEtree">Xtmpl.tree</a> list -&gt;<br/>       ?title:string -&gt;<br/>       ?xtype:<a href="Xtmpl.html#TYPEtree">Xtmpl.tree</a> list -&gt;<br/>       ?type_:string -&gt;<br/>       ?xname:<a href="Xtmpl.html#TYPEtree">Xtmpl.tree</a> list -&gt;<br/>       ?name:string -&gt; ?atts:<a href="Xtmpl.html#TYPEattributes">Xtmpl.attributes</a> -&gt; <a href="Xtmpl.html#TYPEtree">Xtmpl.tree</a> list -&gt; <a href="Xtmpl.html#TYPEtree">Xtmpl.tree</a></code> </pre>
+<pre><span id="TYPEelt_fun"><span class="keyword">type</span> elt_fun</span> = <code class="type">?xid:<a href="Xtmpl_rewrite.html#TYPEtree">Xtmpl_rewrite.tree</a> list -&gt;<br/>       ?id:string -&gt;<br/>       ?xclass:<a href="Xtmpl_rewrite.html#TYPEtree">Xtmpl_rewrite.tree</a> list -&gt;<br/>       ?class_:string -&gt;<br/>       ?classes:string list -&gt;<br/>       ?xhref:<a href="Xtmpl_rewrite.html#TYPEtree">Xtmpl_rewrite.tree</a> list -&gt;<br/>       ?href:string -&gt;<br/>       ?xtitle:<a href="Xtmpl_rewrite.html#TYPEtree">Xtmpl_rewrite.tree</a> list -&gt;<br/>       ?title:string -&gt;<br/>       ?xtype:<a href="Xtmpl_rewrite.html#TYPEtree">Xtmpl_rewrite.tree</a> list -&gt;<br/>       ?type_:string -&gt;<br/>       ?xname:<a href="Xtmpl_rewrite.html#TYPEtree">Xtmpl_rewrite.tree</a> list -&gt;<br/>       ?name:string -&gt;<br/>       ?atts:<a href="Xtmpl_rewrite.html#TYPEattributes">Xtmpl_rewrite.attributes</a> -&gt;<br/>       <a href="Xtmpl_rewrite.html#TYPEtree">Xtmpl_rewrite.tree</a> list -&gt; <a href="Xtmpl_rewrite.html#TYPEtree">Xtmpl_rewrite.tree</a></code> </pre>
 
 
 <pre><span id="TYPEelt_fun_"><span class="keyword">type</span> elt_fun_</span> = <code class="type">?prefix:string -&gt; string -&gt; <a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code> </pre>
@@ -79,7 +72,7 @@ Creating XHTML nodes.<br/>
 <div class="section-title" id="2_Blocks">Blocks</div><br/>
 
 <pre><span id="VALp"><span class="keyword">val</span> p</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
-<pre><span id="VALhr"><span class="keyword">val</span> hr</span> : <code class="type"><a href="Xtmpl.html#TYPEtree">Xtmpl.tree</a></code></pre>
+<pre><span id="VALhr"><span class="keyword">val</span> hr</span> : <code class="type"><a href="Xtmpl_rewrite.html#TYPEtree">Xtmpl_rewrite.tree</a></code></pre>
 <pre><span id="VALpre"><span class="keyword">val</span> pre</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
 <pre><span id="VALblockquote"><span class="keyword">val</span> blockquote</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
 <pre><span id="VALol"><span class="keyword">val</span> ol</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
@@ -123,8 +116,8 @@ Creating XHTML nodes.<br/>
 <pre><span id="VALbdi"><span class="keyword">val</span> bdi</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
 <pre><span id="VALbdo"><span class="keyword">val</span> bdo</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
 <pre><span id="VALspan"><span class="keyword">val</span> span</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
-<pre><span id="VALbr"><span class="keyword">val</span> br</span> : <code class="type"><a href="Xtmpl.html#TYPEtree">Xtmpl.tree</a></code></pre>
-<pre><span id="VALwbr"><span class="keyword">val</span> wbr</span> : <code class="type"><a href="Xtmpl.html#TYPEtree">Xtmpl.tree</a></code></pre><br/>
+<pre><span id="VALbr"><span class="keyword">val</span> br</span> : <code class="type"><a href="Xtmpl_rewrite.html#TYPEtree">Xtmpl_rewrite.tree</a></code></pre>
+<pre><span id="VALwbr"><span class="keyword">val</span> wbr</span> : <code class="type"><a href="Xtmpl_rewrite.html#TYPEtree">Xtmpl_rewrite.tree</a></code></pre><br/>
 <div class="section-title" id="2_Edits">Edits</div><br/>
 
 <pre><span id="VALins"><span class="keyword">val</span> ins</span> : <code class="type"><a href="Xtmpl_xhtml.html#TYPEelt_fun">elt_fun</a></code></pre>
@@ -170,11 +163,6 @@ Creating XHTML nodes.<br/>
 
 
 </div>
-
-<footer id="bottombar">
-</footer>
-<script src="https://zoggy.github.io/xtmpl/jquery.js" type="text/javascript">_</script>
-<script src="https://zoggy.github.io/xtmpl/bootstrap-collapse.js" type="text/javascript">_</script>
-
+</div>
 </body>
 </html>
