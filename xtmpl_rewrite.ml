@@ -209,16 +209,16 @@ and from_xmls l = List.map from_xml l
 
 let from_doc d = doc d.Xml.prolog (from_xmls d.Xml.elements)
 
-let from_string str =
-  try from_xmls (Xml.from_string str)
+let from_string ?pos_start str =
+  try from_xmls (Xml.from_string ?pos_start str)
   with Xml.Error (loc, msg) -> parse_error loc msg
 
 let from_file file =
   try from_xmls (Xml.from_file file)
   with Xml.Error (loc, msg) -> parse_error loc msg
 
-let doc_from_string str =
-  try from_doc (Xml.doc_from_string str)
+let doc_from_string ?pos_start str =
+  try from_doc (Xml.doc_from_string ?pos_start str)
   with Xml.Error (loc, msg) -> parse_error loc msg
 
 let doc_from_file file =

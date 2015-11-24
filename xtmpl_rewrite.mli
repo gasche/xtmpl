@@ -289,10 +289,10 @@ val atts_to_string : ?xml_atts: bool -> attributes -> Xml.str_attributes
 val doc_to_string : ?xml_atts: bool -> tree Xml.doc -> string
 
 (** Parses a string as {!tree} list. *)
-val from_string : string -> tree list
+val from_string : ?pos_start:Xml.pos -> string -> tree list
 
 (** Parses a {!tree} doc. *)
-val doc_from_string : string -> tree Xml.doc
+val doc_from_string : ?pos_start:Xml.pos -> string -> tree Xml.doc
 
 (** Same as {!from_string} but read from a file. *)
 val from_file : string -> tree list

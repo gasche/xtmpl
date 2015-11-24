@@ -31,6 +31,8 @@ module U = Sedlexing.Utf8
 type name = string * string
 
 type pos = { line: int ; bol : int; char: int ; file : string option }
+let pos ?file ~line ~bol ~char () = { line ; bol ; char ; file }
+
 type loc = { loc_start: pos; loc_stop: pos }
 type 'a with_loc = 'a * loc option
 
@@ -53,7 +55,7 @@ let string_of_loc loc =
   Printf.sprintf "%sline %d, character%s %d%s"
     (match file with
      | None -> ""
-     | Some s -> Printf.sprintf "File %s, " s)
+     | Some s -> Printf.sprintf "File %S, " s)
     line
     (if len > 1 then "s" else "")
     char
@@ -691,13 +693,11 @@ let doc_to_string_ f doc =
 
 let doc_to_string = doc_to_string_ print_tree
 
-let from_lexbuf
-  ?(pos_start={ line = 1; char = 1 ; bol = 0 ; file = None }) lb =
+let from_lexbuf ?(pos_start=pos ~line: 1 ~bol: 0 ~char: 1 ()) lb =
     parse_text (new_stack pos_start) ~first: true
     pos_start lb
 
-let doc_from_lexbuf
-  ?(pos_start={ line = 1; char = 1 ; bol = 0 ; file = None }) lb =
+let doc_from_lexbuf ?(pos_start=pos ~line:1 ~bol:0 ~char:1 ()) lb =
     parse_doc pos_start lb
 
 let from_string ?pos_start str =
@@ -718,7 +718,7 @@ let doc_from_channel ?pos_start ic =
 
 let from_file file =
   let ic = open_in_bin file in
-  let pos_start= { line = 1; char = 1 ; bol = 0 ; file = Some file } in
+  let pos_start = pos ~file ~line:1 ~bol:0 ~char:1 () in
   try let xmls = from_channel ~pos_start ic in close_in ic; xmls
   with e ->
     close_in ic;
@@ -726,7 +726,7 @@ let from_file file =
 
 let doc_from_file file =
   let ic = open_in_bin file in
-  let pos_start= { line = 1; char = 1 ; bol = 0 ; file = Some file } in
+  let pos_start = pos ~file ~line:1 ~bol:0 ~char:1 () in
   try let xmls = doc_from_channel ~pos_start ic in close_in ic; xmls
   with e ->
     close_in ic;

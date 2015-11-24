@@ -292,26 +292,46 @@ let map_tmpl loc tmpl =
 
 let template_of_inline_string loc node exp =
   match exp.pexp_desc with
-  | Pexp_constant (Const_string (str, _)) -> X.from_string str
+  | Pexp_constant (Const_string (str, idopt)) ->
+      let p = loc.Location.loc_start in
+      let open Lexing in
+      let char =
+        match idopt with
+          None -> p.pos_cnum + 1
+        | Some s -> p.pos_cnum + 2 + (String.length s)
+      in
+      let pos_start =
+         let file = match p.pos_fname with "" -> None | s -> Some s in
+         Xtmpl_xml.pos ?file ~line: p.pos_lnum ~bol: p.pos_bol ~char ()
+      in
+      X.from_string ~pos_start str
   | _ -> kerror loc "String constant expected in %s extension node" node
 
 let map_xtmpl_string exp =
   let loc = exp.pexp_loc in
-  let tmpl = template_of_inline_string loc "xtmpl.string" exp in
-  map_tmpl loc tmpl
+  try
+    let tmpl = template_of_inline_string loc "xtmpl.string" exp in
+    map_tmpl loc tmpl
+  with
+    Xtmpl_rewrite.Error e ->
+      error loc (Xtmpl_rewrite.string_of_error e)
 
 let map_xtmpl exp =
   let loc = exp.pexp_loc in
-  let file = file_path exp in
-  let tmpl = read_template loc file in
-  map_tmpl loc tmpl
+  try
+    let file = file_path exp in
+    let tmpl = read_template loc file in
+    map_tmpl loc tmpl
+  with
+    Xtmpl_rewrite.Error e ->
+      error loc (Xtmpl_rewrite.string_of_error e)
 
 let typ_of_params loc params =
   let f acc (name, p) =
     let opt = p.default <> None in
     let label = Printf.sprintf "%s%s"
       (if opt then "?" else "")
-      (ml_id_of_param p)
+        (ml_id_of_param p)
     in
     let typ =
       let str = match p.typ with
@@ -328,16 +348,20 @@ let typ_of_params loc params =
     in
     Typ.arrow label typ acc
   in
- (* list parameters in reverse order to generate them in name order *)
+  (* list parameters in reverse order to generate them in name order *)
   let params = Xml.Name_map.fold (fun name p acc -> (name, p) :: acc) params [] in
   let typ = List.fold_left f [%type: unit -> Xtmpl_rewrite.tree list] params in
   [%type: ?env: unit Xtmpl_rewrite.env -> [%t typ] ]
 
 let map_xtmpl_string_type exp =
   let loc = exp.pexp_loc in
-  let tmpl = template_of_inline_string loc "xtmpl.string.type" exp in
-  let (params, tmpl) = gather_params loc tmpl in
-  typ_of_params loc params
+  try
+    let tmpl = template_of_inline_string loc "xtmpl.string.type" exp in
+    let (params, tmpl) = gather_params loc tmpl in
+    typ_of_params loc params
+  with
+    Xtmpl_rewrite.Error e ->
+      error loc (Xtmpl_rewrite.string_of_error e)
 
 let typ_mapper mapper typ =
   match typ.ptyp_desc with

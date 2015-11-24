@@ -29,6 +29,7 @@
 
 (** A position in a source (file, string, ...). *)
 type pos = { line: int; bol: int; char: int; file: string option }
+val pos : ?file: string -> line: int -> bol: int -> char: int -> unit -> pos
 
 (** A location is a range defined by two positions.*)
 type loc = { loc_start: pos; loc_stop: pos}
