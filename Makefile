@@ -27,7 +27,7 @@
 VERSION=0.13.0
 
 OCAMLFIND=ocamlfind
-PACKAGES=xmlm,sedlex,uutf
+PACKAGES=sedlex,uutf
 JS_PACKAGES=$(PACKAGES),js_of_ocaml
 COMPFLAGS=-annot -rectypes -safe-string -g
 OCAMLPP=
