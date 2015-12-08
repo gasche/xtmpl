@@ -141,7 +141,7 @@ and to_xml ?xml_atts = function
 | X.C comment -> Xml.C comment
 | X.PI pi -> Xml.PI pi
 | X.E { X.loc ; name ; atts ; subs } ->
-    let atts = Name_map.map (fun t -> (to_string t, None)) atts in
+    let atts = atts_to_string atts in
     let subs = to_xmls subs in
     Xml.node ?loc name ~atts subs
 
