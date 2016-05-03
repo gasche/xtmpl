@@ -170,13 +170,13 @@ let doctype_name doc = match doc.prolog.doctype with None -> None | Some dt -> S
 
 type stack = (pos * name * str_attributes) Stack.t
 
-let e_nameStartChar = [%sedlex.regexp? ":" | 'A'..'Z' | "_" | 'a'..'z' | 0xC0..0xD6 | 0xD8..0xF6 | 0xF8..0x02FF | 0x0370..0x037D | 0x037F..0x1FFF | 0x200C..0x200D | 0x2070..0x218F | 0x2C00..0x2FEF | 0x3001..0xD7FF | 0xF900..0xFDCF | 0xFDF0..0xFFFD | 0x010000..0x0EFFFF]
-let e_nameChar = [%sedlex.regexp? e_nameStartChar | "-" | "." | '0'..'9' | 0xB7 | 0x0300..0x036F | 0x203F..0x2040]
+let e_nameStartChar = [%sedlex.regexp? ":" | 'A'..'Z' | "_" | 'a'..'z' | 0xC0 .. 0xD6 | 0xD8 .. 0xF6 | 0xF8 .. 0x02FF | 0x0370 .. 0x037D | 0x037F .. 0x1FFF | 0x200C .. 0x200D | 0x2070 .. 0x218F | 0x2C00 .. 0x2FEF | 0x3001 .. 0xD7FF | 0xF900 .. 0xFDCF | 0xFDF0 .. 0xFFFD | 0x010000 .. 0x0EFFFF]
+let e_nameChar = [%sedlex.regexp? e_nameStartChar | "-" | "." | '0' .. '9' | 0xB7 | 0x0300 .. 0x036F | 0x203F .. 0x2040]
 
 let e_name = [%sedlex.regexp? e_nameStartChar , Star(e_nameChar)]
 let e_space = [%sedlex.regexp? 	Plus(0x20 | 0x9 | 0xD | 0xA)]
 
-let e_char_no_minus = [%sedlex.regexp?  0x9 | 0xA | 0xD | 0x20..0x2C | 0x2E..0xD7FF | 0xE000..0xFFFD | 0x10000..0x10FFFF]
+let e_char_no_minus = [%sedlex.regexp?  0x9 | 0xA | 0xD | 0x20 .. 0x2C | 0x2E .. 0xD7FF | 0xE000 .. 0xFFFD | 0x10000 .. 0x10FFFF]
 let e_char = [%sedlex.regexp? e_char_no_minus | '-']
 
 let e_charRef = [%sedlex.regexp?
@@ -184,11 +184,11 @@ let e_charRef = [%sedlex.regexp?
 let e_entityRef = [%sedlex.regexp? '&',e_name,';']
 let e_reference = [%sedlex.regexp? e_entityRef | e_charRef]
 let e_attValueChar =
-  [%sedlex.regexp? 0x00..0x25| 0x27..0x3B | 0x3D..0x0EFFFF]
+  [%sedlex.regexp? 0x00 .. 0x25| 0x27 .. 0x3B | 0x3D .. 0x0EFFFF]
 let e_attValueChar_noquot =
-  [%sedlex.regexp? 0x00..0x21 | 0x23..0x25| 0x27..0x3B | 0x3D..0x0EFFFF]
+  [%sedlex.regexp? 0x00 .. 0x21 | 0x23 .. 0x25| 0x27 .. 0x3B | 0x3D .. 0x0EFFFF]
 let e_attValueChar_noapos =
-  [%sedlex.regexp? 0x00..0x25| 0x28..0x3B | 0x3D..0x0EFFFF]
+  [%sedlex.regexp? 0x00 .. 0x25| 0x28 .. 0x3B | 0x3D .. 0x0EFFFF]
 
 let e_attValue = [%sedlex.regexp?
     '"', Star(e_attValueChar_noquot | e_reference), '"'
@@ -397,7 +397,7 @@ let rec parse_text stack ~first pos lb =
       in
       begin
         match app with
-          ("", s) when String.lowercase s = "xml" ->
+          ("", s) when String.lowercase_ascii s = "xml" ->
             let loc = loc pos pos2 in
             error loc "Illegal XML declaration here"
         | _ ->
@@ -558,7 +558,7 @@ let rec parse_prolog ?xml_decl misc pos lb =
       in
       begin
         match app with
-          ("", s) when String.lowercase s = "xml" ->
+          ("", s) when String.lowercase_ascii s = "xml" ->
             let loc = loc pos pos2 in
             error loc "Illegal XML declaration here"
         | _ ->

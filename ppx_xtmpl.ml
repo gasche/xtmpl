@@ -71,7 +71,7 @@ let file_path exp =
     | f -> Filename.dirname f
   in
   match exp.pexp_desc with
-  | Pexp_constant (Const_string (file, _)) ->
+  | Pexp_constant (Pconst_string (file, _)) ->
       begin
         match Filename.is_relative file with
         | true -> Filename.concat base_path file
@@ -175,7 +175,7 @@ let to_id = String.map
   (function
    | 'a'..'z' as c -> c
    | '0'..'9' as c -> c
-   | 'A'..'Z' as c -> Char.lowercase c
+   | 'A'..'Z' as c -> Char.lowercase_ascii c
    | _ -> '_')
 
 let ml_id_of_param p =
@@ -190,8 +190,8 @@ let fun_of_param loc body (name, p) =
   let id = ml_id_of_param p in
   let label =
     match p.default with
-      None -> id
-    | Some v ->  "?"^id
+      None -> Labelled id
+    | Some v ->  Optional id
   in
   let pat = Pat.var ~loc (Location.mkloc id loc) in
   Exp.fun_ ~loc label None pat body
@@ -206,13 +206,13 @@ let funs_of_params loc params body =
 let env_or_defaults loc params exp =
  let f name p exp =
     let (prefix, str) = name in
-    let e_prefix = Exp.constant (Const_string (prefix,None)) in
-    let e_str = Exp.constant (Const_string (str,None)) in
+    let e_prefix = Exp.constant (Pconst_string (prefix,None)) in
+    let e_str = Exp.constant (Pconst_string (str,None)) in
     let id = ml_id_of_param p in
     let e_id = Exp.ident (lid loc id) in
     let e_name =
       let (p,s) = name in
-      let const s = Exp.constant (Const_string (s, None)) in
+      let const s = Exp.constant (Pconst_string (s, None)) in
       [%expr ([%e const p], [%e const s])]
     in
     let add_to_env exp =
@@ -229,8 +229,8 @@ let env_or_defaults loc params exp =
     in
     let default_def v =
       match p.typ, v with
-      | `CData, [X.D v] -> Exp.constant (Const_string (v.Xml.text, None))
-      | `CData, [] -> Exp.constant (Const_string ("", None))
+      | `CData, [X.D v] -> Exp.constant (Pconst_string (v.Xml.text, None))
+      | `CData, [] -> Exp.constant (Pconst_string ("", None))
       | `CData, _ ->
               error loc
             (Printf.sprintf "Parameter %S should have CData default value"
@@ -266,7 +266,7 @@ let defaults_of_params loc params exp =
     match p.typ, p.default with
     | `Xmls, Some xmls ->
         let const_tmpl = Exp.constant ~loc
-          (Const_string (X.to_string xmls, None))
+          (Pconst_string (X.to_string xmls, None))
         in
         let id = "__default_"^(ml_id_of_param p) in
         Exp.let_ Nonrecursive
@@ -281,7 +281,7 @@ let defaults_of_params loc params exp =
 let map_tmpl loc tmpl =
   let (params, tmpl) = gather_params loc tmpl in
   let const_tmpl = Exp.constant ~loc
-    (Const_string (X.to_string tmpl, None)) in
+    (Pconst_string (X.to_string tmpl, None)) in
   let call = [%expr let (_, res) = Xtmpl_rewrite.apply_to_xmls () env tmpl_ in res] in
   (*let envs = Xtmpl_rewrite.Name_map.fold (env_of_param loc) params call in*)
   let envs = env_or_defaults loc params call in
@@ -292,7 +292,7 @@ let map_tmpl loc tmpl =
 
 let template_of_inline_string loc node exp =
   match exp.pexp_desc with
-  | Pexp_constant (Const_string (str, idopt)) ->
+  | Pexp_constant (Pconst_string (str, idopt)) ->
       let p = loc.Location.loc_start in
       let open Lexing in
       let char =
@@ -329,9 +329,9 @@ let map_xtmpl exp =
 let typ_of_params loc params =
   let f acc (name, p) =
     let opt = p.default <> None in
-    let label = Printf.sprintf "%s%s"
-      (if opt then "?" else "")
-        (ml_id_of_param p)
+    let label =
+      let s = ml_id_of_param p in
+      if opt then Optional s else Labelled s
     in
     let typ =
       let str = match p.typ with
