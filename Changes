@@ -1,6 +1,7 @@
 Next release:
 - fix: remove special attributes when converting Xtmpl_rewrite.tree
   to Xtmpl_xml.tree
+- upgrade to ocaml 4.03.0 + replace deprecated stdlib functions
 
 Release 0.13.0:
 - include own XML parser, keeping locations (do not depend on Xmlm any more,
