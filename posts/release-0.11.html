@@ -36,8 +36,8 @@ the <a href="https://zoggy.github.io/xtmpl/download.html">download page</a>.
 <li>add <a href="https://zoggy.github.io/xtmpl/doc.html#ppx">ppx_xtmpl</a>:
      this preprocessor creates functions from template files or strings,
      with the parameters described in the template. Usage:
-     <pre class="code-ocaml"><span class="hl kwa">let</span><span class="hl std"> </span><span class="">doc</span><span class="hl std"> = [%</span><span class="">xtmpl</span><span class="hl std"> </span><span class="hl str">"file.xml"</span><span class="hl std">]
-</span><span class="hl kwa">let</span><span class="hl std"> </span><span class="">doc</span><span class="hl std"> = [%</span><span class="">xtmpl</span><span class="hl std">.</span><span class="hl kwd">string</span><span class="hl std"> {| &lt;</span><span class="">div</span><span class="hl std">&gt;...&lt;/</span><span class="">div</span><span class="hl std">&gt; |} ]
+     <pre class="code-ocaml"><span class="hl kwa">let</span><span class="hl std"> </span><span class="">doc</span><span class="hl std"> = [</span><span class="hl kw5">xtmpl</span><span class="hl std"> </span><span class="hl str">"file.xml"</span><span class="hl std">]
+</span><span class="hl kwa">let</span><span class="hl std"> </span><span class="">doc</span><span class="hl std"> = [</span><span class="hl kw5">xtmpl</span><span class="hl std">.</span><span class="hl kwd">string</span><span class="hl std"> {| &lt;</span><span class="">div</span><span class="hl std">&gt;...&lt;/</span><span class="">div</span><span class="hl std">&gt; |} ]
 </span></pre></li>
 <li>some functions renamed (deprecating original ones functions),</li>
 <li>add <span class="icode"><span class="hl kwc">Xtmpl</span><span class="hl std">.</span><span class="">node</span></span> and <span class="icode"><span class="hl kwc">Xtmpl</span><span class="hl std">.</span><span class="">cdata</span></span>,

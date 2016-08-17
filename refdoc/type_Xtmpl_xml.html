@@ -26,172 +26,175 @@
 
 
 <div class="ocamldoc-page">
-<code class="code"><span class="keyword">sig</span><br/>
-  <span class="keyword">type</span> pos = { line : int; bol : int; char : int; file : string option; }<br/>
-  <span class="keyword">type</span> loc = { loc_start : <span class="constructor">Xtmpl_xml</span>.pos; loc_stop : <span class="constructor">Xtmpl_xml</span>.pos; }<br/>
-  <span class="keyword">val</span> string_of_loc : <span class="constructor">Xtmpl_xml</span>.loc <span class="keywordsign">-&gt;</span> string<br/>
-  <span class="keyword">val</span> loc_sprintf :<br/>
-    <span class="constructor">Xtmpl_xml</span>.loc option <span class="keywordsign">-&gt;</span> (<span class="keywordsign">'</span>a, unit, string) <span class="constructor">Pervasives</span>.format <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a<br/>
-  <span class="keyword">type</span> <span class="keywordsign">'</span>a with_loc = <span class="keywordsign">'</span>a * <span class="constructor">Xtmpl_xml</span>.loc option<br/>
-  <span class="keyword">val</span> loc : <span class="constructor">Xtmpl_xml</span>.pos <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.pos <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.loc<br/>
-  <span class="keyword">type</span> error = <span class="constructor">Xtmpl_xml</span>.loc * string<br/>
-  <span class="keyword">exception</span> <span class="constructor">Error</span> <span class="keyword">of</span> <span class="constructor">Xtmpl_xml</span>.error<br/>
-  <span class="keyword">val</span> error : <span class="constructor">Xtmpl_xml</span>.loc <span class="keywordsign">-&gt;</span> string <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a<br/>
-  <span class="keyword">val</span> string_of_error : <span class="constructor">Xtmpl_xml</span>.loc * string <span class="keywordsign">-&gt;</span> string<br/>
-  <span class="keyword">type</span> name = string * string<br/>
-  <span class="keyword">val</span> string_of_name : string * string <span class="keywordsign">-&gt;</span> string<br/>
-  <span class="keyword">val</span> name_of_string : string <span class="keywordsign">-&gt;</span> string * string<br/>
-  <span class="keyword">module</span> <span class="constructor">Name_ord</span> : <span class="keyword">sig</span> <span class="keyword">type</span> t = name <span class="keyword">val</span> compare : t <span class="keywordsign">-&gt;</span> t <span class="keywordsign">-&gt;</span> int <span class="keyword">end</span><br/>
-  <span class="keyword">module</span> <span class="constructor">Name_map</span> :<br/>
-    <span class="keyword">sig</span><br/>
-      <span class="keyword">type</span> key = name<br/>
-      <span class="keyword">type</span> +<span class="keywordsign">'</span>a t<br/>
-      <span class="keyword">val</span> empty : <span class="keywordsign">'</span>a t<br/>
-      <span class="keyword">val</span> is_empty : <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> bool<br/>
-      <span class="keyword">val</span> mem : key <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> bool<br/>
-      <span class="keyword">val</span> add : key <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t<br/>
-      <span class="keyword">val</span> singleton : key <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t<br/>
-      <span class="keyword">val</span> remove : key <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t<br/>
-      <span class="keyword">val</span> merge :<br/>
-        (key <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a option <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>b option <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>c option) <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>b t <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>c t<br/>
-      <span class="keyword">val</span> compare : (<span class="keywordsign">'</span>a <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="keywordsign">-&gt;</span> int) <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> int<br/>
-      <span class="keyword">val</span> equal : (<span class="keywordsign">'</span>a <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="keywordsign">-&gt;</span> bool) <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> bool<br/>
-      <span class="keyword">val</span> iter : (key <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="keywordsign">-&gt;</span> unit) <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> unit<br/>
-      <span class="keyword">val</span> fold : (key <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>b <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>b) <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>b <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>b<br/>
-      <span class="keyword">val</span> for_all : (key <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="keywordsign">-&gt;</span> bool) <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> bool<br/>
-      <span class="keyword">val</span> exists : (key <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="keywordsign">-&gt;</span> bool) <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> bool<br/>
-      <span class="keyword">val</span> filter : (key <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="keywordsign">-&gt;</span> bool) <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t<br/>
-      <span class="keyword">val</span> partition : (key <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="keywordsign">-&gt;</span> bool) <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t * <span class="keywordsign">'</span>a t<br/>
-      <span class="keyword">val</span> cardinal : <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> int<br/>
-      <span class="keyword">val</span> bindings : <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> (key * <span class="keywordsign">'</span>a) list<br/>
-      <span class="keyword">val</span> min_binding : <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> key * <span class="keywordsign">'</span>a<br/>
-      <span class="keyword">val</span> max_binding : <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> key * <span class="keywordsign">'</span>a<br/>
-      <span class="keyword">val</span> choose : <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> key * <span class="keywordsign">'</span>a<br/>
-      <span class="keyword">val</span> split : key <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t * <span class="keywordsign">'</span>a option * <span class="keywordsign">'</span>a t<br/>
-      <span class="keyword">val</span> find : key <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a<br/>
-      <span class="keyword">val</span> map : (<span class="keywordsign">'</span>a <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>b) <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>b t<br/>
-      <span class="keyword">val</span> mapi : (key <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>b) <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>b t<br/>
-    <span class="keyword">end</span><br/>
-  <span class="keyword">module</span> <span class="constructor">Name_set</span> :<br/>
-    <span class="keyword">sig</span><br/>
-      <span class="keyword">type</span> elt = name<br/>
-      <span class="keyword">type</span> t<br/>
-      <span class="keyword">val</span> empty : t<br/>
-      <span class="keyword">val</span> is_empty : t <span class="keywordsign">-&gt;</span> bool<br/>
-      <span class="keyword">val</span> mem : elt <span class="keywordsign">-&gt;</span> t <span class="keywordsign">-&gt;</span> bool<br/>
-      <span class="keyword">val</span> add : elt <span class="keywordsign">-&gt;</span> t <span class="keywordsign">-&gt;</span> t<br/>
-      <span class="keyword">val</span> singleton : elt <span class="keywordsign">-&gt;</span> t<br/>
-      <span class="keyword">val</span> remove : elt <span class="keywordsign">-&gt;</span> t <span class="keywordsign">-&gt;</span> t<br/>
-      <span class="keyword">val</span> union : t <span class="keywordsign">-&gt;</span> t <span class="keywordsign">-&gt;</span> t<br/>
-      <span class="keyword">val</span> inter : t <span class="keywordsign">-&gt;</span> t <span class="keywordsign">-&gt;</span> t<br/>
-      <span class="keyword">val</span> diff : t <span class="keywordsign">-&gt;</span> t <span class="keywordsign">-&gt;</span> t<br/>
-      <span class="keyword">val</span> compare : t <span class="keywordsign">-&gt;</span> t <span class="keywordsign">-&gt;</span> int<br/>
-      <span class="keyword">val</span> equal : t <span class="keywordsign">-&gt;</span> t <span class="keywordsign">-&gt;</span> bool<br/>
-      <span class="keyword">val</span> subset : t <span class="keywordsign">-&gt;</span> t <span class="keywordsign">-&gt;</span> bool<br/>
-      <span class="keyword">val</span> iter : (elt <span class="keywordsign">-&gt;</span> unit) <span class="keywordsign">-&gt;</span> t <span class="keywordsign">-&gt;</span> unit<br/>
-      <span class="keyword">val</span> fold : (elt <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a) <span class="keywordsign">-&gt;</span> t <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a<br/>
-      <span class="keyword">val</span> for_all : (elt <span class="keywordsign">-&gt;</span> bool) <span class="keywordsign">-&gt;</span> t <span class="keywordsign">-&gt;</span> bool<br/>
-      <span class="keyword">val</span> exists : (elt <span class="keywordsign">-&gt;</span> bool) <span class="keywordsign">-&gt;</span> t <span class="keywordsign">-&gt;</span> bool<br/>
-      <span class="keyword">val</span> filter : (elt <span class="keywordsign">-&gt;</span> bool) <span class="keywordsign">-&gt;</span> t <span class="keywordsign">-&gt;</span> t<br/>
-      <span class="keyword">val</span> partition : (elt <span class="keywordsign">-&gt;</span> bool) <span class="keywordsign">-&gt;</span> t <span class="keywordsign">-&gt;</span> t * t<br/>
-      <span class="keyword">val</span> cardinal : t <span class="keywordsign">-&gt;</span> int<br/>
-      <span class="keyword">val</span> elements : t <span class="keywordsign">-&gt;</span> elt list<br/>
-      <span class="keyword">val</span> min_elt : t <span class="keywordsign">-&gt;</span> elt<br/>
-      <span class="keyword">val</span> max_elt : t <span class="keywordsign">-&gt;</span> elt<br/>
-      <span class="keyword">val</span> choose : t <span class="keywordsign">-&gt;</span> elt<br/>
-      <span class="keyword">val</span> split : elt <span class="keywordsign">-&gt;</span> t <span class="keywordsign">-&gt;</span> t * bool * t<br/>
-      <span class="keyword">val</span> find : elt <span class="keywordsign">-&gt;</span> t <span class="keywordsign">-&gt;</span> elt<br/>
-      <span class="keyword">val</span> of_list : elt list <span class="keywordsign">-&gt;</span> t<br/>
-    <span class="keyword">end</span><br/>
-  <span class="keyword">type</span> cdata = { loc : <span class="constructor">Xtmpl_xml</span>.loc option; text : string; quoted : bool; }<br/>
-  <span class="keyword">type</span> comment = { loc : <span class="constructor">Xtmpl_xml</span>.loc option; comment : string; }<br/>
-  <span class="keyword">type</span> proc_inst = {<br/>
-    loc : <span class="constructor">Xtmpl_xml</span>.loc option;<br/>
-    app : <span class="constructor">Xtmpl_xml</span>.name;<br/>
-    args : string;<br/>
-  }<br/>
-  <span class="keyword">type</span> <span class="keywordsign">'</span>a attributes = <span class="keywordsign">'</span>a <span class="constructor">Xtmpl_xml</span>.<span class="constructor">Name_map</span>.t<br/>
-  <span class="keyword">type</span> str_attributes = string <span class="constructor">Xtmpl_xml</span>.with_loc <span class="constructor">Xtmpl_xml</span>.attributes<br/>
-  <span class="keyword">type</span> xml_decl = {<br/>
-    loc : <span class="constructor">Xtmpl_xml</span>.loc option;<br/>
-    atts : <span class="constructor">Xtmpl_xml</span>.str_attributes;<br/>
-  }<br/>
-  <span class="keyword">type</span> doctype = {<br/>
-    loc : <span class="constructor">Xtmpl_xml</span>.loc option;<br/>
-    name : <span class="constructor">Xtmpl_xml</span>.name;<br/>
-    args : string;<br/>
-  }<br/>
-  <span class="keyword">type</span> node = {<br/>
-    loc : <span class="constructor">Xtmpl_xml</span>.loc option;<br/>
-    name : <span class="constructor">Xtmpl_xml</span>.name;<br/>
-    atts : <span class="constructor">Xtmpl_xml</span>.str_attributes;<br/>
-    subs : <span class="constructor">Xtmpl_xml</span>.tree list;<br/>
-  }<br/>
-  <span class="keyword">and</span> tree =<br/>
-      <span class="constructor">E</span> <span class="keyword">of</span> <span class="constructor">Xtmpl_xml</span>.node<br/>
-    <span class="keywordsign">|</span> <span class="constructor">D</span> <span class="keyword">of</span> <span class="constructor">Xtmpl_xml</span>.cdata<br/>
-    <span class="keywordsign">|</span> <span class="constructor">C</span> <span class="keyword">of</span> <span class="constructor">Xtmpl_xml</span>.comment<br/>
-    <span class="keywordsign">|</span> <span class="constructor">PI</span> <span class="keyword">of</span> <span class="constructor">Xtmpl_xml</span>.proc_inst<br/>
-  <span class="keyword">type</span> prolog_misc = <span class="constructor">PC</span> <span class="keyword">of</span> <span class="constructor">Xtmpl_xml</span>.comment <span class="keywordsign">|</span> <span class="constructor">PPI</span> <span class="keyword">of</span> <span class="constructor">Xtmpl_xml</span>.proc_inst<br/>
-  <span class="keyword">type</span> prolog = {<br/>
-    decl : <span class="constructor">Xtmpl_xml</span>.xml_decl option;<br/>
-    misc : <span class="constructor">Xtmpl_xml</span>.prolog_misc list;<br/>
-    doctype : <span class="constructor">Xtmpl_xml</span>.doctype option;<br/>
-  }<br/>
-  <span class="keyword">type</span> <span class="keywordsign">'</span>a doc = { prolog : <span class="constructor">Xtmpl_xml</span>.prolog; elements : <span class="keywordsign">'</span>a list; }<br/>
-  <span class="keyword">val</span> node :<br/>
-    ?loc:<span class="constructor">Xtmpl_xml</span>.loc <span class="keywordsign">-&gt;</span><br/>
-    <span class="constructor">Xtmpl_xml</span>.name <span class="keywordsign">-&gt;</span><br/>
-    ?atts:<span class="constructor">Xtmpl_xml</span>.str_attributes <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.tree list <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.tree<br/>
-  <span class="keyword">val</span> cdata : ?loc:<span class="constructor">Xtmpl_xml</span>.loc <span class="keywordsign">-&gt;</span> ?quoted:bool <span class="keywordsign">-&gt;</span> string <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.tree<br/>
-  <span class="keyword">val</span> comment : ?loc:<span class="constructor">Xtmpl_xml</span>.loc <span class="keywordsign">-&gt;</span> string <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.tree<br/>
-  <span class="keyword">val</span> prolog_comment : ?loc:<span class="constructor">Xtmpl_xml</span>.loc <span class="keywordsign">-&gt;</span> string <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.prolog_misc<br/>
-  <span class="keyword">val</span> pi : ?loc:<span class="constructor">Xtmpl_xml</span>.loc <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.name <span class="keywordsign">-&gt;</span> string <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.tree<br/>
-  <span class="keyword">val</span> prolog_pi :<br/>
-    ?loc:<span class="constructor">Xtmpl_xml</span>.loc <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.name <span class="keywordsign">-&gt;</span> string <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.prolog_misc<br/>
-  <span class="keyword">val</span> xml_decl :<br/>
-    ?loc:<span class="constructor">Xtmpl_xml</span>.loc <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.str_attributes <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.xml_decl<br/>
-  <span class="keyword">val</span> doctype :<br/>
-    ?loc:<span class="constructor">Xtmpl_xml</span>.loc <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.name <span class="keywordsign">-&gt;</span> string <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.doctype<br/>
-  <span class="keyword">val</span> prolog :<br/>
-    ?decl:<span class="constructor">Xtmpl_xml</span>.xml_decl <span class="keywordsign">-&gt;</span><br/>
-    ?doctype:<span class="constructor">Xtmpl_xml</span>.doctype <span class="keywordsign">-&gt;</span><br/>
-    <span class="constructor">Xtmpl_xml</span>.prolog_misc list <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.prolog<br/>
-  <span class="keyword">val</span> doc :<br/>
-    <span class="constructor">Xtmpl_xml</span>.prolog <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.tree list <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.tree <span class="constructor">Xtmpl_xml</span>.doc<br/>
-  <span class="keyword">val</span> merge_cdata : <span class="constructor">Xtmpl_xml</span>.cdata <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.cdata <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.cdata<br/>
-  <span class="keyword">val</span> doctype_name : <span class="keywordsign">'</span>a <span class="constructor">Xtmpl_xml</span>.doc <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.name option<br/>
-  <span class="keyword">val</span> unescape : ?entities:bool <span class="keywordsign">-&gt;</span> string <span class="keywordsign">-&gt;</span> string<br/>
-  <span class="keyword">val</span> escape : ?quotes:bool <span class="keywordsign">-&gt;</span> string <span class="keywordsign">-&gt;</span> string<br/>
-  <span class="keyword">val</span> from_string : ?pos_start:<span class="constructor">Xtmpl_xml</span>.pos <span class="keywordsign">-&gt;</span> string <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.tree list<br/>
-  <span class="keyword">val</span> from_channel :<br/>
-    ?pos_start:<span class="constructor">Xtmpl_xml</span>.pos <span class="keywordsign">-&gt;</span> <span class="constructor">Pervasives</span>.in_channel <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.tree list<br/>
-  <span class="keyword">val</span> from_file : string <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.tree list<br/>
-  <span class="keyword">val</span> doc_from_string :<br/>
-    ?pos_start:<span class="constructor">Xtmpl_xml</span>.pos <span class="keywordsign">-&gt;</span> string <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.tree <span class="constructor">Xtmpl_xml</span>.doc<br/>
-  <span class="keyword">val</span> doc_from_channel :<br/>
-    ?pos_start:<span class="constructor">Xtmpl_xml</span>.pos <span class="keywordsign">-&gt;</span><br/>
-    <span class="constructor">Pervasives</span>.in_channel <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.tree <span class="constructor">Xtmpl_xml</span>.doc<br/>
-  <span class="keyword">val</span> doc_from_file : string <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.tree <span class="constructor">Xtmpl_xml</span>.doc<br/>
-  <span class="keyword">val</span> to_string : <span class="constructor">Xtmpl_xml</span>.tree list <span class="keywordsign">-&gt;</span> string<br/>
-  <span class="keyword">val</span> doc_to_string : <span class="constructor">Xtmpl_xml</span>.tree <span class="constructor">Xtmpl_xml</span>.doc <span class="keywordsign">-&gt;</span> string<br/>
-  <span class="keyword">val</span> atts_empty : <span class="keywordsign">'</span>a <span class="constructor">Xtmpl_xml</span>.attributes<br/>
-  <span class="keyword">val</span> atts_of_list :<br/>
-    ?atts:<span class="keywordsign">'</span>a <span class="constructor">Xtmpl_xml</span>.attributes <span class="keywordsign">-&gt;</span><br/>
-    (<span class="constructor">Xtmpl_xml</span>.name * <span class="keywordsign">'</span>a) list <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="constructor">Xtmpl_xml</span>.attributes<br/>
-  <span class="keyword">val</span> atts_one :<br/>
-    ?atts:<span class="keywordsign">'</span>a <span class="constructor">Xtmpl_xml</span>.attributes <span class="keywordsign">-&gt;</span><br/>
-    <span class="constructor">Xtmpl_xml</span>.name <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="constructor">Xtmpl_xml</span>.attributes<br/>
-  <span class="keyword">val</span> atts_remove :<br/>
-    <span class="constructor">Xtmpl_xml</span>.name <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="constructor">Xtmpl_xml</span>.attributes <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="constructor">Xtmpl_xml</span>.attributes<br/>
-  <span class="keyword">val</span> atts_replace :<br/>
-    <span class="constructor">Xtmpl_xml</span>.name <span class="keywordsign">-&gt;</span><br/>
-    <span class="keywordsign">'</span>a <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="constructor">Xtmpl_xml</span>.attributes <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="constructor">Xtmpl_xml</span>.attributes<br/>
-  <span class="keyword">val</span> get_att : <span class="keywordsign">'</span>a <span class="constructor">Xtmpl_xml</span>.attributes <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.name <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a option<br/>
-  <span class="keyword">val</span> opt_att :<br/>
-    <span class="constructor">Xtmpl_xml</span>.str_attributes <span class="keywordsign">-&gt;</span><br/>
-    ?def:string <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.name <span class="keywordsign">-&gt;</span> string * <span class="constructor">Xtmpl_xml</span>.loc option<br/>
-  <span class="keyword">val</span> string_of_atts : <span class="constructor">Xtmpl_xml</span>.str_attributes <span class="keywordsign">-&gt;</span> string<br/>
+<code class="code"><span class="keyword">sig</span>
+  <span class="keyword">type</span> pos = { line : int; bol : int; char : int; file : string option; }
+  <span class="keyword">val</span> pos :
+    ?file:string <span class="keywordsign">-&gt;</span> line:int <span class="keywordsign">-&gt;</span> bol:int <span class="keywordsign">-&gt;</span> char:int <span class="keywordsign">-&gt;</span> unit <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.pos
+  <span class="keyword">type</span> loc = { loc_start : <span class="constructor">Xtmpl_xml</span>.pos; loc_stop : <span class="constructor">Xtmpl_xml</span>.pos; }
+  <span class="keyword">val</span> string_of_loc : <span class="constructor">Xtmpl_xml</span>.loc <span class="keywordsign">-&gt;</span> string
+  <span class="keyword">val</span> loc_sprintf :
+    <span class="constructor">Xtmpl_xml</span>.loc option <span class="keywordsign">-&gt;</span> (<span class="keywordsign">'</span>a, unit, string) <span class="constructor">Pervasives</span>.format <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a
+  <span class="keyword">type</span> <span class="keywordsign">'</span>a with_loc = <span class="keywordsign">'</span>a * <span class="constructor">Xtmpl_xml</span>.loc option
+  <span class="keyword">val</span> loc : <span class="constructor">Xtmpl_xml</span>.pos <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.pos <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.loc
+  <span class="keyword">type</span> error = <span class="constructor">Xtmpl_xml</span>.loc * string
+  <span class="keyword">exception</span> <span class="constructor">Error</span> <span class="keyword">of</span> <span class="constructor">Xtmpl_xml</span>.error
+  <span class="keyword">val</span> error : <span class="constructor">Xtmpl_xml</span>.loc <span class="keywordsign">-&gt;</span> string <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a
+  <span class="keyword">val</span> string_of_error : <span class="constructor">Xtmpl_xml</span>.loc * string <span class="keywordsign">-&gt;</span> string
+  <span class="keyword">type</span> name = string * string
+  <span class="keyword">val</span> string_of_name : string * string <span class="keywordsign">-&gt;</span> string
+  <span class="keyword">val</span> name_of_string : string <span class="keywordsign">-&gt;</span> string * string
+  <span class="keyword">module</span> <span class="constructor">Name_ord</span> : <span class="keyword">sig</span> <span class="keyword">type</span> t = name <span class="keyword">val</span> compare : t <span class="keywordsign">-&gt;</span> t <span class="keywordsign">-&gt;</span> int <span class="keyword">end</span>
+  <span class="keyword">module</span> <span class="constructor">Name_map</span> :
+    <span class="keyword">sig</span>
+      <span class="keyword">type</span> key = name
+      <span class="keyword">type</span> +<span class="keywordsign">'</span>a t
+      <span class="keyword">val</span> empty : <span class="keywordsign">'</span>a t
+      <span class="keyword">val</span> is_empty : <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> bool
+      <span class="keyword">val</span> mem : key <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> bool
+      <span class="keyword">val</span> add : key <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t
+      <span class="keyword">val</span> singleton : key <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t
+      <span class="keyword">val</span> remove : key <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t
+      <span class="keyword">val</span> merge :
+        (key <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a option <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>b option <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>c option) <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>b t <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>c t
+      <span class="keyword">val</span> union : (key <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a option) <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t
+      <span class="keyword">val</span> compare : (<span class="keywordsign">'</span>a <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="keywordsign">-&gt;</span> int) <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> int
+      <span class="keyword">val</span> equal : (<span class="keywordsign">'</span>a <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="keywordsign">-&gt;</span> bool) <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> bool
+      <span class="keyword">val</span> iter : (key <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="keywordsign">-&gt;</span> unit) <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> unit
+      <span class="keyword">val</span> fold : (key <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>b <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>b) <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>b <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>b
+      <span class="keyword">val</span> for_all : (key <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="keywordsign">-&gt;</span> bool) <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> bool
+      <span class="keyword">val</span> exists : (key <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="keywordsign">-&gt;</span> bool) <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> bool
+      <span class="keyword">val</span> filter : (key <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="keywordsign">-&gt;</span> bool) <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t
+      <span class="keyword">val</span> partition : (key <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="keywordsign">-&gt;</span> bool) <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t * <span class="keywordsign">'</span>a t
+      <span class="keyword">val</span> cardinal : <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> int
+      <span class="keyword">val</span> bindings : <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> (key * <span class="keywordsign">'</span>a) list
+      <span class="keyword">val</span> min_binding : <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> key * <span class="keywordsign">'</span>a
+      <span class="keyword">val</span> max_binding : <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> key * <span class="keywordsign">'</span>a
+      <span class="keyword">val</span> choose : <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> key * <span class="keywordsign">'</span>a
+      <span class="keyword">val</span> split : key <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t * <span class="keywordsign">'</span>a option * <span class="keywordsign">'</span>a t
+      <span class="keyword">val</span> find : key <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a
+      <span class="keyword">val</span> map : (<span class="keywordsign">'</span>a <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>b) <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>b t
+      <span class="keyword">val</span> mapi : (key <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>b) <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a t <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>b t
+    <span class="keyword">end</span>
+  <span class="keyword">module</span> <span class="constructor">Name_set</span> :
+    <span class="keyword">sig</span>
+      <span class="keyword">type</span> elt = name
+      <span class="keyword">type</span> t
+      <span class="keyword">val</span> empty : t
+      <span class="keyword">val</span> is_empty : t <span class="keywordsign">-&gt;</span> bool
+      <span class="keyword">val</span> mem : elt <span class="keywordsign">-&gt;</span> t <span class="keywordsign">-&gt;</span> bool
+      <span class="keyword">val</span> add : elt <span class="keywordsign">-&gt;</span> t <span class="keywordsign">-&gt;</span> t
+      <span class="keyword">val</span> singleton : elt <span class="keywordsign">-&gt;</span> t
+      <span class="keyword">val</span> remove : elt <span class="keywordsign">-&gt;</span> t <span class="keywordsign">-&gt;</span> t
+      <span class="keyword">val</span> union : t <span class="keywordsign">-&gt;</span> t <span class="keywordsign">-&gt;</span> t
+      <span class="keyword">val</span> inter : t <span class="keywordsign">-&gt;</span> t <span class="keywordsign">-&gt;</span> t
+      <span class="keyword">val</span> diff : t <span class="keywordsign">-&gt;</span> t <span class="keywordsign">-&gt;</span> t
+      <span class="keyword">val</span> compare : t <span class="keywordsign">-&gt;</span> t <span class="keywordsign">-&gt;</span> int
+      <span class="keyword">val</span> equal : t <span class="keywordsign">-&gt;</span> t <span class="keywordsign">-&gt;</span> bool
+      <span class="keyword">val</span> subset : t <span class="keywordsign">-&gt;</span> t <span class="keywordsign">-&gt;</span> bool
+      <span class="keyword">val</span> iter : (elt <span class="keywordsign">-&gt;</span> unit) <span class="keywordsign">-&gt;</span> t <span class="keywordsign">-&gt;</span> unit
+      <span class="keyword">val</span> fold : (elt <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a) <span class="keywordsign">-&gt;</span> t <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a
+      <span class="keyword">val</span> for_all : (elt <span class="keywordsign">-&gt;</span> bool) <span class="keywordsign">-&gt;</span> t <span class="keywordsign">-&gt;</span> bool
+      <span class="keyword">val</span> exists : (elt <span class="keywordsign">-&gt;</span> bool) <span class="keywordsign">-&gt;</span> t <span class="keywordsign">-&gt;</span> bool
+      <span class="keyword">val</span> filter : (elt <span class="keywordsign">-&gt;</span> bool) <span class="keywordsign">-&gt;</span> t <span class="keywordsign">-&gt;</span> t
+      <span class="keyword">val</span> partition : (elt <span class="keywordsign">-&gt;</span> bool) <span class="keywordsign">-&gt;</span> t <span class="keywordsign">-&gt;</span> t * t
+      <span class="keyword">val</span> cardinal : t <span class="keywordsign">-&gt;</span> int
+      <span class="keyword">val</span> elements : t <span class="keywordsign">-&gt;</span> elt list
+      <span class="keyword">val</span> min_elt : t <span class="keywordsign">-&gt;</span> elt
+      <span class="keyword">val</span> max_elt : t <span class="keywordsign">-&gt;</span> elt
+      <span class="keyword">val</span> choose : t <span class="keywordsign">-&gt;</span> elt
+      <span class="keyword">val</span> split : elt <span class="keywordsign">-&gt;</span> t <span class="keywordsign">-&gt;</span> t * bool * t
+      <span class="keyword">val</span> find : elt <span class="keywordsign">-&gt;</span> t <span class="keywordsign">-&gt;</span> elt
+      <span class="keyword">val</span> of_list : elt list <span class="keywordsign">-&gt;</span> t
+    <span class="keyword">end</span>
+  <span class="keyword">type</span> cdata = { loc : <span class="constructor">Xtmpl_xml</span>.loc option; text : string; quoted : bool; }
+  <span class="keyword">type</span> comment = { loc : <span class="constructor">Xtmpl_xml</span>.loc option; comment : string; }
+  <span class="keyword">type</span> proc_inst = {
+    loc : <span class="constructor">Xtmpl_xml</span>.loc option;
+    app : <span class="constructor">Xtmpl_xml</span>.name;
+    args : string;
+  }
+  <span class="keyword">type</span> <span class="keywordsign">'</span>a attributes = <span class="keywordsign">'</span>a <span class="constructor">Xtmpl_xml</span>.<span class="constructor">Name_map</span>.t
+  <span class="keyword">type</span> str_attributes = string <span class="constructor">Xtmpl_xml</span>.with_loc <span class="constructor">Xtmpl_xml</span>.attributes
+  <span class="keyword">type</span> xml_decl = {
+    loc : <span class="constructor">Xtmpl_xml</span>.loc option;
+    atts : <span class="constructor">Xtmpl_xml</span>.str_attributes;
+  }
+  <span class="keyword">type</span> doctype = {
+    loc : <span class="constructor">Xtmpl_xml</span>.loc option;
+    name : <span class="constructor">Xtmpl_xml</span>.name;
+    args : string;
+  }
+  <span class="keyword">type</span> node = {
+    loc : <span class="constructor">Xtmpl_xml</span>.loc option;
+    name : <span class="constructor">Xtmpl_xml</span>.name;
+    atts : <span class="constructor">Xtmpl_xml</span>.str_attributes;
+    subs : <span class="constructor">Xtmpl_xml</span>.tree list;
+  }
+  <span class="keyword">and</span> tree =
+      <span class="constructor">E</span> <span class="keyword">of</span> <span class="constructor">Xtmpl_xml</span>.node
+    <span class="keywordsign">|</span> <span class="constructor">D</span> <span class="keyword">of</span> <span class="constructor">Xtmpl_xml</span>.cdata
+    <span class="keywordsign">|</span> <span class="constructor">C</span> <span class="keyword">of</span> <span class="constructor">Xtmpl_xml</span>.comment
+    <span class="keywordsign">|</span> <span class="constructor">PI</span> <span class="keyword">of</span> <span class="constructor">Xtmpl_xml</span>.proc_inst
+  <span class="keyword">type</span> prolog_misc = <span class="constructor">PC</span> <span class="keyword">of</span> <span class="constructor">Xtmpl_xml</span>.comment <span class="keywordsign">|</span> <span class="constructor">PPI</span> <span class="keyword">of</span> <span class="constructor">Xtmpl_xml</span>.proc_inst
+  <span class="keyword">type</span> prolog = {
+    decl : <span class="constructor">Xtmpl_xml</span>.xml_decl option;
+    misc : <span class="constructor">Xtmpl_xml</span>.prolog_misc list;
+    doctype : <span class="constructor">Xtmpl_xml</span>.doctype option;
+  }
+  <span class="keyword">type</span> <span class="keywordsign">'</span>a doc = { prolog : <span class="constructor">Xtmpl_xml</span>.prolog; elements : <span class="keywordsign">'</span>a list; }
+  <span class="keyword">val</span> node :
+    ?loc:<span class="constructor">Xtmpl_xml</span>.loc <span class="keywordsign">-&gt;</span>
+    <span class="constructor">Xtmpl_xml</span>.name <span class="keywordsign">-&gt;</span>
+    ?atts:<span class="constructor">Xtmpl_xml</span>.str_attributes <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.tree list <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.tree
+  <span class="keyword">val</span> cdata : ?loc:<span class="constructor">Xtmpl_xml</span>.loc <span class="keywordsign">-&gt;</span> ?quoted:bool <span class="keywordsign">-&gt;</span> string <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.tree
+  <span class="keyword">val</span> comment : ?loc:<span class="constructor">Xtmpl_xml</span>.loc <span class="keywordsign">-&gt;</span> string <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.tree
+  <span class="keyword">val</span> prolog_comment : ?loc:<span class="constructor">Xtmpl_xml</span>.loc <span class="keywordsign">-&gt;</span> string <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.prolog_misc
+  <span class="keyword">val</span> pi : ?loc:<span class="constructor">Xtmpl_xml</span>.loc <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.name <span class="keywordsign">-&gt;</span> string <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.tree
+  <span class="keyword">val</span> prolog_pi :
+    ?loc:<span class="constructor">Xtmpl_xml</span>.loc <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.name <span class="keywordsign">-&gt;</span> string <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.prolog_misc
+  <span class="keyword">val</span> xml_decl :
+    ?loc:<span class="constructor">Xtmpl_xml</span>.loc <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.str_attributes <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.xml_decl
+  <span class="keyword">val</span> doctype :
+    ?loc:<span class="constructor">Xtmpl_xml</span>.loc <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.name <span class="keywordsign">-&gt;</span> string <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.doctype
+  <span class="keyword">val</span> prolog :
+    ?decl:<span class="constructor">Xtmpl_xml</span>.xml_decl <span class="keywordsign">-&gt;</span>
+    ?doctype:<span class="constructor">Xtmpl_xml</span>.doctype <span class="keywordsign">-&gt;</span>
+    <span class="constructor">Xtmpl_xml</span>.prolog_misc list <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.prolog
+  <span class="keyword">val</span> doc :
+    <span class="constructor">Xtmpl_xml</span>.prolog <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.tree list <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.tree <span class="constructor">Xtmpl_xml</span>.doc
+  <span class="keyword">val</span> merge_cdata : <span class="constructor">Xtmpl_xml</span>.cdata <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.cdata <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.cdata
+  <span class="keyword">val</span> doctype_name : <span class="keywordsign">'</span>a <span class="constructor">Xtmpl_xml</span>.doc <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.name option
+  <span class="keyword">val</span> unescape : ?entities:bool <span class="keywordsign">-&gt;</span> string <span class="keywordsign">-&gt;</span> string
+  <span class="keyword">val</span> escape : ?quotes:bool <span class="keywordsign">-&gt;</span> string <span class="keywordsign">-&gt;</span> string
+  <span class="keyword">val</span> from_string : ?pos_start:<span class="constructor">Xtmpl_xml</span>.pos <span class="keywordsign">-&gt;</span> string <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.tree list
+  <span class="keyword">val</span> from_channel :
+    ?pos_start:<span class="constructor">Xtmpl_xml</span>.pos <span class="keywordsign">-&gt;</span> <span class="constructor">Pervasives</span>.in_channel <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.tree list
+  <span class="keyword">val</span> from_file : string <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.tree list
+  <span class="keyword">val</span> doc_from_string :
+    ?pos_start:<span class="constructor">Xtmpl_xml</span>.pos <span class="keywordsign">-&gt;</span> string <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.tree <span class="constructor">Xtmpl_xml</span>.doc
+  <span class="keyword">val</span> doc_from_channel :
+    ?pos_start:<span class="constructor">Xtmpl_xml</span>.pos <span class="keywordsign">-&gt;</span>
+    <span class="constructor">Pervasives</span>.in_channel <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.tree <span class="constructor">Xtmpl_xml</span>.doc
+  <span class="keyword">val</span> doc_from_file : string <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.tree <span class="constructor">Xtmpl_xml</span>.doc
+  <span class="keyword">val</span> to_string : <span class="constructor">Xtmpl_xml</span>.tree list <span class="keywordsign">-&gt;</span> string
+  <span class="keyword">val</span> doc_to_string : <span class="constructor">Xtmpl_xml</span>.tree <span class="constructor">Xtmpl_xml</span>.doc <span class="keywordsign">-&gt;</span> string
+  <span class="keyword">val</span> atts_empty : <span class="keywordsign">'</span>a <span class="constructor">Xtmpl_xml</span>.attributes
+  <span class="keyword">val</span> atts_of_list :
+    ?atts:<span class="keywordsign">'</span>a <span class="constructor">Xtmpl_xml</span>.attributes <span class="keywordsign">-&gt;</span>
+    (<span class="constructor">Xtmpl_xml</span>.name * <span class="keywordsign">'</span>a) list <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="constructor">Xtmpl_xml</span>.attributes
+  <span class="keyword">val</span> atts_one :
+    ?atts:<span class="keywordsign">'</span>a <span class="constructor">Xtmpl_xml</span>.attributes <span class="keywordsign">-&gt;</span>
+    <span class="constructor">Xtmpl_xml</span>.name <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="constructor">Xtmpl_xml</span>.attributes
+  <span class="keyword">val</span> atts_remove :
+    <span class="constructor">Xtmpl_xml</span>.name <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="constructor">Xtmpl_xml</span>.attributes <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="constructor">Xtmpl_xml</span>.attributes
+  <span class="keyword">val</span> atts_replace :
+    <span class="constructor">Xtmpl_xml</span>.name <span class="keywordsign">-&gt;</span>
+    <span class="keywordsign">'</span>a <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="constructor">Xtmpl_xml</span>.attributes <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a <span class="constructor">Xtmpl_xml</span>.attributes
+  <span class="keyword">val</span> get_att : <span class="keywordsign">'</span>a <span class="constructor">Xtmpl_xml</span>.attributes <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.name <span class="keywordsign">-&gt;</span> <span class="keywordsign">'</span>a option
+  <span class="keyword">val</span> opt_att :
+    <span class="constructor">Xtmpl_xml</span>.str_attributes <span class="keywordsign">-&gt;</span>
+    ?def:string <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xml</span>.name <span class="keywordsign">-&gt;</span> string * <span class="constructor">Xtmpl_xml</span>.loc option
+  <span class="keyword">val</span> string_of_atts : <span class="constructor">Xtmpl_xml</span>.str_attributes <span class="keywordsign">-&gt;</span> string
 <span class="keyword">end</span></code></div>
 
 

@@ -26,125 +26,125 @@
 
 
 <div class="ocamldoc-page">
-<code class="code"><span class="keyword">sig</span><br/>
-  <span class="keyword">type</span> elt_fun =<br/>
-      ?xid:<span class="constructor">Xtmpl_rewrite</span>.tree list <span class="keywordsign">-&gt;</span><br/>
-      ?id:string <span class="keywordsign">-&gt;</span><br/>
-      ?xclass:<span class="constructor">Xtmpl_rewrite</span>.tree list <span class="keywordsign">-&gt;</span><br/>
-      ?class_:string <span class="keywordsign">-&gt;</span><br/>
-      ?classes:string list <span class="keywordsign">-&gt;</span><br/>
-      ?xhref:<span class="constructor">Xtmpl_rewrite</span>.tree list <span class="keywordsign">-&gt;</span><br/>
-      ?href:string <span class="keywordsign">-&gt;</span><br/>
-      ?xtitle:<span class="constructor">Xtmpl_rewrite</span>.tree list <span class="keywordsign">-&gt;</span><br/>
-      ?title:string <span class="keywordsign">-&gt;</span><br/>
-      ?xtype:<span class="constructor">Xtmpl_rewrite</span>.tree list <span class="keywordsign">-&gt;</span><br/>
-      ?type_:string <span class="keywordsign">-&gt;</span><br/>
-      ?xname:<span class="constructor">Xtmpl_rewrite</span>.tree list <span class="keywordsign">-&gt;</span><br/>
-      ?name:string <span class="keywordsign">-&gt;</span><br/>
-      ?atts:<span class="constructor">Xtmpl_rewrite</span>.attributes <span class="keywordsign">-&gt;</span><br/>
-      <span class="constructor">Xtmpl_rewrite</span>.tree list <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_rewrite</span>.tree<br/>
-  <span class="keyword">type</span> elt_fun_ = ?prefix:string <span class="keywordsign">-&gt;</span> string <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> elt : <span class="constructor">Xtmpl_xhtml</span>.elt_fun_<br/>
-  <span class="keyword">val</span> html : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> head : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> meta : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> title : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> base : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> link : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> style : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> body : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> article : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> section : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> nav : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> aside : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> h1 : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> h2 : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> h3 : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> h4 : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> h5 : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> h6 : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> header : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> footer : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> address : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> p : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> hr : <span class="constructor">Xtmpl_rewrite</span>.tree<br/>
-  <span class="keyword">val</span> pre : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> blockquote : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> ol : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> ul : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> li : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> dl : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> dt : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> dd : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> figure : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> figcaption : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> div : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> main : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> a : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> em : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> strong : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> small : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> s : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> cite : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> q : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> dfn : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> abbr : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> data : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> time : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> code : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> var : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> samp : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> kbd : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> sub : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> sup : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> i : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> b : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> u : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> mark : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> ruby : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> rb : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> rt : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> rtc : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> rp : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> bdi : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> bdo : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> span : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> br : <span class="constructor">Xtmpl_rewrite</span>.tree<br/>
-  <span class="keyword">val</span> wbr : <span class="constructor">Xtmpl_rewrite</span>.tree<br/>
-  <span class="keyword">val</span> ins : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> del : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> embed : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> object_ : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> img : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> audio : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> video : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> source : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> script : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> table : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> caption : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> colgroup : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> col : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> tbody : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> thead : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> tfoot : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> tr : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> td : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> th : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> form : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> label : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> input : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> button : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> select : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> datalist : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> optgroup : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> option : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> textarea : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> keygen : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> output : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> progress : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> meter : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> fieldset : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
-  <span class="keyword">val</span> legend : <span class="constructor">Xtmpl_xhtml</span>.elt_fun<br/>
+<code class="code"><span class="keyword">sig</span>
+  <span class="keyword">type</span> elt_fun =
+      ?xid:<span class="constructor">Xtmpl_rewrite</span>.tree list <span class="keywordsign">-&gt;</span>
+      ?id:string <span class="keywordsign">-&gt;</span>
+      ?xclass:<span class="constructor">Xtmpl_rewrite</span>.tree list <span class="keywordsign">-&gt;</span>
+      ?class_:string <span class="keywordsign">-&gt;</span>
+      ?classes:string list <span class="keywordsign">-&gt;</span>
+      ?xhref:<span class="constructor">Xtmpl_rewrite</span>.tree list <span class="keywordsign">-&gt;</span>
+      ?href:string <span class="keywordsign">-&gt;</span>
+      ?xtitle:<span class="constructor">Xtmpl_rewrite</span>.tree list <span class="keywordsign">-&gt;</span>
+      ?title:string <span class="keywordsign">-&gt;</span>
+      ?xtype:<span class="constructor">Xtmpl_rewrite</span>.tree list <span class="keywordsign">-&gt;</span>
+      ?type_:string <span class="keywordsign">-&gt;</span>
+      ?xname:<span class="constructor">Xtmpl_rewrite</span>.tree list <span class="keywordsign">-&gt;</span>
+      ?name:string <span class="keywordsign">-&gt;</span>
+      ?atts:<span class="constructor">Xtmpl_rewrite</span>.attributes <span class="keywordsign">-&gt;</span>
+      <span class="constructor">Xtmpl_rewrite</span>.tree list <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_rewrite</span>.tree
+  <span class="keyword">type</span> elt_fun_ = ?prefix:string <span class="keywordsign">-&gt;</span> string <span class="keywordsign">-&gt;</span> <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> elt : <span class="constructor">Xtmpl_xhtml</span>.elt_fun_
+  <span class="keyword">val</span> html : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> head : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> meta : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> title : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> base : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> link : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> style : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> body : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> article : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> section : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> nav : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> aside : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> h1 : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> h2 : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> h3 : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> h4 : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> h5 : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> h6 : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> header : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> footer : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> address : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> p : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> hr : <span class="constructor">Xtmpl_rewrite</span>.tree
+  <span class="keyword">val</span> pre : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> blockquote : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> ol : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> ul : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> li : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> dl : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> dt : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> dd : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> figure : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> figcaption : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> div : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> main : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> a : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> em : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> strong : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> small : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> s : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> cite : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> q : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> dfn : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> abbr : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> data : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> time : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> code : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> var : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> samp : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> kbd : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> sub : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> sup : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> i : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> b : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> u : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> mark : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> ruby : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> rb : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> rt : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> rtc : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> rp : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> bdi : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> bdo : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> span : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> br : <span class="constructor">Xtmpl_rewrite</span>.tree
+  <span class="keyword">val</span> wbr : <span class="constructor">Xtmpl_rewrite</span>.tree
+  <span class="keyword">val</span> ins : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> del : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> embed : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> object_ : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> img : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> audio : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> video : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> source : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> script : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> table : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> caption : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> colgroup : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> col : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> tbody : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> thead : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> tfoot : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> tr : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> td : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> th : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> form : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> label : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> input : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> button : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> select : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> datalist : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> optgroup : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> option : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> textarea : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> keygen : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> output : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> progress : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> meter : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> fieldset : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
+  <span class="keyword">val</span> legend : <span class="constructor">Xtmpl_xhtml</span>.elt_fun
 <span class="keyword">end</span></code></div>
 
 
