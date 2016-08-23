@@ -25,7 +25,6 @@
 
 (** *)
 
-module S = Sedlexing
 module U = Sedlexing.Utf8
 
 type name = string * string
@@ -700,21 +699,40 @@ let from_lexbuf ?(pos_start=pos ~line: 1 ~bol: 0 ~char: 1 ()) lb =
 let doc_from_lexbuf ?(pos_start=pos ~line:1 ~bol:0 ~char:1 ()) lb =
     parse_doc pos_start lb
 
+let malformed ?(pos=pos ~line: 1 ~bol: 1 ~char: 1 ()) src =
+  error (loc_of_pos pos 1) ("Malformed character in "^src)
+
 let from_string ?pos_start str =
-  let lb=  U.from_string str in
-  from_lexbuf ?pos_start lb
+  try
+    let lb=  U.from_string str in
+    from_lexbuf ?pos_start lb
+  with
+    Sedlexing.MalFormed ->
+       malformed ?pos: pos_start str
 
 let doc_from_string ?pos_start str =
-  let lb=  U.from_string str in
-  doc_from_lexbuf ?pos_start lb
+  try
+    let lb=  U.from_string str in
+    doc_from_lexbuf ?pos_start lb
+  with
+    Sedlexing.MalFormed ->
+       malformed ?pos: pos_start str
 
 let from_channel ?pos_start ic =
-  let lb=  U.from_channel ic in
-  from_lexbuf ?pos_start lb
+  try
+    let lb=  U.from_channel ic in
+    from_lexbuf ?pos_start lb
+  with
+    Sedlexing.MalFormed ->
+       malformed ?pos: pos_start "<channel>"
 
 let doc_from_channel ?pos_start ic =
-  let lb=  U.from_channel ic in
-  doc_from_lexbuf ?pos_start lb
+  try
+    let lb=  U.from_channel ic in
+    doc_from_lexbuf ?pos_start lb
+  with
+    Sedlexing.MalFormed ->
+      malformed ?pos: pos_start "<channel>"
 
 let from_file file =
   let ic = open_in_bin file in
