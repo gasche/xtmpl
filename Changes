@@ -1,4 +1,8 @@
 Next release:
+- Xtmpl_js.dom_of_html: add optional ?doc parameter to specify
+  the root document (default is Dom_html.document)
+
+Release 0.14.0:
 - fix: remove special attributes when converting Xtmpl_rewrite.tree
   to Xtmpl_xml.tree
 

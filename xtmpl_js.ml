@@ -245,7 +245,6 @@ let dom_of_xtmpl =
       List.iter (Dom.appendChild n) subs;
       (n :> Dom.node Js.t)
   in
-  fun t ->
-    let doc = Dom_html.document in
+  fun ?(doc=Dom_html.document) t ->
     map doc ns_env_empty t
 ;;

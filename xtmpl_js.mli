@@ -26,5 +26,8 @@
 (** Convenient functions to use in JS code *)
 
 (** Create a new tree of DOM nodes from a given XML tree.
-  Errors are logged to the firebug console. *)
-val dom_of_xtmpl : Xtmpl_rewrite.tree -> Dom.node Js.t
+  Errors are logged to the firebug console.
+  @param doc Default is [Dom_html.document].
+  *)
+val dom_of_xtmpl : ?doc:Dom_html.document Js.t ->
+  Xtmpl_rewrite.tree -> Dom.node Js.t

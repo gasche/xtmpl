@@ -199,7 +199,11 @@ let e_xml = [%sedlex.regexp? ('x'|'X'),('m'|'M'),('l'|'L')]
 
 let map_string lexer str =
   let buf = Buffer.create (String.length str) in
-  lexer buf (U.from_string str);
+  (
+   try lexer buf (U.from_string str)
+   with Sedlexing.MalFormed ->
+     failwith (Printf.sprintf "Bad UTF-8 string: %s" str)
+  );
   Buffer.contents buf
 
 let cp_to_string cp =
