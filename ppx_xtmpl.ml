@@ -340,10 +340,10 @@ let typ_of_params loc params =
         | `Other (typ, _) -> typ
       in
       let typ = parse_ocaml_type loc str in
-      if opt then
+      (*if opt then
         let lid_option = Location.mkloc (Ldot (Lident "*predef*","option")) loc in
         Typ.constr lid_option [typ]
-      else
+      else*)
         typ
     in
     Typ.arrow label typ acc
