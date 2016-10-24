@@ -708,7 +708,7 @@ let malformed ?(pos=pos ~line: 1 ~bol: 1 ~char: 1 ()) src =
 
 let from_string ?pos_start str =
   try
-    let lb=  U.from_string str in
+    let lb = U.from_string str in
     from_lexbuf ?pos_start lb
   with
     Sedlexing.MalFormed ->

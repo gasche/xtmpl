@@ -9,4 +9,7 @@ ppx_xtmpl.byte
 test_ppx_xtmpl
 test_cat
 dump.odoc
+test_js.js.byte
+test_js.js
+
 

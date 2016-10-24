@@ -30,6 +30,7 @@ type name = string * string
 
 module Name_map = Xml.Name_map
 module Name_set = Xml.Name_set
+module Str = Re_str
 
 type attributes = tree list Xml.attributes
 and node = { loc: Xml.loc option; name: name ; atts: attributes ; subs: tree list }
@@ -202,7 +203,9 @@ and from_xml_atts atts =
          let escamp = Name_set.mem name to_escape in
          let s = if escamp then escape_ampersand s else s in
          try from_xmls (Xml.from_string ?pos_start s)
-         with Xml.Error (loc, msg) -> parse_error loc msg
+         with
+           Xml.Error (loc, msg) -> parse_error loc msg
+         | e -> failwith (s^" => "^(Printexc.to_string e))
       )
       atts
 and from_xmls l = List.map from_xml l

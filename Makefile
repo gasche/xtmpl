@@ -27,7 +27,7 @@
 VERSION=0.15.0
 
 OCAMLFIND=ocamlfind
-PACKAGES=sedlex,uutf
+PACKAGES=sedlex,uutf,re.str
 JS_PACKAGES=$(PACKAGES),js_of_ocaml
 COMPFLAGS=-annot -rectypes -safe-string -g
 OCAMLPP=
@@ -85,11 +85,11 @@ $(LIB_JS): $(LIB_BYTE) $(LIB_JS_CMIFILES) $(LIB_JS_CMOFILES)
 	$(OCAMLFIND) ocamlc -c -package $(PACKAGES) $(COMPFLAGS) $<
 
 ppx_xtmpl: $(LIB) ppx_xtmpl.ml
-	$(OCAMLFIND) ocamlopt -o $@ -package ppx_tools.metaquot,str,$(PACKAGES) \
+	$(OCAMLFIND) ocamlopt -o $@ -package ppx_tools.metaquot,$(PACKAGES) \
 	$(COMPFLAGS) -linkpkg $(LIB) ppx_xtmpl.ml
 
 ppx_xtmpl.byte: $(LIB_BYTE) ppx_xtmpl.ml
-	$(OCAMLFIND) ocamlc -o $@ -package ppx_tools.metaquot,str,$(PACKAGES) \
+	$(OCAMLFIND) ocamlc -o $@ -package ppx_tools.metaquot,$(PACKAGES) \
 	$(COMPFLAGS) -linkpkg $(LIB_BYTE) ppx_xtmpl.ml
 
 xtmpl_js.cmo: xtmpl_js.ml
@@ -105,14 +105,23 @@ xtmpl_js.cmi: xtmpl_js.mli
 test: test_ppx_xtmpl test_cat
 
 test_ppx_xtmpl: ppx_xtmpl test_ppx_xtmpl.ml
-	$(OCAMLFIND) ocamlopt -o $@ -dsource -rectypes -package uutf,sedlex,str -linkpkg \
+	$(OCAMLFIND) ocamlopt -o $@ -dsource -rectypes -package uutf,sedlex,re.str -linkpkg \
 	-ppx ./ppx_xtmpl xtmpl.cmxa test_ppx_xtmpl.ml
 	@echo "======"
 	./$@
 
 test_cat: xtmpl.cmxa test_cat.ml
-	$(OCAMLFIND) ocamlopt -o $@ -rectypes -package uutf,sedlex,str -linkpkg \
+	$(OCAMLFIND) ocamlopt -o $@ -rectypes -package uutf,sedlex,re.str -linkpkg \
 	xtmpl.cmxa test_cat.ml
+
+test_js.js: xtmpl.cma xtmpl_js.cmo test_js.ml
+	$(OCAMLFIND) ocamlc -o $@.byte -rectypes \
+	-package js_of_ocaml,js_of_ocaml.ppx,uutf,sedlex,re.str -linkpkg \
+	$^
+	js_of_ocaml --pretty --noinline \
+	--disable staticeval --disable share \
+	 +js_of_ocaml/nat.js $@.byte -o $@
+	rm -f $@.byte
 
 ##########
 .PHONY: doc
