@@ -118,9 +118,7 @@ test_js.js: xtmpl.cma xtmpl_js.cmo test_js.ml
 	$(OCAMLFIND) ocamlc -o $@.byte -rectypes \
 	-package js_of_ocaml,js_of_ocaml.ppx,uutf,sedlex,re.str -linkpkg \
 	$^
-	js_of_ocaml --pretty --noinline \
-	--disable staticeval --disable share \
-	 +js_of_ocaml/nat.js $@.byte -o $@
+	js_of_ocaml --pretty +js_of_ocaml/nat.js $@.byte -o $@
 	rm -f $@.byte
 
 ##########

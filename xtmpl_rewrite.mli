@@ -202,6 +202,7 @@ type error =
        *)
 
 | Parse_error of Xml.loc * string
+| Parse_attribute_error of Xml.loc option * name * string (** loc * att name * message *)
 | Invalid_attribute_value of string * tree list
 | Fixpoint_limit of int
 

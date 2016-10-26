@@ -57,6 +57,7 @@ type rewrite_stack = (name * attributes * tree list * Xml.loc option) list
 type error =
   Loop of rewrite_stack
 | Parse_error of Xml.loc * string
+| Parse_attribute_error of Xml.loc option * Xml.name * string
 | Invalid_attribute_value of string * tree list
 | Fixpoint_limit of int
 
@@ -64,6 +65,7 @@ exception Error of error
 let error e = raise (Error e)
 let loop_error stack = error (Loop stack)
 let parse_error loc msg = error (Parse_error (loc, msg))
+let parse_attribute_error loc name msg = error (Parse_attribute_error (loc, name, msg))
 let invalid_attribute_value att v = error (Invalid_attribute_value (att,v))
 let fixpoint_limit n = error (Fixpoint_limit n)
 
@@ -176,6 +178,10 @@ let string_of_error = function
     "Max rewrite depth reached -- possible loop ?\nRewrite stack:\n"^(string_of_rewrite_stack stack)
 | Parse_error (loc, msg) ->
     Printf.sprintf "%s: Parse error: %s" (Xml.string_of_loc loc) msg
+| Parse_attribute_error (loc, name, msg) ->
+    Printf.sprintf "%sParse error in attribute %S: %s"
+      (match loc with None -> "" | Some loc -> (Xml.string_of_loc loc)^": ")
+      (Xml.string_of_name name) msg
 | Invalid_attribute_value (att, v) ->
     Printf.sprintf "invalid value of attribute %s: %s" att (to_string v)
 | Fixpoint_limit n ->
@@ -205,7 +211,11 @@ and from_xml_atts atts =
          try from_xmls (Xml.from_string ?pos_start s)
          with
            Xml.Error (loc, msg) -> parse_error loc msg
-         | e -> failwith (s^" => "^(Printexc.to_string e))
+         | e ->
+           let msg = Printf.sprintf "%s\n%s"
+             (Printexc.to_string e) s
+           in
+           parse_attribute_error loc name msg
       )
       atts
 and from_xmls l = List.map from_xml l
