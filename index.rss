@@ -5,7 +5,7 @@
          <link>https://zoggy.github.io/xtmpl</link>
          <description>Xml template library for OCaml</description>
          <managingEditor>maxence 'DOT' guesdon 'AT' inria 'DOT' fr</managingEditor>
-         <pubDate>17 Mar 2014 21:33:17 +0000</pubDate><lastBuildDate>%d %b 2016 %T %z</lastBuildDate>
+         <pubDate>17 Mar 2014 21:33:17 +0000</pubDate><lastBuildDate>Wed, 26 Oct 2016 20:50:55 +0000</lastBuildDate>
          <generator>Stog</generator>
          <div class="img"><img class="img" src="" width=""/><div class="legend"><url>https://zoggy.github.io/xtmpl/logo.png</url>
            <title>Xtmpl</title><link>https://zoggy.github.io/xtmpl</link>
@@ -19,7 +19,7 @@ Release 0.15.0 of Xtmpl is available from the
 &lt;a href="https://zoggy.github.io/xtmpl/download.html"&gt;Download page&lt;/a&gt;.
 &lt;/p&gt;
 </description>
-      <pubDate>%d %b 2016 %T %z</pubDate>
+      <pubDate>Wed, 26 Oct 2016 00:00:00 +0000</pubDate>
       <guid isPermaLink="true">https://zoggy.github.io/xtmpl/posts/release-0.15.0.html</guid>
     </item><item>
       <title>Xtmpl 0.14.0</title>
@@ -30,7 +30,7 @@ Release 0.14.0 of Xtmpl is available from the
 &lt;a href="https://zoggy.github.io/xtmpl/download.html"&gt;Download page&lt;/a&gt;.
 &lt;/p&gt;
 </description>
-      <pubDate>%d %b 2016 %T %z</pubDate>
+      <pubDate>Wed, 17 Aug 2016 00:00:00 +0000</pubDate>
       <guid isPermaLink="true">https://zoggy.github.io/xtmpl/posts/release-0.14.0.html</guid>
     </item><item>
       <title>Xtmpl 0.13.0</title>
@@ -41,7 +41,7 @@ Release 0.13.0 of Xtmpl is available from the
 &lt;a href="https://zoggy.github.io/xtmpl/download.html"&gt;Download page&lt;/a&gt;.
 &lt;/p&gt;
 </description>
-      <pubDate>%d %b 2015 %T %z</pubDate>
+      <pubDate>Tue, 24 Nov 2015 00:00:00 +0000</pubDate>
       <guid isPermaLink="true">https://zoggy.github.io/xtmpl/posts/release-0.13.0.html</guid>
     </item><item>
       <title>Xtmpl 0.12</title>
@@ -52,7 +52,7 @@ Release 0.12 of Xtmpl is available from
 the &lt;a href="https://zoggy.github.io/xtmpl/download.html"&gt;download page&lt;/a&gt;.
 &lt;/p&gt;
 </description>
-      <pubDate>%d %b 2015 %T %z</pubDate>
+      <pubDate>Mon, 30 Mar 2015 00:00:00 +0000</pubDate>
       <guid isPermaLink="true">https://zoggy.github.io/xtmpl/posts/release-0.12.html</guid>
     </item><item>
       <title>Xtmpl 0.11</title>
@@ -63,7 +63,7 @@ Release 0.11 of Xtmpl is available from
 the &lt;a href="https://zoggy.github.io/xtmpl/download.html"&gt;download page&lt;/a&gt;.
 &lt;/p&gt;
 </description>
-      <pubDate>%d %b 2015 %T %z</pubDate>
+      <pubDate>Thu, 05 Mar 2015 00:00:00 +0000</pubDate>
       <guid isPermaLink="true">https://zoggy.github.io/xtmpl/posts/release-0.11.html</guid>
     </item>
        </channel>
