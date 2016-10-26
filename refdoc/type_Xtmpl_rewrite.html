@@ -110,6 +110,7 @@
   <span class="keyword">type</span> error =
       <span class="constructor">Loop</span> <span class="keyword">of</span> <span class="constructor">Xtmpl_rewrite</span>.rewrite_stack
     <span class="keywordsign">|</span> <span class="constructor">Parse_error</span> <span class="keyword">of</span> <span class="constructor">Xml</span>.loc * string
+    <span class="keywordsign">|</span> <span class="constructor">Parse_attribute_error</span> <span class="keyword">of</span> <span class="constructor">Xml</span>.loc option * <span class="constructor">Xtmpl_rewrite</span>.name * string
     <span class="keywordsign">|</span> <span class="constructor">Invalid_attribute_value</span> <span class="keyword">of</span> string * <span class="constructor">Xtmpl_rewrite</span>.tree list
     <span class="keywordsign">|</span> <span class="constructor">Fixpoint_limit</span> <span class="keyword">of</span> int
   <span class="keyword">exception</span> <span class="constructor">Error</span> <span class="keyword">of</span> <span class="constructor">Xtmpl_rewrite</span>.error

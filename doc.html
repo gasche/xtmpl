@@ -36,15 +36,15 @@ Reference documentation of the Xtmpl library is <a href="https://zoggy.github.io
 <p>
 The ppx preprocessor allows the use of the following extension nodes:
 </p>
-<pre class="code-ocaml"><span class="hl kwa">let</span><span class="hl std"> </span><span class="">doc</span><span class="hl std"> = [</span><span class="hl kw5">xtmpl</span><span class="hl std"> </span><span class="hl str">"file.xml"</span><span class="hl std">]
-</span><span class="hl kwa">let</span><span class="hl std"> </span><span class="">doc</span><span class="hl std"> = [</span><span class="hl kw5">xtmpl</span><span class="hl std">.</span><span class="hl kwd">string</span><span class="hl std"> {| &lt;</span><span class="">div</span><span class="hl std">&gt;...&lt;/</span><span class="">div</span><span class="hl std">&gt; |} ]
+<pre class="code-ocaml"><span class="hl kwa">let</span><span class="hl std"> </span><span class="">doc</span><span class="hl std"> = [</span><span class="hl kw5">%xtmpl</span><span class="hl std"> </span><span class="hl str">"file.xml"</span><span class="hl std">]
+</span><span class="hl kwa">let</span><span class="hl std"> </span><span class="">doc</span><span class="hl std"> = [</span><span class="hl kw5">%xtmpl</span><span class="hl std">.</span><span class="hl kwd">string</span><span class="hl std"> {| &lt;</span><span class="">div</span><span class="hl std">&gt;...&lt;/</span><span class="">div</span><span class="hl std">&gt; |} ]
 </span></pre>
 <p>In the first case, the file <code>file.xml"</code> is read at compilation time,
 and its content is embedded in the code. A function is generated,
 taking the parameters defined in the file and returning the
 template where some nodes have been replaced by parameters.
 </p>
-<p>The second extension node, <span class="icode"><span class="hl std">[</span><span class="hl kw5">xtmpl</span><span class="hl std">.</span><span class="hl kwd">string</span><span class="hl std"> ...]</span></span>,
+<p>The second extension node, <span class="icode"><span class="hl std">[</span><span class="hl kw5">%xtmpl</span><span class="hl std">.</span><span class="hl kwd">string</span><span class="hl std"> ...]</span></span>,
 does the same but the XML code is given as a string instead of
 a file.</p>
 <p>
@@ -89,7 +89,7 @@ name can be given, using the <span class="icode"><span class="hl std">name_="...
 The following OCaml code in <code>example.ml</code>
 </p>
 
-<pre class="code-ocaml"><span><span class="hl kwa">let</span><span class="hl std"> </span><span class="">page</span><span class="hl std"> = [</span><span class="hl kw5">xtmpl</span><span class="hl std"> </span><span class="hl str">"page.tmpl"</span><span class="hl std">];;</span></span></pre>
+<pre class="code-ocaml"><span><span class="hl kwa">let</span><span class="hl std"> </span><span class="">page</span><span class="hl std"> = [</span><span class="hl kw5">%xtmpl</span><span class="hl std"> </span><span class="hl str">"page.tmpl"</span><span class="hl std">];;</span></span></pre>
 
 <p>can be compiled with </p>
 <pre class="command-exec"><span>ocamlfind ocamlc <span class="hl opt">-</span>c <span class="hl opt">-</span>package xtmpl<span class="hl opt">,</span>xtmpl.ppx <span class="hl opt">-</span>rectypes example.ml</span></pre>

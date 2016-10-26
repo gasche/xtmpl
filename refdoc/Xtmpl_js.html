@@ -36,10 +36,11 @@ Convenient functions to use in JS code<br/>
 </div>
 <hr width="100%"/>
 
-<pre><span id="VALdom_of_xtmpl"><span class="keyword">val</span> dom_of_xtmpl</span> : <code class="type"><a href="Xtmpl_rewrite.html#TYPEtree">Xtmpl_rewrite.tree</a> -&gt; Dom.node Js.t</code></pre><div class="info ">
+<pre><span id="VALdom_of_xtmpl"><span class="keyword">val</span> dom_of_xtmpl</span> : <code class="type">?doc:Dom_html.document Js.t -&gt; <a href="Xtmpl_rewrite.html#TYPEtree">Xtmpl_rewrite.tree</a> -&gt; Dom.node Js.t</code></pre><div class="info ">
 Create a new tree of DOM nodes from a given XML tree.
   Errors are logged to the firebug console.<br/>
 </div>
+<div class="param_info"><code class="code">doc</code> : Default is <code class="code">Dom_html.document</code>.</div>
 </div>
 
 
