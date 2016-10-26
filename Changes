@@ -1,4 +1,6 @@
 Release 0.15.0:
+- use Re library rather than Str (in Xtmpl_rewrite) and
+  Jsoo's Regexp (in Xtmpl_js) to simplify code
 - Xtmpl_js.dom_of_html: add optional ?doc parameter to specify
   the root document (default is Dom_html.document)
 - Fix generated types from templates
