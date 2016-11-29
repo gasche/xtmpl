@@ -1,3 +1,6 @@
+Release 0.16.0:
+- move to uutf 1.0.0
+
 Release 0.15.0:
 - use Re library rather than Str (in Xtmpl_rewrite) and
   Jsoo's Regexp (in Xtmpl_js) to simplify code

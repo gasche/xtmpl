@@ -92,12 +92,12 @@ let loc_of_pos pos len =
     loc_stop = { pos with char = pos.char + len } ;
   }
 
-let nl_code = Char.code '\n'
+let nl_char = Uchar.of_char '\n'
 
 let update_pos pos str =
   let f pos i = function
   | `Malformed msg -> error (loc_of_pos pos 1) msg
-  | `Uchar c when c = nl_code ->
+  | `Uchar c when Uchar.equal c nl_char ->
       let bol = pos.char in
       { pos with
         line = pos.line + 1;
@@ -233,12 +233,12 @@ let unescape =
         let lexeme = U.lexeme lb in
         let s =
           try
-            let n =
+            let c =
               let len = String.length lexeme in
               let s = String.sub lexeme 2 (len - 3) in
-              int_of_string s
+              Uchar.of_int (int_of_string s)
             in
-            cp_to_string n
+            cp_to_string c
           with _ -> lexeme
         in
         add buf s ;
@@ -247,12 +247,12 @@ let unescape =
         let lexeme = U.lexeme lb in
         let s =
           try
-            let n =
+            let c =
               let len = String.length lexeme in
               let s = "0"^(String.sub lexeme 2 (len - 3)) in
-              int_of_string s
+              Uchar.of_int (int_of_string s)
             in
-            cp_to_string n
+            cp_to_string c
           with
             _ -> lexeme
         in
