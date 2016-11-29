@@ -8,6 +8,7 @@ dev-repo: "https://github.com/zoggy/xtmpl.git"
 bug-reports: "https://github.com/zoggy/xtmpl/issues"
 tags: ["xml" "template" "javascript"]
 
+version: "0.16.0"
 build: [
   [make "all"]
 ]

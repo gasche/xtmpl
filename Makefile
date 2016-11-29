@@ -23,7 +23,7 @@
 #                                                                                  #
 ####################################################################################
 
-# DO NOT FORGET TO UPDATE META FILE
+# DO NOT FORGET TO UPDATE META AND opam FILES
 VERSION=0.16.0
 
 OCAMLFIND=ocamlfind
