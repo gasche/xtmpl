@@ -74,15 +74,15 @@ let dom_of_xtmpl =
       let n =
         match apply_ns ns_env name with
         | ("", tag) -> doc##createElement (Js.string tag)
-        | (ns, tag) -> doc##createElementNS (Js.string ns, Js.string tag)
+        | (ns, tag) -> doc ## createElementNS (Js.string ns) (Js.string tag)
       in
       Name_map.iter
         (fun name (v, _) ->
            let v = Js.string v in
            match apply_ns ~att: true ns_env name with
-             ("", att) -> ignore (n##setAttribute (Js.string att, v))
+             ("", att) -> ignore (n ## setAttribute (Js.string att) v)
            | (uri, att) ->
-               try n##setAttributeNS(Js.string uri, Js.string att, v)
+               try n ## setAttributeNS (Js.string uri) (Js.string att) v
                with _ ->
                    log ("could not add attribute "^(Xml.string_of_name name))
         )
