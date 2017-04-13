@@ -35,12 +35,15 @@ module SMap = Map.Make(String)
 type ns_env = { ns : string ; map : string SMap.t }
 let ns_env_empty = { ns = "" ; map = SMap.empty }
 
+(* https://www.w3.org/TR/DOM-Level-2-Core/core.html#ID-ElSetAttrNS *)
 let apply_ns ?(att=false) env = function
-  | ("",tag) -> if att then ("", tag) else (env.ns, tag)
-  | (pref,tag) ->
+| ("","xmlns") -> ("http://www.w3.org/2000/xmlns/","xmlns")
+| ("",tag) -> if att then ("", tag) else (env.ns, tag)
+| ("xmlns",tag) -> ("","")
+| (pref,tag) ->
     match SMap.find pref env.map with
     | exception Not_found -> (pref, tag)
-    | s -> (s, tag)
+    | s -> if s = env.ns then ("", tag) else (s, pref ^ ":" ^ tag)
 
 let ns_env_of_att name (str,_) env =
  match name with
@@ -71,20 +74,27 @@ let dom_of_xtmpl =
   | X.E { X.name ; atts ; subs} ->
       let atts = atts_to_string name atts in
       let ns_env = ns_env_of_atts ns_env atts in
+      let (elt_ns, tag) = apply_ns ns_env name in
       let n =
-        match apply_ns ns_env name with
+        match elt_ns, tag with
         | ("", tag) -> doc##createElement (Js.string tag)
         | (ns, tag) -> doc ## createElementNS (Js.string ns) (Js.string tag)
       in
       Name_map.iter
         (fun name (v, _) ->
            let v = Js.string v in
-           match apply_ns ~att: true ns_env name with
-             ("", att) -> ignore (n ## setAttribute (Js.string att) v)
+           let env = if elt_ns <> "" then { ns_env with ns = elt_ns } else ns_env in
+           match apply_ns ~att: true env name with
+           | ("",  "") ->
+               log (Printf.sprintf "not adding %s attribute" (Xml.string_of_name name))
+           | ("", att) ->
+               log (Printf.sprintf "setAttribute (%s)" att);
+               ignore (n ## setAttribute (Js.string att) v)
            | (uri, att) ->
+               log (Printf.sprintf "setAttributeNS (%s, %s)" uri att);
                try n ## setAttributeNS (Js.string uri) (Js.string att) v
                with _ ->
-                   log ("could not add attribute "^(Xml.string_of_name name))
+                   log ("could not add attribute "^(Xml.string_of_name (uri,att)))
         )
         atts;
       let subs = List.map (map doc ns_env) subs in
