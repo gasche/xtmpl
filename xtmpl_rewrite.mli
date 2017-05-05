@@ -55,6 +55,8 @@ and tree =
 | C of Xml.comment  (** Comment *)
 | PI of Xml.proc_inst  (** Processing instruction *)
 
+type doc = tree Xtmpl_xml.doc
+
 (** {2 Constructors} *)
 
 val node : ?loc:Xml.loc -> name -> ?atts:attributes -> tree list -> tree

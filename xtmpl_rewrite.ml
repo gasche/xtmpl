@@ -41,6 +41,8 @@ and tree =
 | C of Xml.comment
 | PI of Xml.proc_inst
 
+type doc = tree Xtmpl_xml.doc
+
 let atts_empty = Name_map.empty
 
 let node ?loc name ?(atts=atts_empty) subs = E { loc ; name ; atts; subs }
