@@ -28,6 +28,7 @@
 module Xml = Xtmpl_xml
 type name = string * string
 
+module SMap = Map.Make(String)
 module Name_map = Xml.Name_map
 module Name_set = Xml.Name_set
 module Str = Re_str
@@ -48,7 +49,10 @@ let comment ?loc comment = C { Xml.loc ; Xml.comment = comment }
 let pi ?loc app args = PI { Xml.loc ; app ; args }
 let doc prolog elements = { Xml.prolog ; elements }
 
-type 'a env = ('a callback) Xml.Name_map.t
+type 'a env = {
+    env_ns : Iri.t SMap.t ;
+    env_map : ('a callback) Xml.Name_map.t ;
+  }
 and 'a callback =
   'a -> 'a env -> ?loc: Xml.loc -> attributes -> tree list -> 'a * tree list
 
@@ -265,13 +269,26 @@ let upto_first_element =
   in
   iter []
 
-let env_add_cb ?(prefix="") name = Name_map.add (prefix, name)
+let env_resolve env name =
+  match name with
+    ("", str) -> ("", str)
+  | (ns, str) ->
+    match SMap.find ns env.env_ns with
+    | exception Not_found -> (ns, str)
+    | iri ->
+          let str = Printf.sprintf "%s%s" (Iri.to_string iri) str in
+          ("", str)
+
+let env_add_cb ?(prefix="") name cb env =
+  let k = env_resolve env (prefix, name) in
+  { env with env_map = Name_map.add k cb env.env_map }
 
 let env_get k env =
-  try Some (Name_map.find k env)
+  let k = env_resolve env k in
+  try Some (Name_map.find k env.env_map)
   with Not_found -> None
 
-let env_empty () = Name_map.empty
+let env_empty () = { env_ns = SMap.empty ; env_map = Name_map.empty }
 
 let env_add_xml ?prefix a v env =
   env_add_cb ?prefix a (fun data _ ?loc _ _ -> data, v) env
@@ -286,10 +303,12 @@ let protect_in_env env atts =
       let f env s =
         match Xtmpl_misc.split_string s [':'] with
           [] -> env
-        | [s] | ["" ; s] -> Name_map.remove ("",s) env
+        | [s] | ["" ; s] ->
+            { env with env_map = Name_map.remove ("",s) env.env_map }
         | s1 :: q ->
             let s2 = String.concat ":" q in
-            Name_map.remove (s1, s2) env
+            let k = env_resolve env (s1, s2) in
+            { env with env_map = Name_map.remove k env.env_map }
       in
       List.fold_left f env (Xtmpl_misc.split_string s.Xml.text [',' ; ';'])
   | Some l -> invalid_attribute_value att_protect l
@@ -303,7 +322,20 @@ let string_of_env env =
     in
     s :: acc
   in
-  String.concat ", " (Name_map.fold f env [])
+  String.concat ", " (Name_map.fold f env.env_map [])
+
+let set_namespaces =
+  let f name v env =
+    match name with
+      ("xmlns",ns) ->
+        begin
+          let s = to_string ~xml_atts:false v in
+          let iri = Iri.of_string s in
+          { env with env_ns = SMap.add ns iri env.env_ns }
+        end
+    | _ -> env
+  in
+  fun env atts -> Name_map.fold f atts env
 
 let limit =
   try Some (int_of_string (Sys.getenv "XTMPL_FIXPOINT_LIMIT"))
@@ -360,6 +392,7 @@ and eval_xml stack data env xml =
   | D _ | C _ | PI _ -> (data, [ xml ])
   | E { name ; atts ; subs ; loc } ->
       let (data, atts) = eval_atts stack data env atts in
+      let env = set_namespaces env atts in
       let env_protect = protect_in_env env atts in
       match name with
         ("", t) when t = tag_env ->

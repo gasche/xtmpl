@@ -1,6 +1,6 @@
 version = "0.16.0"
 description = "OCaml XML templating library"
-requires = "sedlex,uutf,re.str"
+requires = "sedlex,uutf,re.str,iri"
 archive(toploop) = "xtmpl.cma"
 archive(byte) = "xtmpl.cma"
 archive(native) = "xtmpl.cmxa"

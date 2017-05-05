@@ -126,7 +126,7 @@ val opt_att_cdata : attributes -> ?def:string -> name -> string
     environments.
 *)
 
-type 'a env = ('a callback) Xml.Name_map.t
+type 'a env
 and 'a callback =
   'a -> 'a env -> ?loc: Xml.loc -> attributes -> tree list -> 'a * tree list
 

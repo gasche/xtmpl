@@ -1,6 +1,9 @@
 Next release:
 - use js_of_ocaml.ppx instead of camlp4 extension
 - use -g flag everywhere
+- environments now handle and resolve namespaces
+  (except default namespaces)
+- depend on ocaml-iri
 
 Release 0.16.0:
 - move to uutf 1.0.0
