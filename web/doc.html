@@ -15,7 +15,7 @@ The ppx preprocessor allows the use of the following extension nodes:
 let doc = [%xtmpl "file.xml"]
 let doc = [%xtmpl.string {| &lt;div&gt;...&lt;/div&gt; |} ]
 </ocaml>
-<p>In the first case, the file <code>file.xml"</code> is read at compilation time,
+<p>In the first case, the file <code>file.xml</code> is read at compilation time,
 and its content is embedded in the code. A function is generated,
 taking the parameters defined in the file and returning the
 template where some nodes have been replaced by parameters.
